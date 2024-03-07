@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PC Parts List</title>
+</head>
+<body>
+    <h1>PC Parts List</h1>
+    <ul>
+        {% for part in parts %}
+            <li>{{ part.part_type }} - {{ part.brand }} - Serial: {{ part.serial_number }} - Shelf: {{ part.shelf_location }} - Checked Out: {{ part.checked_out }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
