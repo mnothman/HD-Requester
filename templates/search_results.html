@@ -21,6 +21,16 @@
         {% endfor %}
     </ul>
 
+
+    <form action="/checkin" method="post">
+        <input type="text" name="serial_number" placeholder="Enter Serial Number">
+        <input type="text" name="part_type" placeholder="Part Type">
+        <input type="text" name="brand" placeholder="Brand">
+        <input type="text" name="shelf_location" placeholder="Shelf Location">
+        <input type="hidden" name="checked_out" value="0"> <!-- Parts come in not checked out  -->
+        <input type="submit" value="Check In">
+    </form>
+    
     <form action="/search" method="get">
         <input type="text" name="type" placeholder="Search for PC Parts (e.g., RAM, GPU)">
         <input type="submit" value="Search">
