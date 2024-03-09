@@ -20,7 +20,7 @@ def search():
 def checkout():
     serial_number = request.form['serial_number']
     checkout_part(serial_number)  
-    return redirect(url_for('parts')) 
+    return redirect(url_for('pc_parts')) #need to change this for it to go to out panel instead of out it by itself
 
 @app.route('/checkin', methods=['POST'])
 def checkin():

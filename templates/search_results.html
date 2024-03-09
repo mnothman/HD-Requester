@@ -2,38 +2,88 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Search Results</title>
+    <title>E-Waste Enterprises</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #333;
+            color: white;
+        }
+        .inventory {
+            display: flex;
+            align-items: flex-start;
+        }
+        .buttons {
+            display: flex;
+            flex-direction: column;
+        }
+        .buttons form {
+            margin: 5px;
+        }
+        .search-bar {
+            position: relative;
+        }
+        .search-bar input[type="submit"] {
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+        .part-list {
+            margin-left: 20px;
+            flex-grow: 1;
+        }
+    </style>
 </head>
 <body>
-    <h1>Search Results for "{{ search_type }}"</h1>
-    <ul>
-        {% for part in parts %}
-    <li>
-        {{ part.part_type }} - {{ part.brand }} - Serial: {{ part.serial_number }} - Shelf: {{ part.shelf_location }} - Checked Out: {{ part.checked_out }}
-        <!-- Checkout Button -->
-        <form action="/checkout" method="post">
-            <input type="hidden" name="serial_number" value="{{ part.serial_number }}">
-            <input type="submit" value="Check Out">
-        </form>
-    </li>
-        {% else %}
-            <li>No parts found.</li>
-        {% endfor %}
-    </ul>
+    <div class="header">
+        <h1>E-Waste Enterprises</h1>
+        <div class="search-bar">
+            <form action="/search" method="get" class="form-inline">
+                <input type="text" name="type" placeholder="Search for PC Parts (e.g., RAM, GPU)" class="form-control">
+                <input type="submit" value="Search" class="btn btn-light">
+            </form>
+        </div>
+    </div>
 
+    <div class="inventory">
+        <div class="buttons">
+            <form action="" method="post">
+                <input type="submit" value="IN" class="btn btn-success">
+            </form>
+            <form action="" method="post">
+                <input type="submit" value="OUT" class="btn btn-warning">
+            </form>
+        </div>
 
-    <form action="/checkin" method="post">
-        <input type="text" name="serial_number" placeholder="Enter Serial Number">
-        <input type="text" name="part_type" placeholder="Part Type">
-        <input type="text" name="brand" placeholder="Brand">
-        <input type="text" name="shelf_location" placeholder="Shelf Location">
-        <input type="hidden" name="checked_out" value="0"> <!-- Parts come in not checked out  -->
-        <input type="submit" value="Check In">
-    </form>
+        <ul class="part-list list-group">
+            {% for part in parts %}
+                <li class="list-group-item">
+                    {{ part.part_type }} - {{ part.brand }} - Serial: {{ part.serial_number }} - Shelf: {{ part.shelf_location }} - Checked Out: {{ part.checked_out }}
+                    <form action="/checkout" method="post">
+                        <input type="hidden" name="serial_number" value="{{ part.serial_number }}">
+                        <input type="submit" value="Check Out" class="btn btn-primary">
+                    </form>
+                </li>
+            {% else %}
+                <li class="list-group-item">No parts found.</li>
+            {% endfor %}
+        </ul>
     
-    <form action="/search" method="get">
-        <input type="text" name="type" placeholder="Search for PC Parts (e.g., RAM, GPU)">
-        <input type="submit" value="Search">
-    </form>
+        <form action="/checkin" method="post">
+            <input type="text" name="serial_number" placeholder="Enter Serial Number">
+            <input type="text" name="part_type" placeholder="Part Type">
+            <input type="text" name="brand" placeholder="Brand">
+            <input type="text" name="shelf_location" placeholder="Shelf Location">
+            <input type="hidden" name="checked_out" value="0"> <!-- Parts come in not checked out  -->
+            <input type="submit" value="Check In">
+        </form>
+        
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
