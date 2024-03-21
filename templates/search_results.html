@@ -49,6 +49,8 @@
         </div>
     </div>
 
+
+    <!-- will want to change this for the success and warning, need to work on the backend functionality. dont post immediately, wait for the GO button to push to DB -->
     <div class="inventory">
         <div class="buttons">
             <form action="" method="post">
@@ -65,6 +67,7 @@
                     {{ part.part_type }} - {{ part.brand }} - Serial: {{ part.serial_number }} - Shelf: {{ part.shelf_location }} - Checked Out: {{ part.checked_out }}
                     <form action="/checkout" method="post">
                         <input type="hidden" name="serial_number" value="{{ part.serial_number }}">
+                        <!-- checkout button here -->
                         <input type="submit" value="Check Out" class="btn btn-primary">
                     </form>
                 </li>
@@ -72,7 +75,15 @@
                 <li class="list-group-item">No parts found.</li>
             {% endfor %}
         </ul>
+
+
+        <!-- go button -->
+        <form action="/gobutton" method="post">
+            <input type="submit" value="GO" class="btn btn-danger">
+            <!-- need to implement where the IN and OUT is sent here -->
+        </form>
     
+
         <form action="/checkin" method="post">
             <input type="text" name="serial_number" placeholder="Enter Serial Number">
             <input type="text" name="part_type" placeholder="Part Type">
