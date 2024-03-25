@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, session
-from database import db_blueprint, get_all_parts, checkout_part, checkin_part, insert_part
+from database import db_blueprint, get_all_parts, insert_part
 from flask import request, redirect, url_for
 from flask import jsonify # used for converting database into JSON file
 
