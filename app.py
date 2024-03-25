@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, session
-from database import db_blueprint, get_all_parts, checkout_part, checkin_part
+from database import db_blueprint, get_all_parts, checkout_part, checkin_part, insert_part
 from flask import request, redirect, url_for
+from flask import jsonify # used for converting database into JSON file
+
 
 app = Flask(__name__)
 app.register_blueprint(db_blueprint)
@@ -19,6 +21,34 @@ def authenticate_user(username, password):
     return False
 
 #The Routes
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+# AJAX route to fetch parts data
+@app.route('/get_parts', methods=['POST'])
+def get_parts():
+    search_type = request.form.get('searchType', None)
+    parts = get_all_parts(search_type)
+    parts_list = [dict(part) for part in parts]  # Convert rows to dicts for JSON response
+    return jsonify(parts_list)
+
+# AJAX route to add part using test data
+@app.route('/add_part', methods=['POST'])
+def add_part():
+    data = request.form
+    try:
+        # There's a function in database.py to insert a part
+        insert_part(data['Type'], data['Capacity'], data['Size'], data['Speed'],
+                    data['Brand'], data['Model'], data['Location'], data['SN'])
+        return jsonify({'status': 'success'}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+
+
+# Login
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
     if request.method == 'POST':

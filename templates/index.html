@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dynamic Parts Table</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .placeholder-logo { width: 100px; height: 50px; background-color: #ddd; margin-bottom: 20px; margin-right: 20px; float: left;}
+		.text-area-custom { margin: 0 10px 20px 10px; }
+		#addPartBtn {  }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="placeholder-logo">Logo</div>
+			</div>
+			<div class="col-md-9"
+				<!-- Add part button -->
+        		<button id="addPartBtn" class="btn btn-primary">Add Part</button>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-3">
+				<textarea class="form-control text-area-custom" rows="3"></textarea>
+				<div class="btn-group" role="group">
+					<button type="button" class="btn btn-secondary">IN</button>
+					<button type="button" class="btn btn-secondary">OUT</button>
+				</div>
+			</div>
+			<div class="col-md-9">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th>Type</th>
+							<th>Capacity</th>
+							<th>Size</th>
+							<th>Speed</th>
+							<th>Brand</th>
+							<th>Model</th>
+							<th>Location</th>
+							<th>Serial Number</th>
+						</tr>
+					</thead>
+					<tbody id="partsTableBody">
+						<!-- Table data will be loaded here via AJAX -->
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+		
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+			// used to abstract a commonly used function.
+            fetchAndDisplayParts();
+			
+			// This function is hard coding the data to add a stick of RAM.
+			// You can only add this part once to the DB because duplicates
+			// aren't allowed.
+			$('#addPartBtn').click(function() {
+				const partData = {
+					Type: 'PC4', Capacity: '16GB', Size: 'Desktop', Speed: 25600,
+					Brand: 'SK Hynix', Model: 'HMA82GD', Location: 'Shelf 3 C8', SN: '00000019'
+				};
+
+				$.ajax({
+					url: '/add_part',
+					type: 'POST',
+					dataType: 'json',
+					data: partData,
+					success: function(response) {
+						if (response.status === 'success') {
+							// commented out for now
+							//alert("Part added successfully!");
+							// Fetch and display the updated parts list
+							fetchAndDisplayParts();
+						} else {
+							alert("Failed to add the part.");
+						}
+					},
+					error: function(xhr, status, error) {
+						console.error("Error adding part: " + error);
+						alert("Error adding part.");
+					}
+				});
+			});
+
+		});
+		
+		function fetchAndDisplayParts() {
+			$.ajax({
+				url: '/get_parts',
+				type: 'POST',
+				dataType: 'json',
+				success: function(data) {
+					var tableBody = $('#partsTableBody');
+					tableBody.empty(); // Clear existing rows
+					$.each(data, function(index, part) {
+						tableBody.append('<tr>' +
+							'<td>' + part.Type + '</td>' +
+							'<td>' + part.Capacity + '</td>' +
+							'<td>' + part.Size + '</td>' +
+							'<td>' + part.Speed + '</td>' +
+							'<td>' + part.Brand + '</td>' +
+							'<td>' + part.Model + '</td>' +
+							'<td>' + part.Location + '</td>' +
+							'<td>' + part.SN + '</td>' +
+							'</tr>');
+					});
+				},
+				error: function(xhr, status, error) {
+					console.error("Error fetching parts data: " + error);
+				}
+			});
+		}
+
+		
+    </script>
+</body>
+</html>

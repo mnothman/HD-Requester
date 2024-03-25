@@ -4,14 +4,12 @@
 <meta charset="UTF-8">
 <title>modal</title>
 	 <link rel="stylesheet" href="modal.css">
+
+<link href="modal.css" type="text/css" />
 </head>
 
 <body>
-<script src="modal.js"></script>
-<script src="modal.css"></script>
-<button type="button" id="open_button" class="button">Open Modal</button>	
-</body>
-	
+<button type="button" id="open_button" class="button">Open Modal</button>
 <div class="background-modal">
 	<div id="mymodal" class="modal-form">
 
@@ -41,4 +39,14 @@
 	</div>
 	
 	</div>
+		<script>
+			// JavaScript Document
+			document.getElementById('open_button').addEventListener('click', function(){
+						document.querySelector('.background-modal').style.display='flex';
+			});
+
+			document.querySelector('.close').addEventListener('click'),function(){
+				document.querySelector('.background-modal').style.display='none' };	
+		</script>
+	</body>
 </html>
