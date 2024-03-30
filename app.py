@@ -1,26 +1,13 @@
 from flask import Flask, render_template, request, redirect, session
 from database import db_blueprint, get_all_parts, insert_part
 from flask import request, redirect, url_for
-from flask import jsonify # used for converting database into JSON file
+from flask import jsonify # used for converting database into JSON object
 
 
 app = Flask(__name__)
 app.register_blueprint(db_blueprint)
 app.secret_key = 'your_secret_key'
 
-#Temporary User Dictionary
-USER_CREDENTIALS = {
-    'admin': 'password',
-    'user1': '123456'
-}
-
-#Authenticates User Creds
-def authenticate_user(username, password):
-    if username in USER_CREDENTIALS and USER_CREDENTIALS[username] == password:
-        return True
-    return False
-
-#The Routes
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -29,8 +16,14 @@ def index():
 @app.route('/get_parts', methods=['POST'])
 def get_parts():
     search_type = request.form.get('searchType', None)
+	
+	# calls a function in database.py
+	# which returns all rows in the parts table if no argument is given.
+	# If an argument is given like 
     parts = get_all_parts(search_type)
-    parts_list = [dict(part) for part in parts]  # Convert rows to dicts for JSON response
+	
+	# Convert rows to dicts for JSON response
+    parts_list = [dict(part) for part in parts]
     return jsonify(parts_list)
 
 # AJAX route to add part using test data
@@ -49,6 +42,18 @@ def add_part():
 
 
 # Login
+#Temporary User Dictionary
+USER_CREDENTIALS = {
+    'admin': 'password',
+    'user1': '123456'}
+
+#Authenticates User Creds
+def authenticate_user(username, password):
+    if username in USER_CREDENTIALS and USER_CREDENTIALS[username] == password:
+        return True
+    return False
+
+#The Routes
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
     if request.method == 'POST':

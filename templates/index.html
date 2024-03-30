@@ -35,6 +35,7 @@
 					<button type="button" class="btn btn-secondary">IN</button>
 					<button type="button" class="btn btn-secondary">OUT</button>
 				</div>
+				<button type="button" class="btn btn-primary btn-lg btn-block btn-submit">Submit</button>
 			</div>
 			<div class="col-md-9">
 				<table class="table table-striped">
@@ -61,10 +62,11 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         $(document).ready(function() {
-			// used to abstract a commonly used function.
+			// a commonly used function to .
+			// shows content of JSON object
             fetchAndDisplayParts();
 			
-			// This function is hard coding the data to add a stick of RAM.
+			// This Add Button function is hard coding the data to demonstrate adding a stick of RAM.
 			// You can only add this part once to the DB because duplicates
 			// aren't allowed.
 			$('#addPartBtn').click(function() {
@@ -81,7 +83,7 @@
 					success: function(response) {
 						if (response.status === 'success') {
 							// commented out for now
-							//alert("Part added successfully!");
+							// alert("Part added successfully!");
 							// Fetch and display the updated parts list
 							fetchAndDisplayParts();
 						} else {
