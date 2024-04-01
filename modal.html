@@ -3,50 +3,134 @@
 <head>
 <meta charset="UTF-8">
 <title>modal</title>
-	 <link rel="stylesheet" href="modal.css">
-
-<link href="modal.css" type="text/css" />
 </head>
 
 <body>
-<button type="button" id="open_button" class="button">Open Modal</button>
-<div class="background-modal">
-	<div id="mymodal" class="modal-form">
 
-	<div class="close">+</div>
+<style>
+	.background-modal{
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0,0.7);
+	position: absolute;
+	top:0;
+	/*display: flex;*/
+	justify-content: center;
+	align-items: center;
+	display: none;
+	overflow: auto;
+		
 	
-	<p>Serial Number:&nbsp; &nbsp;</p>
-		<input type="text" id="serialnumber" name="serialnumber"><br>
+
+}
+.modal-form{
+	width: 600;
+	height: 600;
+	background-color: white;
+	border-radius: 5px;
+	text-align: left;
+	padding: 30px;
+	position: relative;
+	font-size: 14px;
+	font-family:"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, "sans-serif";
+	
+}
+input{
+	width: 120px;
+	height: 20px;
+	display:grid;
+	margin-right: 10px auto;
+	margin-bottom: 10px auto;
+	font-size: 14px;
+	shape-margin: 10px;
+	
+}
+.close{
+	position: absolute;
+	top:0;
+	right: 18px;
+	font-size: 10px;
+	cursor:pointer;
+	
+}
+button{
+	width: auto;
+	height: auto;
+	font-size: 14px;
+	font-family:Constantia, "Lucida Bright", "DejaVu Serif", Georgia, "serif";
+	}
+table{
+	align-content: center;
+	font-family: Gotham, "Helvetica Neue", Helvetica, Arial, "sans-serif";
+	font-size: 14px;
+	font-weight: normal;
+	border-bottom-color: black;
+	border-style: solid;
+	border-bottom-width: thin;
+	border-left-width: thin;
+	border-right-width: thin;
+	border-top-width: thin;
+	
+}
+</style>
+	
+	
+<button type="button" id="open_button" class="button">Open Modal</button>
+</body>
+	
+<div id="bgmodal" class="background-modal">
+	<div class="modal-form">
+		<span class="close">&times;</span>
+	
+		<p>Serial Number: <input type="text" id="serialnumber" name="serialnumber"></p>
 	 
 	
-	<p>Add item to&nbsp; inventory. Fill blanks.&nbsp;</p>
+		<p>Add item to inventory. Fill blanks.&nbsp;</p>
 		
-	<form action="">
-		<input type="text" id="type" name="type" placeholder="Type">
-		<input type="text" id="capacity" name="Capacity" placeholder="Capacity">
-		<input type="text" id="size" name="Size" placeholder="Size">
-		<input type="text" id="speed" name="Speed" placeholder="Speed">
-		<input type="text" id="brand" name="Brand" placeholder="Brand">
-		<input type="text" id="model" name="Model"  placeholder="Model">
-		<input type="text" id="location" name="Location" placeholder="Location">
-		<input type="text" id="snumber" name="serialnum" placeholder="Serial Number">
+		<table>
+		<tr>
+		<th> Type</th>
+		<th>Capacity</th>
+		<th>Size</th>
+		<th>Speed</th>
+		<th>Brand</th>
+		<th>Model</th>
+		<th>Location</th>
+		<th>Serial Number</th>
+		</tr>
+		<tr>
+		<th><input type="text" id="type" name="type" placeholder="Type"></th>
+		<th><input type="text" id="capacity" name="Capacity" placeholder="Capacity"></th>
+		<th><input type="text" id="size" name="Size" placeholder="Size"></th>
+			<th> <input type="text" id="speed" name="Speed" placeholder="Speed"></th>
+		<th><input type="text" id="brand" name="Brand" placeholder="Brand"></th>
+		<th><input type="text" id="model" name="Model"  placeholder="Model"></th>
+		<th><input type="text" id="location" name="Location" placeholder="Location"></th>
+			<th><input type="text" id="snumber" name="serialnum" placeholder="Serial Number"></th>
+		</tr>
+		</table>
 		
-		<button class="cancel_btn">Cancel</button>
+		<button type="button" id="cancel_btn">Cancel</button>
 	
-		<button class="add_btn">Add</button>
-		</form>
-
+		<button type="button" id="add_btn">Add</button>
+		
 	</div>
 	
 	</div>
-		<script>
-			// JavaScript Document
-			document.getElementById('open_button').addEventListener('click', function(){
-						document.querySelector('.background-modal').style.display='flex';
-			});
-
-			document.querySelector('.close').addEventListener('click'),function(){
-				document.querySelector('.background-modal').style.display='none' };	
-		</script>
-	</body>
+	
+	
+	
+	<script>
+		var modal= document.getElementById("bgmodal");
+		var openbtn=document.getElementById("open_button");
+		var closemodal=document.getElementsByClassName("close")[0];
+		
+		openbtn.onclick=function(){
+			modal.style.display="block";}
+		
+		closemodal.onclick=function(){
+			modal.style.display="none"; }
+		
+		
+	</script>
 </html>
