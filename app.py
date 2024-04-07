@@ -33,7 +33,7 @@ def add_part():
     try:
         # There's a function in database.py to insert a part
         insert_part(data['Type'], data['Capacity'], data['Size'], data['Speed'],
-                    data['Brand'], data['Model'], data['Location'], data['SN'])
+                    data['Brand'], data['Model'], data['Location'], data['Part_sn'])
         return jsonify({'status': 'success'}), 200
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
