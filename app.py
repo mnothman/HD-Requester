@@ -98,6 +98,27 @@ def logout():
     session.pop('username', None)
     return redirect('/login')
 
+@app.route('/sort_parts', methods=['POST'])
+def sort_parts():
+    # Get the column to sort by from the request
+    column = request.form.get('column')
+
+    # Retrieve all parts from the database
+    parts = get_all_parts()
+
+    # Sort the parts based on the specified column
+    if column in ('Type', 'Capacity', 'Size', 'Speed', 'Brand', 'Model', 'Location', 'Part_sn'):
+        sorted_parts = sorted(parts, key=lambda x: x[column])
+    else:
+        # If the column is not recognized, return unsorted parts
+        sorted_parts = parts
+
+	# Convert rows to dicts for JSON response
+    sorted_parts_dicts = [dict(part) for part in sorted_parts]
+		
+    # Return the sorted parts as a JSON response
+    return jsonify(sorted_parts_dicts)
+ 
 
 if __name__ == '__main__':
     app.run(debug=True)
