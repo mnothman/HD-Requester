@@ -38,7 +38,7 @@ def sort_parts():
     parts = get_all_parts()  #all parts to sort
     # validate first
     if column in ['Type', 'Capacity', 'Size', 'Speed', 'Brand', 'Model', 'Location', 'Part_sn']:
-        sorted_parts = sorted(parts, key=lambda part: part[column] if column in part else '')
+        sorted_parts = sorted(parts, key=lambda part: (part[column] is None, part[column]))
     else:
         sorted_parts = parts
     return jsonify([dict(part) for part in sorted_parts])
