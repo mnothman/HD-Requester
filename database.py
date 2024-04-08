@@ -25,7 +25,7 @@ def get_all_parts(search_type=None):
     args = ()
     if search_type:
         query += ' WHERE Type LIKE ?'
-        args = ('%' + Type + '%',)
+        args = ('%' + search_type + '%',)
     parts = db.execute(query, args).fetchall()
     return parts
 
@@ -49,11 +49,3 @@ def checkin_part(serial_number, part_type, brand, shelf_location, checked_out): 
                (serial_number, part_type, brand, shelf_location))
     db.commit()
 """
-
-# we dont need login for the inventory page to check in and out, we only need a login for the admin page. open new window for clicking the admin page which promps for a login. 
-#only use ajax for login page so it doesnt refresh the page when you click go or submit.
-# bootstrap to display inventory/admin page
-#default is IN, and then you can switch to out
-    
-
-    #the go button is like the submit, want to do a lot of actions at once, so we use the go button to do all the actions at once.

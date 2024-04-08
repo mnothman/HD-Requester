@@ -1,149 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
+	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dynamic Parts Table</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    
+	<title>Dynamic Parts Table</title>
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
 	<style>
-		*{
-			margin:0px;
-			padding:0px;
+		* {
+			margin: 0px;
+			padding: 0px;
 			box-sizing: border-box;
 			font-family: sans-serif;
 
 		}
-		nav{
-			width:100%;
+
+		nav {
+			width: 100%;
 			height: 75px;
 			background-color: rgb(26, 107, 30, .9);
-			color:black;
+			color: black;
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			padding: 0px 50px; 
+			padding: 0px 50px;
 			top: 0;
 		}
-		.search form{
-			background-color: white; /* Set background color for the search bar */
+
+		.search form {
+			background-color: white;
+			/* set background color for the search bar */
 			padding: 2px;
 			border: 1px solid black;
-			border-radius: 30px; /* Adjust border-radius to make the search bar more elongated */
+			border-radius: 30px;
+			/* adjust border-radius to make the search bar more elongated */
 			margin-bottom: 20px;
 			margin-top: 20px;
 			margin-left: auto;
-			width: 300px; /* Set width for demonstration */
-			display: flex; /* Align input and button horizontally */
-			align-items: center; /* Center items vertically */
+			width: 300px;
+			/* set width for demonstration */
+			display: flex;
+			/* align input and button horizontally */
+			align-items: center;
+			/* center items vertically */
 		}
-		.search input{
-			flex: 1; /* Take up remaining space */
+
+		.search input {
+			flex: 1;
+			/* take up remaining space */
 			padding: 3px 8px;
 			border: none;
 			outline: none;
 			font-size: 14px;
-			border-radius: 30px; /* Ensure the input field matches the rounded shape */
+			border-radius: 30px;
 		}
-		.search input:hover{
-			border:1px solid #7babe2;
+
+		.search input:hover {
+			border: 1px solid #7babe2;
 		}
-		.search button{
-			background-color: black; /* Example button background color */
+
+		.search button {
+			background-color: black;
 			color: white;
 			border: none;
 			outline: none;
 			padding: 3px 10px;
-			border-radius: 30px; /* Ensure the button matches the rounded shape */
+			border-radius: 30px;
 			cursor: pointer;
 		}
-		.adminLogin button{
+
+		.adminLogin button {
 			color: black;
 			font-size: 14px;
 			border: none;
 			outline: black;
 			margin-left: auto;
 			padding: 3px 10px;
-			border-radius: 30px; /* Ensure the button matches the rounded shape */
+			border-radius: 30px;
 			cursor: pointer;
 		}
 
 		/* BUTTONS */
-		#addPartBtn {  }
-		#rmvPartBtn {  }
+		/* #addPartBtn {  } */
+		/* #rmvPartBtn {  } */
 
-		.btn-group form{
+		.btn-group form {
 			background-color: white;
 			padding: 7px;
 		}
 
-		.btn-in{
-			background-color:rgb(26, 107, 30, .9);
-			color:black;
+		.btn-in {
+			background-color: rgb(26, 107, 30, .9);
+			color: black;
 			border: 1px solid black;
 			padding: 5px 5px;
 			margin-bottom: 20px;
 			margin-top: 20px;
 			margin-left: 5px;
-			width: 70px; /* Set width for demonstration */
+			width: 70px;
 			font-size: 20px;
 		}
 
-		.btn-out{
-			background-color:rgb(26, 107, 30, .9);
-			color:black;
+		.btn-out {
+			background-color: rgb(26, 107, 30, .9);
+			color: black;
 			border: 1px solid black;
 			padding: 5px 5px;
 			margin-bottom: 20px;
 			margin-top: 20px;
 			margin-left: 10px;
-			width: 70px; /* Set width for demonstration */
+			width: 70px;
 			font-size: 20px;
 		}
-		.btn-submit{
-			background-color: white; /* Set background color to white */
-			color: black; /* Set text color to black */
-			border: 1px solid black; /* Set border to black */
-			width:160px;
-			margin-left:10px;
+
+		.btn-submit {
+			background-color: white;
+			color: black;
+			border: 1px solid black;
+			width: 160px;
+			margin-left: 10px;
 		}
 
-		.btn-primary1{
-			background-color: rgb(214, 214, 214); /* Set background color to white */
-			color: black; /* Set text color to black */
-			border: 1px solid black; /* Set border to black */
-			width:140px;
+		.btn-primary1 {
+			background-color: rgb(214, 214, 214);
+			/* Set background color to white */
+			color: black;
+			/* Set text color to black */
+			border: 1px solid black;
+			/* Set border to black */
+			width: 140px;
 			margin-top: 20px;
-			margin-left:475px;
-			padding:5px;
+			margin-left: 475px;
+			padding: 5px;
 		}
-		.btn-primary2{
-			background-color: rgb(214, 214, 214); /* Set background color to white */
-			color: black; /* Set text color to black */
-			border: 1px solid black; /* Set border to black */
-			width:140px;
+
+		.btn-primary2 {
+			background-color: rgb(214, 214, 214);
+			color: black;
+			border: 1px solid black;
+			width: 140px;
 			margin-top: 20px;
-			margin-left:10px;
-			padding:5px;
+			margin-left: 10px;
+			padding: 5px;
 		}
 
 		/* TOPBAR AND LOGO */
-		.logo { 
-			font-weight: bold; 
-			width: 100px; 
-			height: 50px; 
-			margin-bottom: 0px; 
-			margin-right: 0px; 
+		.logo {
+			font-weight: bold;
+			width: 100px;
+			height: 50px;
+			margin-bottom: 0px;
+			margin-right: 0px;
 			float: left;
 		}
-		.text-area-custom { margin: 0 10px 20px 10px; }
-		
-	/* TABLE */
-		.table-striped #partsTableBody tr:nth-of-type(2n+1){ background-color: rgb(223, 223, 185); }
-		.table td, .table th { padding: .25rem; vertical-align: top; border-top: 1px solid #dee2e6; }
-		.table .sortable-column {cursor: pointer;}
-			
-    
+
+		.text-area-custom {
+			margin: 0 10px 20px 10px;
+		}
+
+		/* TABLE */
+		.table-striped #partsTableBody tr:nth-of-type(2n+1) {
+			background-color: rgb(223, 223, 185);
+		}
+
+		.table td,
+		.table th {
+			padding: .25rem;
+			vertical-align: top;
+			border-top: 1px solid #dee2e6;
+		}
+
+		.table .sortable-column {
+			cursor: pointer;
+		}
 	</style>
 </head>
 
@@ -153,29 +183,25 @@
 		<div class="adminLogin">
 			<button type="button">Admin Login</button>
 		</div>
-
 	</nav>
 
-    <div class="container-fluid">
-        <div class="row">
+	<div class="container-fluid">
+		<div class="row">
 			<div class="col-md-9">
-				<!--Button and Search Bar-->
 				<div class="d-flex align-items-center">
-					<!-- Add part button -->
 					<button id="addPartBtn" class="btn btn-primary1">Add Part</button>
-					<!-- Remove part button -->
 					<button id="rmvPartBtn" class="btn btn-primary2">Remove Part</button>
 				</div>
-			</div>	
+			</div>
 
 			<div class="col-md-3">
-					<div class="search">
-						<form>
-							<input type="text" placeholder="Search">
-							<button type="submit">Go</button>
-						</form>
-					</div>
-			</div>		
+				<div class="search">
+					<form>
+						<input type="text" placeholder="Search">
+						<button type="submit">Go</button>
+					</form>
+				</div>
+			</div>
 		</div>
 
 		<div class="row">
@@ -183,8 +209,8 @@
 				<textarea class="form-control text-area-custom" rows="3"></textarea>
 				<div class="btn-group" role="group">
 					<form>
-					<button type="button" class="btn-in">IN</button>
-					<button type="button" class="btn-out">OUT</button>
+						<button type="button" class="btn-in">IN</button>
+						<button type="button" class="btn-out">OUT</button>
 					</form>
 				</div>
 				<button type="button" class="btn btn-primary btn-lg btn-block btn-submit">Submit</button>
@@ -210,39 +236,41 @@
 			</div>
 		</div>
 	</div>
-		
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script>
-        $(document).ready(function() {
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script>
+		$(document).ready(function () {
 			// a commonly used function to
 			// show content of JSON object
-            fetchAndDisplayParts();
-			
-			/* ====== EVENT LISTENERS ===== */			
+			fetchAndDisplayParts();
+
+			/* ====== EVENT LISTENERS ===== */
 			// Sort column
-			$('.sortable-column').click(function() {
+			$('.sortable-column').click(function () {
 				var column = $(this).text().trim();  // Get the column name
 				handleSort(column);  // Call handleSort function with the column name
 			});
-			
+
 			// Add part
-			$('#addPartBtn').click(function() {
-				const partData = {Type: 'PC4', Capacity: '16GB', Size: 'Desktop', Speed: 25600,
-					Brand: 'SK Hynix', Model: 'HMA82GD', Location: 'Shelf 3 C8', Part_sn: '00000019'};
+			$('#addPartBtn').click(function () {
+				const partData = {
+					Type: 'PC4', Capacity: '16GB', Size: 'Desktop', Speed: 25600,
+					Brand: 'SK Hynix', Model: 'HMA82GD', Location: 'Shelf 3 C8', Part_sn: '00000019'
+				};
 				handleAddPart(partData);
 			});
-			
+
 		}); // end (document).ready()
-		
+
 		function fetchAndDisplayParts() {
 			$.ajax({
 				url: '/get_parts',
 				type: 'POST',
 				dataType: 'json',
-				success: function(data) {
+				success: function (data) {
 					var tableBody = $('#partsTableBody');
 					tableBody.empty(); // Clear existing rows
-					$.each(data, function(index, part) {
+					$.each(data, function (index, part) {
 						tableBody.append('<tr>' +
 							'<td>' + part.Type + '</td>' +
 							'<td>' + part.Capacity + '</td>' +
@@ -255,22 +283,22 @@
 							'</tr>');
 					});
 				},
-				error: function(xhr, status, error) {
+				error: function (xhr, status, error) {
 					console.error("Error fetching parts data: " + error);
 				}
 			});
 		} // end fetchAndDisplayParts
-		
+
 		function handleSort(column) {
-        	// Make an AJAX request to the server to retrieve sorted data
-        	$.ajax({
+			// Make an AJAX request to the server to retrieve sorted data
+			$.ajax({
 				url: '/sort_parts',  // URL for sorting route in app.py
 				method: 'POST',
 				data: { column: column },  // Send the column to sort by
-				success: function(response) {
+				success: function (response) {
 					// Replace the table body with sorted data
 					$('#partsTableBody').html('');
-					response.forEach(function(part) {
+					response.forEach(function (part) {
 						$('#partsTableBody').append(`<tr>
 							<td>${part.Type}</td>
 							<td>${part.Capacity}</td>
@@ -283,32 +311,33 @@
 						</tr>`);
 					});
 				},
-				error: function(xhr, status, error) {
+				error: function (xhr, status, error) {
 					console.error("Error sorting parts: " + error);
 				}
 			}); // end handleSort
 		}
-		
+
 		function handleAddPart(partData) {
 			$.ajax({
-					url: '/add_part',
-					type: 'POST',
-					dataType: 'json',
-					data: partData,
-					success: function(response) {
-						if (response.status === 'success') {
-							fetchAndDisplayParts();
-						} else {
-							alert("Failed to add the part.");
-						}
-					},
-					error: function(xhr, status, error) {
-						console.error("Error adding part: " + error);
-						alert("Error adding part.");
+				url: '/add_part',
+				type: 'POST',
+				dataType: 'json',
+				data: partData,
+				success: function (response) {
+					if (response.status === 'success') {
+						fetchAndDisplayParts();
+					} else {
+						alert("Failed to add the part.");
 					}
-				});
-			} // end handleAddPart
-		
-    </script>
+				},
+				error: function (xhr, status, error) {
+					console.error("Error adding part: " + error);
+					alert("Error adding part.");
+				}
+			});
+		} // end handleAddPart
+
+	</script>
 </body>
+
 </html>
