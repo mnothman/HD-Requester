@@ -30,38 +30,6 @@ def add_part():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    """Handle user login."""
-    if request.method == 'POST':
-        if authenticate_user(request.form['username'], request.form['password']):
-            session['username'] = request.form['username']
-            return redirect('/dashboard')
-        else:
-            return render_template('login.html', message='Invalid username or password')
-    return render_template('login.html')
-
-@app.route('/dashboard')
-def dashboard():
-    """Render the dashboard with all parts or filtered by type."""
-    search_type = request.args.get('type', '')
-    parts = get_all_parts(search_type)
-    return render_template('search_results.html', parts=parts, search_type=search_type)
-
-@app.route('/checkout', methods=['POST'])
-def checkout():
-    """Mark a part as checked out."""
-    serial_number = request.form['serial_number']
-    # checkout_part(serial_number)  # implement later
-    return redirect(url_for('dashboard'))
-
-@app.route('/checkin', methods=['POST'])
-def checkin():
-    serial_number = request.form['serial_number']
-    # add aditional fields to checkin
-
-    # checkin_part(serial_number)  # implement later
-    return redirect(url_for('dashboard'))
 
 @app.route('/sort_parts', methods=['POST'])
 def sort_parts():
@@ -75,11 +43,6 @@ def sort_parts():
         sorted_parts = parts
     return jsonify([dict(part) for part in sorted_parts])
 
-@app.route('/logout')
-def logout():
-    #log out current user
-    session.pop('username', None)
-    return redirect('/login')
 
 if __name__ == '__main__':
     app.run(debug=True)
