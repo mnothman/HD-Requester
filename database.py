@@ -29,10 +29,10 @@ def get_all_parts(search_type=None):
     parts = db.execute(query, args).fetchall()
     return parts
 
-def insert_part(Type, Capacity, Size, Speed, Brand, Model, Location, SN):
+def insert_part(Type, Capacity, Size, Speed, Brand, Model, Location, Part_sn):
     db = get_db()
-    db.execute('INSERT INTO Part (Type, Capacity, Size, Speed, Brand, Model, Location, SN) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-               (Type, Capacity, Size, Speed, Brand, Model, Location, SN))
+    db.execute('INSERT INTO Part (Type, Capacity, Size, Speed, Brand, Model, Location, Part_sn) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+               (Type, Capacity, Size, Speed, Brand, Model, Location, Part_sn))
     db.commit()
 
 # commented out for now
