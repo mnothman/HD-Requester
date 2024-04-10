@@ -24,7 +24,8 @@
   <li>Clone the repository to your local machine.</li>
   <li>Open your terminal or command prompt.</li>
   <li>Navigate to the directory where the app is located using the 'cd' command.</li>
-  <li>Run the command <code>flash python.py</code> to start the app.</li>
+  <li>Run the command <code> pip install flask</code> to install Flask.</li>
+  <li>Run the command <code>python ./app.py</code> to start the app.</li>
   <li>Open your web browser and go to <code>http://localhost:8000</code>.</li>
   <li>You should now see the app running in your browser.</li>
   </ol>
