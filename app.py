@@ -16,6 +16,7 @@ def index():
 
 @app.route('/get_parts', methods=['POST'])
 def get_parts(): #fetch parts from search
+    print("gets parts here 2")
     search_type = request.form.get('searchType', None)
     parts = get_all_parts(search_type)
     return jsonify([dict(part) for part in parts])
@@ -23,12 +24,16 @@ def get_parts(): #fetch parts from search
 @app.route('/add_part', methods=['POST'])
 def add_part():
     try:
-        data = request.form
+        print("add part 2")
+        data = request.json
+        print(data)
         insert_part(data['Type'], data['Capacity'], data['Size'], data['Speed'],
                     data['Brand'], data['Model'], data['Location'], data['Part_sn'])
         return jsonify({'status': 'success'}), 200
     except Exception as e:
+        print(e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 
 @app.route('/sort_parts', methods=['POST'])
@@ -45,4 +50,5 @@ def sort_parts():
 
 
 if __name__ == '__main__':
+    # app.run(port=8000)
     app.run(debug=True)

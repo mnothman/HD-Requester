@@ -175,70 +175,59 @@
 			cursor: pointer;
 		}
 
-/* style modal*/ 
-.background-modal{
-	width: 100%;
-	height: 100%;
-	background-color: rgba(0,0,0,0.7);
-	position: absolute;
-	top:0;
-	/*display: flex;*/
-	justify-content: center;
-	align-items: center;
-	display: none;
-	overflow: auto;
 
-}
-.modal-form{
-	width: 600;
-	height: 600;
-	background-color: white;
-	border-radius: 5px;
-	text-align: left;
-	padding: 30px;
-	position: relative;
-	font-size: 14px;
-	font-family:"Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, "sans-serif";
-	
-}
-input{
-	width: 120px;
-	height: 20px;
-	display:grid;
-	margin-right: 10px auto;
-	margin-bottom: 10px auto;
-	font-size: 14px;
-	shape-margin: 10px;
-	
-}
-.close{
-	position: absolute;
-	top:0;
-	right: 18px;
-	font-size: 10px;
-	cursor:pointer;
-	
-}
-button{
-	width: auto;
-	height: auto;
-	font-size: 14px;
-	font-family:Constantia, "Lucida Bright", "DejaVu Serif", Georgia, "serif";
-	}
-table{
-	align-content: center;
-	font-family: Gotham, "Helvetica Neue", Helvetica, Arial, "sans-serif";
-	font-size: 14px;
-	font-weight: normal;
-	border-bottom-color: black;
-	border-style: solid;
-	border-bottom-width: thin;
-	border-left-width: thin;
-	border-right-width: thin;
-	border-top-width: thin;
-	
-}
-/*end style modal*/
+	 .background-modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+  .modal-form {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: auto;
+    max-width: 1000px;
+  }
+  .modal-header, .modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+  }
+  .modal-header {
+    border-bottom: 1px solid #e5e5e5;
+  }
+  .modal-footer {
+    border-top: 1px solid #e5e5e5;
+    justify-content: flex-start;
+  }
+  .modal-content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .form-control {
+    margin: 5px;
+    flex-grow: 1;
+    min-width: 120px; 
+  }
+  .close {
+    cursor: pointer;
+    font-size: 1.5rem;
+  }
+  .btn-success {
+    margin-top: 20px; 
+  }
+
 	</style>
 </head>
 
@@ -254,7 +243,8 @@ table{
 		<div class="row">
 			<div class="col-sm-9">
 				<div class="d-flex align-items-center">
-					<button id="addPartBtn" class="btn btn-primary1">Add Part</button>
+					<!-- <button id="addPartBtn" class="btn btn-primary1">Add Part</button> -->
+					<button id="showModalBtn" class="btn btn-primary2">Add Part</button>
 					<button id="rmvPartBtn" class="btn btn-primary2">Remove Part</button>
 				</div>
 			</div>
@@ -302,6 +292,36 @@ table{
 		</div>
 	</div>
 
+
+	<button id="showModalBtn" class="btn btn-primary">Add Part</button>
+	<div id="addPartModal" class="background-modal">
+		<div class="modal-form">
+		  <div class="modal-header">
+			<h3>Add part manually</h3>
+			<button class="close" id="closeModalBtn">&times;</button>
+		  </div>
+		  <div class="modal-body">
+			<form id="addPartForm" class="form-inline">
+			  <input type="text" id="type" placeholder="Type" class="form-control mb-2 mr-sm-2">
+			  <input type="text" id="capacity" placeholder="Capacity" class="form-control mb-2 mr-sm-2">
+			  <select id="size" class="form-control mb-2 mr-sm-2">
+				<option value="No Size">Default Size</option>
+				<option value="2.5'' HD">2.5'' HD</option>
+				<option value="3.5'' HD">3.5'' HD</option>
+				<option value="Laptop">Laptop</option>
+				<option value="Desktop">Desktop</option>
+			  </select>
+			  <input type="text" id="speed" placeholder="Speed" class="form-control mb-2 mr-sm-2">
+			  <input type="text" id="brand" placeholder="Brand" class="form-control mb-2 mr-sm-2">
+			  <input type="text" id="model" placeholder="Model" class="form-control mb-2 mr-sm-2">
+			  <input type="text" id="location" placeholder="Location" class="form-control mb-2 mr-sm-2">
+			  <input type="text" id="snumber" placeholder="Serial Number" class="form-control mb-2 mr-sm-2">
+			  <button type="button" id="add_btn" class="btn btn-primary mb-2">OK</button>
+			</form>
+		  </div>
+		</div>
+	  </div>
+
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 	<script>
 		$(document).ready(function () {
@@ -316,70 +336,70 @@ table{
 				handleSort(column);  // Call handleSort function with the column name
 			});
 
+			$('#showModalBtn').click(function () {
+				$('#addPartModal').show();
+			});
+
+			$('#closeModalBtn').click(function () {
+				$('#addPartModal').hide();
+			});
+
+
 			// Add part
-			$('#addPartBtn').click(function () {
-				
-				//the following block code was commented for the moment because we are adding the modal to the main page 
-				
-				//const partData = {
-				//	Type: 'PC4', Capacity: '16GB', Size: 'Desktop', Speed: 25600,
-				//	Brand: 'SK Hynix', Model: 'HMA82GD', Location: 'Shelf 3 C8', Part_sn: '00000019'
-				//};
-				
-				
-				//open modal with add button 
-				var modal= document.getElementById("bgmodal");
-				var openbtn=document.getElementById("addPartBtn");
-				var closemodal=document.getElementsByClassName("close")[0];
-		
-				openbtn.onclick=function(){
-				modal.style.display="block";}
-		
-				closemodal.onclick=function(){
-				modal.style.display="none"; }
+			$('#add_btn').click(function () {
+				const partData = {
+					Type: $('#type').val(),
+					Capacity: $('#capacity').val(),
+					Size: $('#size').val(),
+					Speed: $('#speed').val(),
+					Brand: $('#brand').val(),
+					Model: $('#model').val(),
+					Location: $('#location').val(),
+					Part_sn: $('#snumber').val()
+				};
 				handleAddPart(partData);
 				});
 
-		}); // end (document).ready()
+			function fetchAndDisplayParts() {
+				$.ajax({
+					url: '/get_parts',
+					type: 'POST',
+					dataType: 'json',
+					success: function (data) {
+						var tableBody = $('#partsTableBody');
+						console.log("GETS PARTS HERE 1")
+						tableBody.empty(); // Clear existing rows
+						$.each(data, function (index, part) {
+							tableBody.append('<tr>' +
+								'<td>' + part.Type + '</td>' +
+								'<td>' + part.Capacity + '</td>' +
+								'<td>' + part.Size + '</td>' +
+								'<td>' + part.Speed + '</td>' +
+								'<td>' + part.Brand + '</td>' +
+								'<td>' + part.Model + '</td>' +
+								'<td>' + part.Location + '</td>' +
+								'<td>' + part.Part_sn + '</td>' +
+								'</tr>');
+						});
+					},
+					error: function (xhr, status, error) {
+						console.error("Error fetching parts data: " + error);
+					}
+				});
+			} // end fetchAndDisplayParts
 
-		function fetchAndDisplayParts() {
-			$.ajax({
-				url: '/get_parts',
-				type: 'POST',
-				dataType: 'json',
-				success: function (data) {
-					var tableBody = $('#partsTableBody');
-					tableBody.empty(); // Clear existing rows
-					$.each(data, function (index, part) {
-						tableBody.append('<tr>' +
-							'<td>' + part.Type + '</td>' +
-							'<td>' + part.Capacity + '</td>' +
-							'<td>' + part.Size + '</td>' +
-							'<td>' + part.Speed + '</td>' +
-							'<td>' + part.Brand + '</td>' +
-							'<td>' + part.Model + '</td>' +
-							'<td>' + part.Location + '</td>' +
-							'<td>' + part.Part_sn + '</td>' +
-							'</tr>');
-					});
-				},
-				error: function (xhr, status, error) {
-					console.error("Error fetching parts data: " + error);
-				}
-			});
-		} // end fetchAndDisplayParts
-
-		function handleSort(column) {
-			// Make an AJAX request to the server to retrieve sorted data
-			$.ajax({
-				url: '/sort_parts',  // URL for sorting route in app.py
-				method: 'POST',
-				data: { column: column },  // Send the column to sort by
-				success: function (response) {
-					// Replace the table body with sorted data
-					$('#partsTableBody').html('');
-					response.forEach(function (part) {
-						$('#partsTableBody').append(`<tr>
+			function handleSort(column) {
+				console.log(partData);
+				// Make an AJAX request to the server to retrieve sorted data
+				$.ajax({
+					url: '/sort_parts',  // URL for sorting route in app.py
+					method: 'POST',
+					data: { column: column },  // Send the column to sort by
+					success: function (response) {
+						// Replace the table body with sorted data
+						$('#partsTableBody').html('');
+						response.forEach(function (part) {
+							$('#partsTableBody').append(`<tr>
 							<td>${part.Type}</td>
 							<td>${part.Capacity}</td>
 							<td>${part.Size}</td>
@@ -389,36 +409,42 @@ table{
 							<td>${part.Location}</td>
 							<td>${part.Part_sn}</td>
 						</tr>`);
-					});
-				},
-				error: function (xhr, status, error) {
-					console.error("Error sorting parts: " + error);
-				}
-			}); // end handleSort
-		}
-
-		function handleAddPart(partData) {
-			$.ajax({
-				url: '/add_part',
-				type: 'POST',
-				dataType: 'json',
-				data: partData,
-				success: function (response) {
-					if (response.status === 'success') {
-						fetchAndDisplayParts();
-					} else {
-						alert("Failed to add the part.");
+							// print("Sorted by " + column + " column.");
+						});
+					},
+					error: function (xhr, status, error) {
+						console.error("Error sorting parts: " + error);
 					}
-				},
-				error: function (xhr, status, error) {
-					console.error("Error adding part: " + error);
-					alert("Error adding part.");
-				}
-			});
-		} // end handleAddPart
+				}); // end handleSort
+			}
 
-	
 
+			//how add part works=> clicking add button (showModalBtn) opens the modal, which then prompts user input, clicking 
+			//submit sends data to server utilizing current add and handleadd functions
+			function handleAddPart(partData) {
+				$.ajax({
+					url: '/add_part',
+					type: 'POST',
+					contentType: 'application/json',
+					dataType: 'json',
+					data: JSON.stringify(partData),
+					success: function (response) {
+						console.log("ADD PARTS HERE 1")
+						if (response.status === 'success') {
+							$('#addPartModal').hide(); // hide modal
+							fetchAndDisplayParts(); //refresh page with new data immediately
+							$('#addPartForm')[0].reset(); //resets form	
+						} else {
+							alert("Failed to add the part." + response.message);
+						}
+					},
+					error: function (xhr, status, error) {
+						console.error("Error adding part: " + error);
+						alert("Error adding part. Ensure all boxes are filled. " + error);
+					}
+				});
+			} // end handleAddPart
+		});
 	</script>
 	
 <!--modal html code-->
