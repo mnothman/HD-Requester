@@ -81,10 +81,6 @@
 			cursor: pointer;
 		}
 
-		/* BUTTONS */
-		/* #addPartBtn {  } */
-		/* #rmvPartBtn {  } */
-
 		.btn-group form {
 			background-color: white;
 			padding: 7px;
@@ -155,7 +151,8 @@
 			float: left;
 		}
 
-		.text-area-custom {
+		/* TEXT INPUT REQUEST AREA */
+		#text-input-request {
 			margin: 0 10px 20px 10px;
 		}
 
@@ -175,58 +172,37 @@
 			cursor: pointer;
 		}
 
-
-	 .background-modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
-  }
-  .modal-form {
-    background-color: #fefefe;
-    margin: 5% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: auto;
-    max-width: 1000px;
-  }
-  .modal-header, .modal-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 10px;
-  }
-  .modal-header {
-    border-bottom: 1px solid #e5e5e5;
-  }
-  .modal-footer {
-    border-top: 1px solid #e5e5e5;
-    justify-content: flex-start;
-  }
-  .modal-content {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
-  .form-control {
-    margin: 5px;
-    flex-grow: 1;
-    min-width: 120px; 
-  }
-  .close {
-    cursor: pointer;
-    font-size: 1.5rem;
-  }
-  .btn-success {
-    margin-top: 20px; 
-  }
+		.background-modal {
+			display: none;
+			position: fixed;
+			z-index: 1;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			overflow: auto;
+			background-color: rgba(0, 0, 0, 0.4);
+		}
+		.modal-form {
+			background-color: #fefefe;
+			margin: 5% auto;
+			padding: 20px;
+			border: 1px solid #888;
+			width: auto;
+			max-width: 1000px;
+		}
+		.modal-header {
+			border-bottom: 1px solid #e5e5e5;
+		}
+		.form-control {
+			margin: 5px;
+			flex-grow: 1;
+			min-width: 120px; 
+		}
+		.close {
+			cursor: pointer;
+			font-size: 1.5rem;
+		}
 
 	</style>
 </head>
@@ -243,9 +219,8 @@
 		<div class="row">
 			<div class="col-sm-9">
 				<div class="d-flex align-items-center">
-					<!-- <button id="addPartBtn" class="btn btn-primary1">Add Part</button> -->
-					<button id="showModalBtn" class="btn btn-primary2">Add Part</button>
-					<button id="rmvPartBtn" class="btn btn-primary2">Remove Part</button>
+					<button id="showModalBtn" type="button" class="btn btn-primary2">Add Part</button>
+					<button id="rmvPartBtn" type="button" class="btn btn-primary2">Remove Part</button>
 				</div>
 			</div>
 
@@ -296,7 +271,7 @@
 		<div class="modal-form">
 		  <div class="modal-header">
 			<h3>Add part manually</h3>
-			<button class="close" id="closeModalBtn">&times;</button>
+			<button type="button" class="close" id="closeModalBtn">&times;</button>
 		  </div>
 		  <div class="modal-body">
 			<form id="addPartForm" class="form-inline">
@@ -347,7 +322,6 @@
 				console.log(parsedData);
 			});
 
-
 			// Add part
 			$('#add_btn').click(function () {
 				const partData = {
@@ -361,7 +335,7 @@
 					Part_sn: $('#snumber').val()
 				};
 				handleAddPart(partData);
-				});
+			});
 
 			function fetchAndDisplayParts() {
 				$.ajax({
@@ -421,7 +395,6 @@
 				}); // end handleSort
 			}
 
-
 			//how add part works=> clicking add button (showModalBtn) opens the modal, which then prompts user input, clicking 
 			//submit sends data to server utilizing current add and handleadd functions
 			function handleAddPart(partData) {
@@ -447,11 +420,9 @@
 					}
 				});
 			} // end handleAddPart
-		});
 		
-		
-		function parseTextInput(){
-			var textContent = document.getElementById('text-input-request').value; // Get the content of the textarea
+			function parseTextInput(){
+				var textContent = document.getElementById('text-input-request').value; // Get the content of the textarea
 				var lines = textContent.trim().split('\n'); // Split the content into lines
 
 				var dataObject = {
@@ -482,55 +453,10 @@
 				}
 
 				return dataObject;
-		}
-		
+			}
+		});
 		
 	</script>
-	
-<!--modal html code-->
-	
-<!--<button type="button" id="open_button" class="button">Open Modal</button>-->
-</body>
-	
-<div id="bgmodal" class="background-modal">
-	<div class="modal-form">
-		<span class="close">&times;</span>
-	
-		<p>Serial Number: <input type="text" id="serialnumber" name="serialnumber"></p>
-	 
-	
-		<p>Add item to inventory. Fill blanks.&nbsp;</p>
-		
-		<table>
-		<tr>
-		<th> Type</th>
-		<th>Capacity</th>
-		<th>Size</th>
-		<th>Speed</th>
-		<th>Brand</th>
-		<th>Model</th>
-		<th>Location</th>
-		<th>Serial Number</th>
-		</tr>
-		<tr>
-		<th><input type="text" id="type" name="type" placeholder="Type"></th>
-		<th><input type="text" id="capacity" name="Capacity" placeholder="Capacity"></th>
-		<th><input type="text" id="size" name="Size" placeholder="Size"></th>
-			<th> <input type="text" id="speed" name="Speed" placeholder="Speed"></th>
-		<th><input type="text" id="brand" name="Brand" placeholder="Brand"></th>
-		<th><input type="text" id="model" name="Model"  placeholder="Model"></th>
-		<th><input type="text" id="location" name="Location" placeholder="Location"></th>
-			<th><input type="text" id="snumber" name="serialnum" placeholder="Serial Number"></th>
-		</tr>
-		</table>
-		
-		<button type="button" id="cancel_btn">Cancel</button>
-	
-		<button type="button" id="add_btn">Add</button>
-		
-	</div>
-	
-	</div>
-	<!--end code for modal-->
 
+</body>
 </html>
