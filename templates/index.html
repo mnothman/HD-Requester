@@ -261,14 +261,14 @@
 
 		<div class="row">
 			<div class="col-sm-3">
-				<textarea class="form-control text-area-custom" rows="3"></textarea>
+				<textarea class="form-control text-area-custom" rows="3" id="text-input-request"></textarea>
 				<div class="btn-group" role="group">
 					<form>
 						<button type="button" class="btn-in">IN</button>
 						<button type="button" class="btn-out">OUT</button>
 					</form>
 				</div>
-				<button type="button" class="btn btn-primary btn-lg btn-block btn-submit">Submit</button>
+				<button type="button" class="btn btn-primary btn-lg btn-block btn-submit" id="btn-submit-request">Submit</button>
 			</div>
 			<div class="col-sm-9">
 				<table class="table table-striped">
@@ -292,8 +292,6 @@
 		</div>
 	</div>
 
-
-	<button id="showModalBtn" class="btn btn-primary">Add Part</button>
 	<div id="addPartModal" class="background-modal">
 		<div class="modal-form">
 		  <div class="modal-header">
@@ -342,6 +340,11 @@
 
 			$('#closeModalBtn').click(function () {
 				$('#addPartModal').hide();
+			});
+			
+			$('#btn-submit-request').click(function() {
+				var parsedData = parseTextInput();
+				console.log(parsedData);
 			});
 
 
@@ -445,6 +448,43 @@
 				});
 			} // end handleAddPart
 		});
+		
+		
+		function parseTextInput(){
+			var textContent = document.getElementById('text-input-request').value; // Get the content of the textarea
+				var lines = textContent.trim().split('\n'); // Split the content into lines
+
+				var dataObject = {
+					traveler_id: lines[0].trim(),
+					unit_sn: lines[1].trim(),
+					parts: [],
+					size: lines[lines.length - 1].trim() // Assuming last line is always 'size'
+				};
+
+				// Parse parts details (lines between unit_sn and size)
+				for (var i = 2; i < lines.length - 1; i++) {
+					var details = lines[i].trim().split(' ');
+					var part = {};
+
+					if (details[0].match(/\d+(GB|TB)$/)) { // Checking if it starts with a number and ends with GB or TB
+						part = {
+							capacity: details[0],
+							type: details[1]
+						};
+					} else { // Assuming it's RAM
+						var last = details.length - 1;
+						part = {
+							type: details.slice(0, last).join(' '),
+							capacity: details[last]
+						};
+					}
+					dataObject.parts.push(part);
+				}
+
+				return dataObject;
+		}
+		
+		
 	</script>
 	
 <!--modal html code-->
