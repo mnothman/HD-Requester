@@ -21,7 +21,7 @@ def close_db(error):
 
 def get_all_parts(search_type=None):
     db = get_db()
-    query = 'SELECT Part.* FROM Part JOIN Part_log ON Part.Part_sn = Part_log.Part_sn WHERE Part_log.Part_status IS \'in\''
+    query = 'SELECT Part.* FROM Part JOIN Part_log ON Part.Part_sn = Part_log.Part_sn WHERE Part_log.Part_status IS "in"'
     args = ()
     if search_type:
         query += ' AND Type LIKE ?'

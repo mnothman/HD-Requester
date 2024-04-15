@@ -44,13 +44,14 @@ def sort_parts():
 def check_part_in_inventory():
     data = request.get_json()
     part_sn = data['Part_sn']
+    size = data['Size']
     expected_type = data['Type']
     expected_capacity = data['Capacity']
 
     conn = get_db()
     try:
         # Query to check if Part_sn exists in the Part table and is currently checked out
-        part = conn.execute('SELECT Type, Capacity, Part_status FROM Part_log pl JOIN Part p on pl.Part_sn = p.Part_sn WHERE p.Part_sn = ?', (part_sn,)).fetchone()
+        part = conn.execute('SELECT Type, Capacity, Size, Part_status FROM Part_log pl JOIN Part p on pl.Part_sn = p.Part_sn WHERE p.Part_sn = ?', (part_sn,)).fetchone()
 
         if part is None:
             return jsonify({'exists': False, 'error': 'not_in_inventory', 'message': 'Part not found in inventory.'})
@@ -72,7 +73,7 @@ def check_part_in_inventory():
                 'exists': False,
                 'error': 'checked-in',
                 'message': 'Already checked-in.',
-                'part': {'Part_sn': part_sn, 'Type': part['Type'], 'Capacity': part['Capacity']}
+                'part': {'Part_sn': part_sn, 'Type': part['Type'], 'Capacity': part['Capacity'], 'Size': part['Size']}
             })
 
     finally:

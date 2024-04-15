@@ -246,6 +246,7 @@
 						<button id="rmvPartBtn" type="button" class="btn">Remove Part</button>
 						<button id="btnDemoCheckin" type="button" class="btn">Check-in Demo</button>
 						<button id="btnDemoCheckinNotSeenBefore" type="button" class="btn">Check-In Demo Not Seen b4</button>
+						<button id="btnDemoCheckinMismatch" type="button" class="btn">Check-in Demo Mismatch SN and Specs</button>
 						<button id="btnResetLogTables" type="button" class="btn">Reset Log Tables</button>
 					</div>
 					<div class="search col-sm-3">
@@ -276,30 +277,14 @@
 		</div>
 	</div>
 
-	<div id="addPartModal" class="background-modal">
+	<div id="Modal" class="background-modal">
 		<div class="modal-form">
 		  <div class="modal-header">
-			<h3>Add part manually</h3>
+			<h3 id="modalTitle">Title</h3>
 			<button type="button" class="close" id="closeModalBtn">&times;</button>
 		  </div>
 		  <div class="modal-body">
-			<form id="addPartForm" class="form-inline">
-			  <input type="text" id="type" placeholder="Type" class="form-control mb-2 mr-sm-2">
-			  <input type="text" id="capacity" placeholder="Capacity" class="form-control mb-2 mr-sm-2">
-			  <select id="size" class="form-control mb-2 mr-sm-2">
-				<option value="No Size">No Size</option>
-				<option value="2.5&quot; HD">2.5&quot; HD</option>
-				<option value="3.5&quot; HD">3.5&quot; HD</option>
-				<option value="Laptop">Laptop</option>
-				<option value="Desktop">Desktop</option>
-			  </select>
-			  <input type="text" id="speed" placeholder="Speed" class="form-control mb-2 mr-sm-2">
-			  <input type="text" id="brand" placeholder="Brand" class="form-control mb-2 mr-sm-2">
-			  <input type="text" id="model" placeholder="Model" class="form-control mb-2 mr-sm-2">
-			  <input type="text" id="location" placeholder="Location" class="form-control mb-2 mr-sm-2">
-			  <input type="text" id="snumber" placeholder="Serial Number" class="form-control mb-2 mr-sm-2">
-			  <button type="button" id="add_btn" class="btn btn-primary mb-2">OK</button>
-			</form>
+			<p id="modalContent"></p>
 		  </div>
 		</div>
 	  </div>
@@ -349,7 +334,17 @@
 					"unit_sn": "123456",
 					"parts": [{"capacity": "99 TB","type": "SSD"}],
 					"size": "Laptop",
-					"serial_numbers": ["00000002"]
+					"serial_numbers": ["0000011"]
+				}
+				checkInPart(demoPart);
+			});
+			$('#btnDemoCheckinMismatch').click(function() {
+				var demoPart = {
+					"tid": "TI000000-00000001",
+					"unit_sn": "123456",
+					"parts": [{"capacity": "99 TB","type": "SSD"}],
+					"size": "Laptop",
+					"serial_numbers": ["0000010"]
 				}
 				checkInPart(demoPart);
 			});
@@ -357,7 +352,6 @@
 				resetLogTables();
 			});
 			
-
 			// Add part
 			$('#add_btn').click(function () {
 				const partData = {
@@ -401,9 +395,43 @@
 					}
 				});
 			} // end fetchAndDisplayParts
+			
+			// Modal
+			function showModal(dataObject, htmlContent) {
+				// Set the content of the modal
+				$('#modalContent').html(htmlContent);
+
+				// Set the title of the modal if a title is provided in dataObject
+				if (dataObject && dataObject.title) {
+					$('#modalTitle').text(dataObject.title);
+				} else {
+					// Default title if none provided
+					$('#modalTitle').text('Details');
+				}
+
+				// Additional data handling could go here
+				if (dataObject) {
+					console.log("Additional data:", dataObject);
+				}
+
+				// Display the modal
+				$('#Modal').css('display', 'block');
+
+				// Setup close button to hide the modal
+				$('#closeModalBtn').click(function() {
+					$('#Modal').css('display', 'none');
+				});
+
+				// Handle background clicks to also close the modal
+				$(window).click(function(event) {
+					if ($(event.target).is('#Modal')) {
+						$('#Modal').css('display', 'none');
+					}
+				});
+			} // end Modal
+
 
 			function handleSort(column) {
-				console.log(partData);
 				// Make an AJAX request to the server to retrieve sorted data
 				$.ajax({
 					url: '/sort_parts',  // URL for sorting route in app.py
@@ -444,7 +472,7 @@
 					success: function (response) {
 						console.log("ADD PARTS HERE 1")
 						if (response.status === 'success') {
-							$('#addPartModal').hide(); // hide modal
+							$('#Modal').hide(); // hide modal
 							fetchAndDisplayParts(); //refresh page with new data immediately
 							$('#addPartForm')[0].reset(); //resets form	
 						} else {
@@ -539,10 +567,12 @@
 					const partData = {
 						Part_sn: partSn,
 						Type: part.type,
-						Capacity: part.capacity
+						Capacity: part.capacity,
+						Size: dataObject.size,
+						Speed: dataObject.Speed,
+						Brand: dataObject.Brand,
+						Model: dataObject.Model,
 					};
-					
-					console.error(partData);
 
 					$.ajax({
 						url: '/check_part_in_inventory',  // Server-side script to check the inventory
@@ -563,9 +593,7 @@
 										Part_status: 'in'
 									}),
 									success: function(updateResponse) {
-										console.log("Part status updated to 'in' in Part_log and logged in Log table.");
-                                        alert('Part status updated to \'in\' in Part_log and logged in Log table.');
-										fetchAndDisplayParts();
+											fetchAndDisplayParts();
 									},
 									error: function(err) {
 										console.error("Error updating part status: ", err);
@@ -574,7 +602,47 @@
 							} else {
 								// If part does not exist or does not match, show modal to add part
 								console.log(response.message); // Log the message from the server
-								$('#addPartModal').show();
+								// Check for specific mismatch error
+								if(response.error == 'mismatch') {
+									const expectedDetails = response.expected;
+									const actualDetails = response.actual;
+									const content = `
+										<p><strong>Expected: </strong>${expectedDetails.Capacity} ${expectedDetails.Type}</p>
+										<p><strong>Found: </strong>${actualDetails.Capacity} ${actualDetails.Type}</p>
+										
+									`;
+									showModal({ title: 'Check-in Error: ' + response.message }, content);
+								}
+								else if (response.error == 'checked-in'){
+									console.log("Error: " + response.message); // Handle other errors
+									const content = `
+										<p><strong>That part is already checked-in.<strong></p>
+										<p>Serial number: ${partSn}</p>
+										<table width="100%" border="1">
+										<tbody>
+										<tr>
+										  <th scope="col">&nbsp;Type</th>
+										  <th scope="col">Capacity&nbsp;</th>
+										  <th scope="col">Size&nbsp;</th>
+										  <th scope="col">Speed&nbsp;</th>
+										  <th scope="col">Brand&nbsp;</th>
+										  <th scope="col">Model&nbsp;</th>
+										  <th scope="col">Location&nbsp;</th>
+										</tr>
+										<tr>
+											<td>${partData.Type}</td>
+											<td>${partData.Capacity}</td>
+											<td>${partData.Size}</td>
+											<td>${partData.Speed}</td>
+											<td>${partData.Brand}</td>
+											<td>${partData.Model}</td>
+											<td>${partData.Location}</td>
+										</tr>
+										</tbody>
+										</table>
+									`;
+									showModal({ title: 'Check-in Error: ' + response.message }, content);
+								}
 							}
 						},
 						error: function(err) {
