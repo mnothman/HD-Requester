@@ -49,8 +49,8 @@ def check_part_in_inventory():
 
     conn = get_db()
     try:
-        # Query to check if Part_sn exists in the Part table
-        part = conn.execute('SELECT Type, Capacity FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
+        # Query to check if Part_sn exists in the Part table and is currently checked out
+        part = conn.execute('SELECT Type, Capacity, Part_status FROM Part_log pl JOIN Part p on pl.Part_sn = p.Part_sn WHERE p.Part_sn = ?', (part_sn,)).fetchone()
 
         if part is None:
             return jsonify({'exists': False, 'error': 'not_in_inventory', 'message': 'Part not found in inventory.'})
@@ -64,7 +64,16 @@ def check_part_in_inventory():
                 'expected': {'Type': expected_type, 'Capacity': expected_capacity},
                 'actual': {'Type': part['Type'], 'Capacity': part['Capacity']}
             })
-        return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
+		# Check if the existing part is already checked in
+        if part['Part_status'] != 'in':
+            return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
+        else:
+            return jsonify({
+                'exists': False,
+                'error': 'checked-in',
+                'message': 'Already checked-in.',
+                'part': {'Part_sn': part_sn, 'Type': part['Type'], 'Capacity': part['Capacity']}
+            })
 
     finally:
         conn.close()
@@ -95,6 +104,54 @@ def update_part_status():
     finally:
         conn.close()
 
+@app.route('/reset_log_tables', methods=['POST'])
+def reset_log_tables():
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    try:
+        # Dropping tables
+        cursor.execute("DROP TABLE IF EXISTS Log;")
+        cursor.execute("DROP TABLE IF EXISTS Part_log;")
+        
+        # Recreating tables
+        cursor.execute('''
+            CREATE TABLE "Part_log" (
+                "Part_sn" TEXT NOT NULL UNIQUE,
+                "Part_status" TEXT NOT NULL CHECK("Part_status" IN ('in', 'out', 'deleted')),
+                FOREIGN KEY("Part_sn") REFERENCES "Part"("Part_sn")
+            );
+        ''')
+        cursor.execute('''
+            CREATE TABLE "Log" (
+                "TID" TEXT NOT NULL,
+                "Unit_sn" TEXT NOT NULL,
+                "Part_sn" TEXT NOT NULL,
+                "Part_status" TEXT NOT NULL,
+                "Date_time" TEXT,
+                CONSTRAINT "fk_l_status" FOREIGN KEY("Part_status") REFERENCES "Part_log"("Part_status"),
+                CONSTRAINT "fk_l_unitsn" FOREIGN KEY("Unit_sn") REFERENCES "Part_log"("Unit_sn"),
+                CONSTRAINT "fk_l_partsn" FOREIGN KEY("Part_sn") REFERENCES "Part_log"("Part_sn"),
+                CONSTRAINT "pk_l_datetime_tid" PRIMARY KEY("Date_time","TID")
+            );
+        ''')
+
+        # Inserting initial data into Part_log
+        parts_data = [
+            ('00000001', 'in'), ('00000002', 'in'), ('00000003', 'in'),
+            ('00000004', 'in'), ('00000005', 'in'), ('00000006', 'in'),
+            ('00000007', 'in'), ('00000008', 'in'), ('00000009', 'in'),
+            ('00000010', 'in'), ('00000022', 'out')
+        ]
+        cursor.executemany('INSERT INTO Part_log (Part_sn, Part_status) VALUES (?, ?);', parts_data)
+
+        conn.commit()  # Commit the changes
+        return jsonify({'status': 'success', 'message': 'Database has been reset successfully.'})
+    except sqlite3.Error as e:
+        conn.rollback()  # Roll back any changes if something goes wrong
+        return jsonify({'status': 'error', 'message': str(e)})
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
     # app.run(port=8000)

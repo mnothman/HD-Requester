@@ -246,6 +246,7 @@
 						<button id="rmvPartBtn" type="button" class="btn">Remove Part</button>
 						<button id="btnDemoCheckin" type="button" class="btn">Check-in Demo</button>
 						<button id="btnDemoCheckinNotSeenBefore" type="button" class="btn">Check-In Demo Not Seen b4</button>
+						<button id="btnResetLogTables" type="button" class="btn">Reset Log Tables</button>
 					</div>
 					<div class="search col-sm-3">
 						<form>
@@ -338,10 +339,10 @@
 					"unit_sn": "123456",
 					"parts": [{"capacity": "1 TB","type": "SSD"}],
 					"size": "Laptop",
-					"serial_numbers": ["00000002"]
+					"serial_numbers": ["00000022"]
 				}
 				checkInPart(demoPart);
-			})
+			});
 			$('#btnDemoCheckinNotSeenBefore').click(function() {
 				var demoPart = {
 					"tid": "TI000000-00000001",
@@ -351,7 +352,10 @@
 					"serial_numbers": ["00000002"]
 				}
 				checkInPart(demoPart);
-			})
+			});
+			$('#btnResetLogTables').click(function() {
+				resetLogTables();
+			});
 			
 
 			// Add part
@@ -576,6 +580,25 @@
 					});
 				});
 			} // end checkinPart
+			
+			function resetLogTables(){
+                $.ajax({
+                    url: '/reset_log_tables',  // URL of the Flask endpoint
+                    type: 'POST',  // Method type, as defined in your Flask route
+                    contentType: 'application/json',  // Data type expected to send (if you are sending data to the server)
+                    success: function(response) {
+                        // This function is called if the request succeeds.
+                        console.log('Response:', response);
+                        alert('Database has been reset successfully.');
+                    },
+                    error: function(xhr, status, error) {
+                        // This function is called if the request fails.
+                        console.error('Error resetting database:', error);
+                        alert('Failed to reset database: ' + error);
+                    }
+                });
+			} // end resetLogTables
+			
 		});
 		
 	</script>
