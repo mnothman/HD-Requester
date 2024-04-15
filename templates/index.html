@@ -522,6 +522,7 @@
 
 				if (dataObject.parts.length !== dataObject.serial_numbers.length) {
 					console.error("Error: The number of parts does not match the number of serial numbers.");
+                    alert('Error: The number of parts does not match the number of serial numbers.');
 					return null;
 				}
 
@@ -563,6 +564,8 @@
 									}),
 									success: function(updateResponse) {
 										console.log("Part status updated to 'in' in Part_log and logged in Log table.");
+                                        alert('Part status updated to \'in\' in Part_log and logged in Log table.');
+										fetchAndDisplayParts();
 									},
 									error: function(err) {
 										console.error("Error updating part status: ", err);
@@ -576,6 +579,7 @@
 						},
 						error: function(err) {
 							console.error("Error checking part in inventory: ", err);
+                            alert('Error checking part in inventory: ' + error);
 						}
 					});
 				});
@@ -590,6 +594,7 @@
                         // This function is called if the request succeeds.
                         console.log('Response:', response);
                         alert('Database has been reset successfully.');
+						fetchAndDisplayParts();
                     },
                     error: function(xhr, status, error) {
                         // This function is called if the request fails.
