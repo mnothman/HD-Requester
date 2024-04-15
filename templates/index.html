@@ -244,6 +244,8 @@
 					<div id="parts-buttons" class="col-sm-9">
 						<button id="showModalBtn" type="button" class="btn">Add Part</button>
 						<button id="rmvPartBtn" type="button" class="btn">Remove Part</button>
+						<button id="btnDemoCheckin" type="button" class="btn">Check-in Demo</button>
+						<button id="btnDemoCheckinNotSeenBefore" type="button" class="btn">Check-In Demo Not Seen b4</button>
 					</div>
 					<div class="search col-sm-3">
 						<form>
@@ -330,7 +332,26 @@
 				console.log(parsedData);
 			});
 			
-			
+			$('#btnDemoCheckin').click(function() {
+				var demoPart = {
+					"tid": "TI000000-00000001",
+					"unit_sn": "123456",
+					"parts": [{"capacity": "1 TB","type": "SSD"}],
+					"size": "Laptop",
+					"serial_numbers": ["00000002"]
+				}
+				checkInPart(demoPart);
+			})
+			$('#btnDemoCheckinNotSeenBefore').click(function() {
+				var demoPart = {
+					"tid": "TI000000-00000001",
+					"unit_sn": "123456",
+					"parts": [{"capacity": "99 TB","type": "SSD"}],
+					"size": "Laptop",
+					"serial_numbers": ["00000002"]
+				}
+				checkInPart(demoPart);
+			})
 			
 
 			// Add part
@@ -433,39 +454,128 @@
 				});
 			} // end handleAddPart
 		
-			function parseTextInput(){
-				var textContent = document.getElementById('textarea-request').value; // Get the content of the textarea
-				var lines = textContent.trim().split('\n'); // Split the content into lines
-
+			function parseTextInput() {
+				var textContent = document.getElementById('textarea-request').value;
+				var lines = textContent.trim().split('\n');
 				var dataObject = {
-					traveler_id: lines[0].trim(),
-					unit_sn: lines[1].trim(),
+					tid: null,
+					unit_sn: null,
 					parts: [],
-					size: lines[lines.length - 1].trim() // Assuming last line is always 'size'
+					size: null,
+					serial_numbers: []
 				};
 
-				// Parse parts details (lines between unit_sn and size)
-				for (var i = 2; i < lines.length - 1; i++) {
+				if (lines.length < 4) { // Minimum number of lines for valid input
+					console.error("Error: Insufficient input data.");
+					return null;
+				}
+
+				// Parse TID
+				dataObject.tid = lines[0].trim();
+				if (!dataObject.tid.startsWith("TI") && !dataObject.tid.startsWith("TZZ")) {
+					console.error("Error: Invalid TID format.");
+					return null;
+				}
+
+				// Parse Unit_sn
+				dataObject.unit_sn = lines[1].trim();
+				if (!dataObject.unit_sn) {
+					console.error("Error: Missing unit_sn.");
+					return null;
+				}
+
+				// Parse parts and serial numbers
+				var i = 2;
+				while (lines[i] && !["Laptop", "Desktop", "Server"].includes(lines[i].trim())) {
 					var details = lines[i].trim().split(' ');
 					var part = {};
 
-					if (details[0].match(/\d+(GB|TB)$/)) { // Checking if it starts with a number and ends with GB or TB
+					if (details[0].match(/\d+(GB|TB)$/)) { // Drive
 						part = {
 							capacity: details[0],
-							type: details[1]
+							type: details.slice(1).join(' ')
 						};
-					} else { // Assuming it's RAM
-						var last = details.length - 1;
+					} else { // RAM
+						var capacityIndex = details.findIndex(detail => detail.match(/\d+(GB|MB)$/));
 						part = {
-							type: details.slice(0, last).join(' '),
-							capacity: details[last]
+							type: details.slice(0, capacityIndex).join(' '),
+							capacity: details[capacityIndex]
 						};
 					}
 					dataObject.parts.push(part);
+					i++;
+				}
+
+				// Parse Size
+				dataObject.size = lines[i].trim();
+				i++;
+
+				// Parse Serial Numbers
+				while (i < lines.length) {
+					dataObject.serial_numbers.push(lines[i].trim());
+					i++;
+				}
+
+				if (dataObject.parts.length !== dataObject.serial_numbers.length) {
+					console.error("Error: The number of parts does not match the number of serial numbers.");
+					return null;
 				}
 
 				return dataObject;
-			}
+			} // end parseTextInput
+			
+			
+			function checkInPart(dataObject) {
+				// Assume dataObject has already been parsed and structured
+				dataObject.parts.forEach((part, index) => {
+					const partSn = dataObject.serial_numbers[index];  // Get the serial number for the current part
+
+					// Prepare the data to be sent to the server including Type and Capacity
+					const partData = {
+						Part_sn: partSn,
+						Type: part.type,
+						Capacity: part.capacity
+					};
+					
+					console.error(partData);
+
+					$.ajax({
+						url: '/check_part_in_inventory',  // Server-side script to check the inventory
+						type: 'POST',
+						contentType: 'application/json',
+						data: JSON.stringify(partData),
+						success: function(response) {
+							if (response.exists) {
+								// If part exists and matches type and capacity, update its status to 'in'
+								$.ajax({
+									url: '/update_part_status',
+									type: 'POST',
+									contentType: 'application/json',
+									data: JSON.stringify({
+										Part_sn: partSn,
+										TID: dataObject.tid,
+										Unit_sn: dataObject.unit_sn,
+										Part_status: 'in'
+									}),
+									success: function(updateResponse) {
+										console.log("Part status updated to 'in' in Part_log and logged in Log table.");
+									},
+									error: function(err) {
+										console.error("Error updating part status: ", err);
+									}
+								});
+							} else {
+								// If part does not exist or does not match, show modal to add part
+								console.log(response.message); // Log the message from the server
+								$('#addPartModal').show();
+							}
+						},
+						error: function(err) {
+							console.error("Error checking part in inventory: ", err);
+						}
+					});
+				});
+			} // end checkinPart
 		});
 		
 	</script>

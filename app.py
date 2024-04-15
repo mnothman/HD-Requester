@@ -1,14 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-from database import db_blueprint, get_all_parts, insert_part # checkout_part, checkin_part
+from database import db_blueprint, get_db, get_all_parts, insert_part # checkout_part, checkin_part
 
 app = Flask(__name__)
 app.register_blueprint(db_blueprint)
-app.secret_key = 'your_secret_key'  # use env variable for production
-
-USER_CREDENTIALS = {'admin': 'password', 'user1': '123456'}
-
-def authenticate_user(username, password):
-    return USER_CREDENTIALS.get(username) == password
 
 @app.route('/')
 def index():
@@ -34,8 +28,6 @@ def add_part():
         print(e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-
-
 @app.route('/sort_parts', methods=['POST'])
 def sort_parts():
     """Sort parts based on a specified column."""
@@ -47,6 +39,61 @@ def sort_parts():
     else:
         sorted_parts = parts
     return jsonify([dict(part) for part in sorted_parts])
+
+@app.route('/check_part_in_inventory', methods=['POST'])
+def check_part_in_inventory():
+    data = request.get_json()
+    part_sn = data['Part_sn']
+    expected_type = data['Type']
+    expected_capacity = data['Capacity']
+
+    conn = get_db()
+    try:
+        # Query to check if Part_sn exists in the Part table
+        part = conn.execute('SELECT Type, Capacity FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
+
+        if part is None:
+            return jsonify({'exists': False, 'error': 'not_in_inventory', 'message': 'Part not found in inventory.'})
+
+        # Check if the existing part matches the expected type and capacity
+        if part['Type'] != expected_type or part['Capacity'] != expected_capacity:
+            return jsonify({
+                'exists': False,
+                'error': 'mismatch',
+                'message': 'Mismatch in type or capacity.',
+                'expected': {'Type': expected_type, 'Capacity': expected_capacity},
+                'actual': {'Type': part['Type'], 'Capacity': part['Capacity']}
+            })
+        return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
+
+    finally:
+        conn.close()
+
+@app.route('/update_part_status', methods=['POST'])
+def update_part_status():
+    data = request.get_json()
+    part_sn = data['Part_sn']
+    tid = data['TID']
+    unit_sn = data['Unit_sn']
+    part_status = 'in'  # We are checking in the part, so we set this status to 'in'
+
+    conn = get_db()
+    try:
+        conn.execute('BEGIN')
+        # Update Part_log to set Part_status to 'in'
+        conn.execute('UPDATE Part_log SET Part_status = ? WHERE Part_sn = ?', (part_status, part_sn))
+        conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status) VALUES (?, ?, ?, ?)', 
+                     (tid, unit_sn, part_sn, part_status))
+        conn.commit()
+        return jsonify({'status': 'success', 'message': 'Part status updated and logged successfully.'})
+
+    except sqlite3.Error as e:
+        # Roll back any changes if there was an error
+        conn.rollback()
+        return jsonify({'status': 'error', 'message': 'Database error: ' + str(e)}), 500
+
+    finally:
+        conn.close()
 
 
 if __name__ == '__main__':

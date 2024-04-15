@@ -21,10 +21,10 @@ def close_db(error):
 
 def get_all_parts(search_type=None):
     db = get_db()
-    query = 'SELECT * FROM Part'
+    query = 'SELECT Part.* FROM Part JOIN Part_log ON Part.Part_sn = Part_log.Part_sn'
     args = ()
     if search_type:
-        query += ' WHERE Type LIKE ?'
+        query += ' WHERE Part_log.Part_status IS 'in' AND Type LIKE ?'
         args = ('%' + search_type + '%',)
     parts = db.execute(query, args).fetchall()
     return parts
