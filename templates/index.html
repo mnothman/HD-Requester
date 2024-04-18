@@ -302,7 +302,11 @@
 			// Sort column
 			$('.sortable-column').click(function () {
 				var column = $(this).text().trim();  // Get the column name
-				handleSort(column);  // Call handleSort function with the column name
+				var sortOrder = $(this).attr('data-sort-order') || 'asc'; //get current sort order, default to ascending
+				handleSort(column, sortOrder);
+				
+				sortOrder = (sortOrder === 'asc' ? 'desc' : 'asc');
+				$(this).attr('data-sort-order', sortOrder); 
 			});
 
 			$('#showModalBtn').click(function () {
@@ -431,28 +435,18 @@
 			} // end Modal
 
 
-			function handleSort(column) {
+			function handleSort(column, sortOrder) {
 				// Make an AJAX request to the server to retrieve sorted data
 				$.ajax({
 					url: '/sort_parts',  // URL for sorting route in app.py
 					method: 'POST',
-					data: { column: column },  // Send the column to sort by
+					data: { 
+						column: column,
+						order: sortOrder 
+					},  // Send the column to sort by
 					success: function (response) {
-						// Replace the table body with sorted data
-						$('#partsTableBody').html('');
-						response.forEach(function (part) {
-							$('#partsTableBody').append(`<tr>
-							<td>${part.Type}</td>
-							<td>${part.Capacity}</td>
-							<td>${part.Size}</td>
-							<td>${part.Speed}</td>
-							<td>${part.Brand}</td>
-							<td>${part.Model}</td>
-							<td>${part.Location}</td>
-							<td>${part.Part_sn}</td>
-						</tr>`);
+						updateTable(response);
 							// print("Sorted by " + column + " column.");
-						});
 					},
 					error: function (xhr, status, error) {
 						console.error("Error sorting parts: " + error);
@@ -651,8 +645,25 @@
 						}
 					});
 				});
-			} // end checkinPart
-			
+			} 
+			function updateTable(parts) {
+        		var tableBody = $('#partsTableBody');
+        		tableBody.empty(); // Clear existing rows
+        		parts.forEach(function (part) {
+            		tableBody.append('<tr>' +
+                		`<td>${part.Type}</td>` +
+                	`<td>${part.Capacity}</td>` +
+                	`<td>${part.Size}</td>` +
+                	`<td>${part.Speed}</td>` +
+                	`<td>${part.Brand}</td>` +
+                	`<td>${part.Model}</td>` +
+                	`<td>${part.Location}</td>` +
+                	`<td>${part.Part_sn}</td>` +
+            	'</tr>');
+        	});
+    	}
+	});
+					
 			function resetLogTables(){
                 $.ajax({
                     url: '/reset_log_tables',  // URL of the Flask endpoint
@@ -671,8 +682,6 @@
                     }
                 });
 			} // end resetLogTables
-			
-		});
 		
 	</script>
 
