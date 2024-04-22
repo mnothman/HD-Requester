@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-from database import db_blueprint, get_db, get_all_parts, insert_part # checkout_part, checkin_part
-import re
+from database import sqlite3, db_blueprint, get_db, get_all_parts # checkout_part, checkin_part
 
 app = Flask(__name__)
 app.register_blueprint(db_blueprint)
@@ -16,53 +15,66 @@ def get_parts(): #fetch parts from search
     parts = get_all_parts(search_type)
     return jsonify([dict(part) for part in parts])
 
+# Sample database function to insert a part
+def insert_part(part_data):
+    # Connection to your SQLite database
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        # SQL query to insert a new part into the Part table
+        conn.execute('BEGIN')
+        cursor.execute('''
+            INSERT INTO Part (Type, Capacity, Size, Speed, Brand, Model, Location, Part_sn)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (part_data['Type'], part_data['Capacity'], part_data['Size'], part_data['Speed'],
+              part_data['Brand'], part_data['Model'], part_data['Location'], part_data['Part_sn']))
+
+        # SQL query to insert a new record into the Part_log table
+        cursor.execute('''
+            INSERT INTO Part_log (Part_sn, Part_status)
+            VALUES (?, 'in')
+        ''', (part_data['Part_sn'],))
+
+        # Commit the changes
+        conn.commit()
+
+    except sqlite3.IntegrityError as e:
+        print("Error occurred: ", e)
+        # Handle specific integrity errors, e.g., unique constraint failed
+        conn.rollback()  # Rollback the transaction on error
+        return {'status': 'error', 'message': str(e)}
+
+    except Exception as e:
+        print("Error occurred: ", e)
+        conn.rollback()  # Ensure no partial data is written
+        return {'status': 'error', 'message': str(e)}
+
+    finally:
+        conn.close()  # Always close the connection
+
+    return {'status': 'success', 'message': 'Part added successfully and logged as in'}
+
 @app.route('/add_part', methods=['POST'])
 def add_part():
+    data = request.get_json()
     try:
-        print("add part 2")
-        data = request.json
-        print(data)
-        insert_part(data['Type'], data['Capacity'], data['Size'], data['Speed'],
-                    data['Brand'], data['Model'], data['Location'], data['Part_sn'])
-        return jsonify({'status': 'success'}), 200
+        insert_part(data)  # Assuming data is a dictionary matching your database schema
+        return jsonify({'status': 'success', 'message': 'Part added successfully'})
     except Exception as e:
-        print(e)
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        return jsonify({'status': 'error', 'message': str(e)})
 
 @app.route('/sort_parts', methods=['POST'])
 def sort_parts():
-    """Sort parts based on a specified column and order, handling numeric values and units properly."""
+    """Sort parts based on a specified column."""
     column = request.form.get('column')
-    order = request.form.get('order', 'asc')  # Default to ascending if not specified
-    parts = get_all_parts()  # Assume this function fetches all parts
-
-    def extract_number(text):
-        """Extracts the leading number from a string, converts it to float, and adjusts for unit."""
-        number = 0
-        match = re.search(r'(\d+)\s*(GB|TB)', text, re.IGNORECASE)
-        if match:
-            number = float(match.group(1))
-            unit = match.group(2)
-            if unit.upper() == 'TB':  # Convert terabytes to gigabytes
-                number *= 1024
-        return number
-
-    # Check if column is one of the acceptable fields to sort by
+    parts = get_all_parts()  #all parts to sort
+    # validate first
     if column in ['Type', 'Capacity', 'Size', 'Speed', 'Brand', 'Model', 'Location', 'Part_sn']:
-        # Determine the sorting key and direction
-        if column == 'Capacity':
-            # Special handling for capacity to sort numerically and consider units
-            sorted_parts = sorted(parts, key=lambda part: (part[column] is None, extract_number(part[column])), reverse=(order == 'desc'))
-        else:
-            # Default sorting for other columns
-            sorted_parts = sorted(parts, key=lambda part: (part[column] is None, part[column]), reverse=(order == 'desc'))
+        sorted_parts = sorted(parts, key=lambda part: (part[column] is None, part[column]))
     else:
-        sorted_parts = parts  # Return unsorted if column is not valid
-
+        sorted_parts = parts
     return jsonify([dict(part) for part in sorted_parts])
-
-if __name__ == '__main__':
-    app.run(debug=True)
 
 @app.route('/check_part_in_inventory', methods=['POST'])
 def check_part_in_inventory():
@@ -78,7 +90,10 @@ def check_part_in_inventory():
         part = conn.execute('SELECT Type, Capacity, Size, Part_status FROM Part_log pl JOIN Part p on pl.Part_sn = p.Part_sn WHERE p.Part_sn = ?', (part_sn,)).fetchone()
 
         if part is None:
-            return jsonify({'exists': False, 'error': 'not_in_inventory', 'message': 'Part not found in inventory.'})
+            return jsonify({'exists': False,
+							'error': 'not_in_inventory',
+							'message': 'Part not found in inventory.',
+						   })
 
         # Check if the existing part matches the expected type and capacity
         if part['Type'] != expected_type or part['Capacity'] != expected_capacity:
