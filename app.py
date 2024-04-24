@@ -1,13 +1,33 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Blueprint, current_app, Flask, g, jsonify, render_template, request, redirect, url_for, session
 from database import sqlite3, db_blueprint, get_db, get_all_parts # checkout_part, checkin_part
-import re
+import re, sqlite3
 
 app = Flask(__name__)
 app.register_blueprint(db_blueprint)
 
+db_blueprint = Blueprint('db', __name__)
+DATABASE = 'refresh.db'
+
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect(DATABASE)
+        g.db.row_factory = sqlite3.Row
+    return g.db
+
+
+@db_blueprint.teardown_app_request
+def close_db(error):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
+    current_app.logger.info("Database is connected")
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/get_parts', methods=['POST'])
 def get_parts(): #fetch parts from search
@@ -15,7 +35,19 @@ def get_parts(): #fetch parts from search
     parts = get_all_parts(search_type)
     return jsonify([dict(part) for part in parts])
 
-# Sample database function to insert a part
+
+def get_all_parts(search_type=None):
+    db = get_db()
+    query = 'SELECT Part.* FROM Part JOIN Part_log ON Part.Part_sn = Part_log.Part_sn WHERE Part_log.Part_status IS "in"'
+    args = ()
+    if search_type:
+        query += ' AND Type LIKE ?'
+        args = ('%' + search_type + '%',)
+    parts = db.execute(query, args).fetchall()
+    return parts
+
+
+# Database function to insert a part
 def insert_part(part_data):
     # Connection to your SQLite database
     conn = get_db()
@@ -55,14 +87,17 @@ def insert_part(part_data):
 
     return {'status': 'success', 'message': 'Part added successfully and logged as in'}
 
+
 @app.route('/add_part', methods=['POST'])
 def add_part():
     data = request.get_json()
     try:
         insert_part(data)  # Assuming data is a dictionary matching your database schema
         return jsonify({'status': 'success', 'message': 'Part added successfully'})
+    
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
+
 
 @app.route('/sort_parts', methods=['POST'])
 def sort_parts():
@@ -95,6 +130,7 @@ def sort_parts():
         sorted_parts = parts  # Return unsorted if column is not valid
 
     return jsonify([dict(part) for part in sorted_parts])
+
 
 @app.route('/check_part_in_inventory', methods=['POST'])
 def check_part_in_inventory():
@@ -158,6 +194,7 @@ def check_part_in_inventory():
     finally:
         conn.close()
 
+
 @app.route('/update_part_status', methods=['POST'])
 def update_part_status():
     data = request.get_json()
@@ -183,6 +220,7 @@ def update_part_status():
 
     finally:
         conn.close()
+
 
 @app.route('/reset_log_tables', methods=['POST'])
 def reset_log_tables():
