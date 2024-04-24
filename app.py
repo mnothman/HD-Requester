@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from database import sqlite3, db_blueprint, get_db, get_all_parts # checkout_part, checkin_part
+import re
 
 app = Flask(__name__)
 app.register_blueprint(db_blueprint)
@@ -66,14 +67,34 @@ def add_part():
 
 @app.route('/sort_parts', methods=['POST'])
 def sort_parts():
-    """Sort parts based on a specified column."""
+    """Sort parts based on a specified column and order, handling numeric values and units properly."""
     column = request.form.get('column')
-    parts = get_all_parts()  #all parts to sort
-    # validate first
+    order = request.form.get('order', 'asc')  # Default to ascending if not specified
+    parts = get_all_parts()  # Assume this function fetches all parts
+
+    def extract_number(text):
+        """Extracts the leading number from a string, converts it to float, and adjusts for unit."""
+        number = 0
+        match = re.search(r'(\d+)\s*(GB|TB)', text, re.IGNORECASE)
+        if match:
+            number = float(match.group(1))
+            unit = match.group(2)
+            if unit.upper() == 'TB':  # Convert terabytes to gigabytes
+                number *= 1024
+        return number
+
+    # Check if column is one of the acceptable fields to sort by
     if column in ['Type', 'Capacity', 'Size', 'Speed', 'Brand', 'Model', 'Location', 'Part_sn']:
-        sorted_parts = sorted(parts, key=lambda part: (part[column] is None, part[column]))
+        # Determine the sorting key and direction
+        if column == 'Capacity':
+            # Special handling for capacity to sort numerically and consider units
+            sorted_parts = sorted(parts, key=lambda part: (part[column] is None, extract_number(part[column])), reverse=(order == 'desc'))
+        else:
+            # Default sorting for other columns
+            sorted_parts = sorted(parts, key=lambda part: (part[column] is None, part[column]), reverse=(order == 'desc'))
     else:
-        sorted_parts = parts
+        sorted_parts = parts  # Return unsorted if column is not valid
+
     return jsonify([dict(part) for part in sorted_parts])
 
 @app.route('/check_part_in_inventory', methods=['POST'])
