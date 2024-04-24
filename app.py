@@ -1,9 +1,7 @@
 from flask import Blueprint, current_app, Flask, g, jsonify, render_template, request, redirect, url_for, session
-from database import sqlite3, db_blueprint, get_db, get_all_parts # checkout_part, checkin_part
 import re, sqlite3
 
 app = Flask(__name__)
-app.register_blueprint(db_blueprint)
 
 db_blueprint = Blueprint('db', __name__)
 DATABASE = 'refresh.db'
