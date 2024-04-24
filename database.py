@@ -28,19 +28,3 @@ def get_all_parts(search_type=None):
         args = ('%' + search_type + '%',)
     parts = db.execute(query, args).fetchall()
     return parts
-
-
-# commented out for now
-"""
-def checkout_part(serial_number): #need to change these buttons to not submit
-    db = get_db()
-    db.execute('UPDATE parts SET checked_out = 1 WHERE serial_number = ?', (serial_number,))
-    db.commit()
-
-
-def checkin_part(serial_number, part_type, brand, shelf_location, checked_out): #checked_out needs to stay here
-    db = get_db()
-    db.execute('INSERT INTO parts (serial_number, part_type, brand, shelf_location, checked_out) VALUES (?, ?, ?, ?, 0)',  #comes as 0 for checked_out
-               (serial_number, part_type, brand, shelf_location))
-    db.commit()
-"""

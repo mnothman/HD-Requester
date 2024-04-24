@@ -7,6 +7,8 @@
 	<title>Dynamic Parts Table</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"> <!-- needed for current modal -->
+    <link href="https://pro.fontawesome.com/releases/v5.10.1/css/all.css" rel="stylesheet">
+
 
 	<style>
 		* {
@@ -145,10 +147,20 @@
 		}
 
 		/* TABLE */
-		.table-striped #partsTableBody tr:nth-of-type(2n+1) {
-			background-color: rgb(223, 223, 185);
+		#partsTableBody .even-row {
+			background-color: rgb(255, 255, 255);
 		}
-
+        
+        #partsTableBody .odd-row {
+            background-color: rgba(0,0,0,.05);
+        }
+        
+        /* Fix alternate colors upon search */
+        .table > :not(caption) > * > * {
+            background-color: transparent!important;
+            box-shadow: none;
+        }
+        
 		.table td,
 		.table th {
 			padding: .25rem;
@@ -212,7 +224,32 @@
 		  .btn-success {
 			margin-top: 20px; 
 		  }
+        
+        .input-wrapper {
+            position: relative;
+        }
 
+        .input-wrapper::after {
+            content: '\f002';  /* FontAwesome search icon unicode */
+            font-family: 'Font Awesome 5 Pro';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;  /* Makes the icon non-interactive */
+            color: #ccc;  /* Icon color, can be changed as needed */
+              -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block; 
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+        }
+
+        .input-wrapper .form-control {
+            padding-right: 30px;  /* Add padding to ensure text does not overlap the icon */
+        }
 	</style>
 </head>
 
@@ -252,11 +289,12 @@
 						<button id="btnResetLogTables" type="button" class="btn">Reset Log Tables</button>
 					</div>
 					<div class="search col-sm-3">
-						<form>
-							<input type="text" placeholder="Search">
-							<button type="submit">Go</button>
-						</form>
-					</div>
+                        <div class="input-wrapper">
+                            <input type="text" class="form-control" placeholder="Search" id="searchInput">
+                        </div>
+                    </div>
+
+
 				</div>
 				<table id="partsTable" class="table table-striped">
 					<thead>
@@ -301,6 +339,26 @@
 			fetchAndDisplayParts();
 
 			/* ====== EVENT LISTENERS ===== */
+            // Live Search functionality
+            $('#searchInput').on('keyup', function() {
+                var searchTerm = $(this).val().toLowerCase();
+
+                // Filter table rows based on the search term
+                $('#partsTableBody tr').filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(searchTerm) > -1)
+                });
+
+                // Reapply classes to visible rows for alternating colors
+                $('#partsTableBody tr').filter(":visible").each(function(index) {
+                    $(this).removeClass('odd-row even-row');  // Clear previous classes
+                    if (index % 2 === 0) {  // Even index, odd row (0-based index)
+                        $(this).addClass('odd-row');
+                    } else {  // Odd index, even row
+                        $(this).addClass('even-row');
+                    }
+                });
+            });
+            
 			// Sort column
 			$('.sortable-column').click(function () {
 				var column = $(this).text().trim();  // Get the column name
@@ -743,7 +801,7 @@
 					});
 				});
 			} // end checkinPart
-            //Meant to be for general purpose where it accepts partData and with whatever is displays if part is not in
+            
 			function checkOutPart(dataObject) {
 				// Assume dataObject has already been parsed and structured
 				dataObject.parts.forEach((part, index) => {
