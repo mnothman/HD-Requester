@@ -11,7 +11,6 @@ def index():
 
 @app.route('/get_parts', methods=['POST'])
 def get_parts(): #fetch parts from search
-    print("gets parts here 2")
     search_type = request.form.get('searchType', None)
     parts = get_all_parts(search_type)
     return jsonify([dict(part) for part in parts])
@@ -104,6 +103,7 @@ def check_part_in_inventory():
     size = data['Size']
     expected_type = data['Type']
     expected_capacity = data['Capacity']
+    expected_part_status = data['Part_status']
 
     conn = get_db()
     try:
@@ -117,7 +117,7 @@ def check_part_in_inventory():
 						   })
 
         # Check if the existing part matches the expected type and capacity
-        if part['Type'] != expected_type or part['Capacity'] != expected_capacity:
+        elif part['Type'] != expected_type or part['Capacity'] != expected_capacity:
             return jsonify({
                 'exists': False,
                 'error': 'mismatch',
@@ -126,13 +126,32 @@ def check_part_in_inventory():
                 'actual': {'Type': part['Type'], 'Capacity': part['Capacity']}
             })
 		# Check if the existing part is already checked in
-        if part['Part_status'] != 'in':
-            return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
+        elif part['Part_status'] == 'in':
+            if expected_part_status == 'in':
+                return jsonify({
+                    'exists': False,
+                    'error': 'checked-in',
+                    'message': 'Already checked-in.',
+                    'part': {'Part_sn': part_sn, 'Type': part['Type'], 'Capacity': part['Capacity'], 'Size': part['Size']}
+                })
+            else:
+                return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
+        # Check if the existing part is already checked out
+        elif part['Part_status'] == 'out':
+            if expected_part_status == 'out':
+                return jsonify({
+                    'exists': False,
+                    'error': 'checked-out',
+                    'message': 'Already checked-out.',
+                    'part': {'Part_sn': part_sn, 'Type': part['Type'], 'Capacity': part['Capacity'], 'Size': part['Size']}
+                })
+            else:
+                return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
         else:
             return jsonify({
                 'exists': False,
-                'error': 'checked-in',
-                'message': 'Already checked-in.',
+                'error': 'uncaught',
+                'message': 'Uncaught error.',
                 'part': {'Part_sn': part_sn, 'Type': part['Type'], 'Capacity': part['Capacity'], 'Size': part['Size']}
             })
 
@@ -145,7 +164,7 @@ def update_part_status():
     part_sn = data['Part_sn']
     tid = data['TID']
     unit_sn = data['Unit_sn']
-    part_status = 'in'  # We are checking in the part, so we set this status to 'in'
+    part_status = data['Part_status']  # update the part status given
 
     conn = get_db()
     try:

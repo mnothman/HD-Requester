@@ -247,6 +247,8 @@
 						<button id="btnDemoCheckin" type="button" class="btn">Check-in Demo</button>
 						<button id="btnDemoCheckinNotSeenBefore" type="button" class="btn">Check-In Demo Not Seen b4</button>
 						<button id="btnDemoCheckinMismatch" type="button" class="btn">Check-in Demo Mismatch SN and Specs</button>
+						<button id="btnDemoCheckout" type="button" class="btn">Check-out Demo</button>
+						<button id="btnDemoCheckoutMismatch" type="button" class="btn">Check-out Demo Not Mismatch SN and Specs</button>
 						<button id="btnResetLogTables" type="button" class="btn">Reset Log Tables</button>
 					</div>
 					<div class="search col-sm-3">
@@ -322,7 +324,7 @@
 				var demoPart = {
 					"tid": "TI000000-00000001",
 					"unit_sn": "123456",
-					"parts": [{"capacity": "1 TB","type": "SSD"}],
+					"parts": [{"capacity": "1TB","type": "SSD"}],
 					"size": "Laptop",
 					"serial_numbers": ["00000022"]
 				}
@@ -332,7 +334,7 @@
 				var demoPart = {
 					"tid": "TI000000-00000001",
 					"unit_sn": "123456",
-					"parts": [{"capacity": "99 TB","type": "SSD"}],
+					"parts": [{"capacity": "99TB","type": "SSD"}],
 					"size": "Laptop",
 					"serial_numbers": ["0000011"]
 				}
@@ -348,6 +350,26 @@
 				}
 				checkInPart(demoPart);
 			});
+			$('#btnDemoCheckout').click(function() {
+				var demoPart = {
+					"tid": "TI000000-00000001",
+					"unit_sn": "123456",
+					"parts": [{"capacity": "2TB","type": "HD"}],
+					"size": "3.5",
+					"serial_numbers": ["00000001"]
+				}
+				checkOutPart(demoPart);
+			});
+			$('#btnDemoCheckoutMismatch').click(function() {
+				var demoPart = {
+					"tid": "TI000000-00000001",
+					"unit_sn": "123456",
+					"parts": [{"capacity": "1TB","type": "HD"}],
+					"size": "3.5",
+					"serial_numbers": ["00000001"]
+				}
+				checkOutPart(demoPart);
+			});
 			$('#btnResetLogTables').click(function() {
 				resetLogTables();
 			});
@@ -360,7 +382,6 @@
 					dataType: 'json',
 					success: function (data) {
 						var tableBody = $('#partsTableBody');
-						console.log("GETS PARTS HERE 1")
 						tableBody.empty(); // Clear existing rows
 						$.each(data, function (index, part) {
 							tableBody.append('<tr>' +
@@ -384,37 +405,31 @@
 			// Modal
 			function showModal(dataObject, htmlContent) {
 				// Set the content of the modal
+                // Set the title of the modal if a title is provided in dataObject
 				$('#modalContent').html(htmlContent);
-
-				// Set the title of the modal if a title is provided in dataObject
 				if (dataObject && dataObject.title) {
 					$('#modalTitle').text(dataObject.title);
 				} else {
 					// Default title if none provided
 					$('#modalTitle').text('Details');
 				}
-
 				// Additional data handling could go here
 				if (dataObject) {
 					console.log("Additional data:", dataObject);
 				}
-
 				// Display the modal
+                // Setup close button to hide the modal
+                // Handle background clicks to also close the modal
 				$('#Modal').css('display', 'block');
-
-				// Setup close button to hide the modal
 				$('#closeModalBtn').click(function() {
 					$('#Modal').css('display', 'none');
 				});
-
-				// Handle background clicks to also close the modal
 				$(window).click(function(event) {
 					if ($(event.target).is('#Modal')) {
 						$('#Modal').css('display', 'none');
 					}
 				});
 			} // end Modal
-
 
             function handleSort(column, sortOrder) {
             // Make an AJAX request to the server to retrieve sorted data
@@ -424,10 +439,9 @@
                     data: { 
                         column: column,
                         order: sortOrder 
-                    },  // Send the column to sort by
+                    },
                     success: function (response) {
                         updateTable(response);
-                            // print("Sorted by " + column + " column.");
                     },
                     error: function (xhr, status, error) {
                         console.error("Error sorting parts: " + error);
@@ -451,10 +465,7 @@
                     '</tr>');
         	    });
     	    }
-			
 
-			//how add part works=> clicking add button (showModalBtn) opens the modal, which then prompts user input, clicking 
-			//submit sends data to server utilizing current add and handleadd functions
 			function handleAddPart() {
 					const content = `
 					<p><strong>Add part manually<strong></p>
@@ -512,7 +523,7 @@
 				});
 			} // end handleAddPart
 			
-			// Function to submit part data to the server
+			// Function to submit part data to the server used by handleAddPart
 			function submitPart(partData) {
 				$.ajax({
 					url: '/add_part',
@@ -620,6 +631,7 @@
 						Speed: dataObject.Speed,
 						Brand: dataObject.Brand,
 						Model: dataObject.Model,
+                        Part_status: 'in'
 					};
 
 					$.ajax({
@@ -731,6 +743,132 @@
 					});
 				});
 			} // end checkinPart
+            //Meant to be for general purpose where it accepts partData and with whatever is displays if part is not in
+			function checkOutPart(dataObject) {
+				// Assume dataObject has already been parsed and structured
+				dataObject.parts.forEach((part, index) => {
+					const partSn = dataObject.serial_numbers[index];  // Get the serial number for the current part
+
+					// Prepare the data to be sent to the server including Type and Capacity
+					const partData = {
+						Part_sn: partSn,
+						Type: part.type,
+						Capacity: part.capacity,
+						Size: dataObject.size,
+						Speed: dataObject.Speed,
+                        Part_status: 'out'
+					};
+
+					$.ajax({
+						url: '/check_part_in_inventory',  // Server-side script to check the inventory
+						type: 'POST',
+						contentType: 'application/json',
+						data: JSON.stringify(partData),
+						success: function(response) {
+							if (response.exists) {
+								// If part exists and matches type and capacity, update its status to 'out'
+								$.ajax({
+									url: '/update_part_status',
+									type: 'POST',
+									contentType: 'application/json',
+									data: JSON.stringify({
+										Part_sn: partSn,
+										TID: dataObject.tid,
+										Unit_sn: dataObject.unit_sn,
+										Part_status: 'out'
+									}),
+									success: function(updateResponse) {
+											fetchAndDisplayParts();
+									},
+									error: function(err) {
+										console.error("Error updating part status: ", err);
+									}
+								});
+							} else {
+								// If part does not exist or does not match, show modal to add part
+								console.log(response.message); // Log the message from the server
+								// Check for specific mismatch error
+								if(response.error == 'mismatch') {
+									const expectedDetails = response.expected;
+									const actualDetails = response.actual;
+									const content = `
+										<p><strong>Expected: </strong>${expectedDetails.Capacity} ${expectedDetails.Type}</p>
+										<p><strong>Found: </strong>${actualDetails.Capacity} ${actualDetails.Type}</p>
+										
+									`;
+									showModal({ title: 'Check-out Error: ' + response.message }, content);
+								}
+								else if (response.error == 'checked-out'){
+									console.log("Error: " + response.message); // Handle other errors
+									const content = `
+										<p><strong>That part is already checked-out.<strong></p>
+										<p>Serial number: ${partSn}</p>
+										<table width="100%" border="1">
+										<tbody>
+										<tr>
+										  <th scope="col">&nbsp;Type</th>
+										  <th scope="col">Capacity&nbsp;</th>
+										  <th scope="col">Size&nbsp;</th>
+										  <th scope="col">Speed&nbsp;</th>
+										  <th scope="col">Brand&nbsp;</th>
+										  <th scope="col">Model&nbsp;</th>
+										  <th scope="col">Location&nbsp;</th>
+										</tr>
+										<tr>
+											<td>${partData.Type}</td>
+											<td>${partData.Capacity}</td>
+											<td>${partData.Size}</td>
+											<td>${partData.Speed}</td>
+											<td>${partData.Brand}</td>
+											<td>${partData.Model}</td>
+											<td>${partData.Location}</td>
+										</tr>
+										</tbody>
+										</table>
+									`;
+									showModal({ title: 'Check-out Error: ' + response.message }, content);
+								}
+								else if(response.error == 'not_in_inventory') {
+									console.log("Error: " + response.message); // Handle other errors
+									const content = `
+										<p><strong>That part has never been added to inventory.<strong></p>
+										<p>Serial number: ${partSn}</p>
+										<p>Add item to inventory. Fill in the blanks.</p>
+										<table width="100%" border="1">
+										<tbody>
+										<tr>
+										  <th scope="col">&nbsp;Type</th>
+										  <th scope="col">Capacity&nbsp;</th>
+										  <th scope="col">Size&nbsp;</th>
+										  <th scope="col">Speed&nbsp;</th>
+										  <th scope="col">Brand&nbsp;</th>
+										  <th scope="col">Model&nbsp;</th>
+										  <th scope="col">Location&nbsp;</th>
+										</tr>
+										<tr>
+											<td>${partData.Type}</td>
+
+											<td>${partData.Capacity}</td>
+											<td>${partData.Size}</td>
+											<td><input type="text" id="iSpeed" name="Speed"></input></td>
+											<td><input type="text" id="iBrand" name="Brand"></input></td>
+											<td><input type="text" id="iModel" name="Model"></input></td>
+											<td><input type="text" id="iLocation" name="Location"></input></td>
+										</tr>
+										</tbody>
+										</table>
+									`;
+									showModal({ title: 'Check-out Error: ' + response.message }, content);
+								}
+							}
+						},
+						error: function(err) {
+							console.error("Error checking part out inventory: ", err);
+                            alert('Error checking part out inventory: ' + error);
+						}
+					});
+				});
+			} // end checkoutPart
 			
 			function resetLogTables(){
                 $.ajax({
