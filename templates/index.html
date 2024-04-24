@@ -53,7 +53,6 @@
 			flex: 1;
 			/* take up remaining space */
 			padding: 3px 8px;
-			border: none;
 			outline: none;
 			font-size: 14px;
 			border-radius: 30px;
@@ -120,17 +119,24 @@
 			border: 1px solid black;
 			width: 100%;
 		}
-
-		#parts-buttons {
+        #parts-buttons {
 			height: 100%;
 			margin: 20px 0px;
 		}
-		#parts-buttons .btn {
-			background-color: rgb(214, 214, 214);
+        #parts-buttons .btn {
+            background-color: rgb(214, 214, 214);
 			color: black;
 			border: 1px solid black;
-		}
-
+        }
+        #demo-buttons {
+            height: 100%;
+            margin: 0px;
+        }
+        #demo-buttons .btn{
+            color: black;
+            border: 1px solid black;
+            background: #FFFFFF;
+        }
 		/* TOPBAR AND LOGO */
 		.logo {
 			font-weight: bold;
@@ -227,6 +233,7 @@
         
         .input-wrapper {
             position: relative;
+            margin: 20px 0px;
         }
 
         .input-wrapper::after {
@@ -239,12 +246,12 @@
             pointer-events: none;  /* Makes the icon non-interactive */
             color: #ccc;  /* Icon color, can be changed as needed */
               -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
-  display: inline-block; 
-  font-style: normal;
-  font-variant: normal;
-  text-rendering: auto;
-  line-height: 1;
+              -webkit-font-smoothing: antialiased;
+            display: inline-block; 
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            line-height: 1;
         }
 
         .input-wrapper .form-control {
@@ -281,21 +288,23 @@
 					<div id="parts-buttons" class="col-sm-9">
 						<button id="btnAddPart" type="button" class="btn">Add Part</button>
 						<button id="rmvPartBtn" type="button" class="btn">Remove Part</button>
-						<button id="btnDemoCheckin" type="button" class="btn">Check-in Demo</button>
-						<button id="btnDemoCheckinNotSeenBefore" type="button" class="btn">Check-In Demo Not Seen b4</button>
-						<button id="btnDemoCheckinMismatch" type="button" class="btn">Check-in Demo Mismatch SN and Specs</button>
-						<button id="btnDemoCheckout" type="button" class="btn">Check-out Demo</button>
-						<button id="btnDemoCheckoutMismatch" type="button" class="btn">Check-out Demo Not Mismatch SN and Specs</button>
-						<button id="btnResetLogTables" type="button" class="btn">Reset Log Tables</button>
 					</div>
 					<div class="search col-sm-3">
                         <div class="input-wrapper">
                             <input type="text" class="form-control" placeholder="Search" id="searchInput">
                         </div>
                     </div>
-
-
-				</div>
+				</div><!-- end row -->
+                <div class="row">
+                    <div id="demo-buttons" style="display: none">
+                        <button id="btnDemoCheckin" type="button" class="btn">Check-in Demo</button>
+						<button id="btnDemoCheckinNotSeenBefore" type="button" class="btn">Check-In Demo Not Seen b4</button>
+						<button id="btnDemoCheckinMismatch" type="button" class="btn">Check-in Demo Mismatch SN and Specs</button>
+						<button id="btnDemoCheckout" type="button" class="btn">Check-out Demo</button>
+						<button id="btnDemoCheckoutMismatch" type="button" class="btn">Check-out Demo Mismatch SN and Specs</button>
+						<button id="btnResetLogTables" type="button" class="btn">Reset Log Tables</button>
+                     </div>
+                </div><!-- end row -->
 				<table id="partsTable" class="table table-striped">
 					<thead>
 						<tr>
@@ -357,7 +366,7 @@
                         $(this).addClass('even-row');
                     }
                 });
-            });
+            }); // end Live Search
             
 			// Sort column
 			$('.sortable-column').click(function () {
@@ -367,7 +376,11 @@
 
 				sortOrder = (sortOrder === 'asc' ? 'desc' : 'asc');
 				$(this).attr('data-sort-order', sortOrder);
-			});
+			}); // end Sort column
+            
+            $('.adminLogin').click(function() {
+                $('#demo-buttons').toggle(); // This toggles the visibility
+            });
 			
 			$('#btn-submit-request').click(function() {
 				var parsedData = parseTextInput();
