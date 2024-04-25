@@ -316,7 +316,7 @@
 					</div>
 				</div><!-- end row -->
 				<div class="row">
-					<div id="demo-buttons" style="display: none">
+					<div id="demo-buttons">
 						<button id="btnDemoCheckin" type="button" class="btn">Check-in Demo</button>
 						<button id="btnDemoCheckinNotSeenBefore" type="button" class="btn">Check-In Demo Not Seen
 							b4</button>
@@ -805,9 +805,6 @@
 						Type: part.type,
 						Capacity: part.capacity,
 						Size: dataObject.size,
-						Speed: dataObject.Speed,
-						Brand: dataObject.Brand,
-						Model: dataObject.Model,
 						Part_status: 'in'
 					};
 
@@ -867,13 +864,13 @@
 										  <th scope="col">Location&nbsp;</th>
 										</tr>
 										<tr>
-											<td>${partData.Type}</td>
-											<td>${partData.Capacity}</td>
-											<td>${partData.Size}</td>
-											<td>${partData.Speed}</td>
-											<td>${partData.Brand}</td>
-											<td>${partData.Model}</td>
-											<td>${partData.Location}</td>
+											<td>${response.part['Type']}</td>
+											<td>${response.part['Capacity']}</td>
+											<td>${response.part['Size']}</td>
+											<td>${response.part['Speed']}</td>
+											<td>${response.part['Brand']}</td>
+											<td>${response.part['Model']}</td>
+											<td>${response.part['Location']}</td>
 										</tr>
 										</tbody>
 										</table>
@@ -992,13 +989,13 @@
 										  <th scope="col">Location&nbsp;</th>
 										</tr>
 										<tr>
-											<td>${partData.Type}</td>
-											<td>${partData.Capacity}</td>
-											<td>${partData.Size}</td>
-											<td>${partData.Speed}</td>
-											<td>${partData.Brand}</td>
-											<td>${partData.Model}</td>
-											<td>${partData.Location}</td>
+											<td>${response.part['Type']}</td>
+											<td>${response.part['Capacity']}</td>
+											<td>${response.part['Size']}</td>
+											<td>${response.part['Speed']}</td>
+											<td>${response.part['Brand']}</td>
+											<td>${response.part['Model']}</td>
+											<td>${response.part['Location']}</td>
 										</tr>
 										</tbody>
 										</table>

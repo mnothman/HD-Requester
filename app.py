@@ -142,7 +142,7 @@ def check_part_in_inventory():
     conn = get_db()
     try:
         # Query to check if Part_sn exists in the Part table and is currently checked out
-        part = conn.execute('SELECT Type, Capacity, Size, Part_status FROM Part_log pl JOIN Part p on pl.Part_sn = p.Part_sn WHERE p.Part_sn = ?', (part_sn,)).fetchone()
+        part = conn.execute('SELECT * FROM Part_log pl JOIN Part p on pl.Part_sn = p.Part_sn WHERE p.Part_sn = ?', (part_sn,)).fetchone()
 
         if part is None:
             return jsonify({'exists': False,
@@ -166,7 +166,14 @@ def check_part_in_inventory():
                     'exists': False,
                     'error': 'checked-in',
                     'message': 'Already checked-in.',
-                    'part': {'Part_sn': part_sn, 'Type': part['Type'], 'Capacity': part['Capacity'], 'Size': part['Size']}
+                    'part': {'Part_sn': part_sn,
+                             'Type': part['Type'],
+                             'Capacity': part['Capacity'],
+                             'Size': part['Size'],
+                             'Speed': part['Speed'],
+                             'Brand': part['Brand'],
+                             'Model': part['Model'],
+                             'Location': part['Location']}
                 })
             else:
                 return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
@@ -177,7 +184,14 @@ def check_part_in_inventory():
                     'exists': False,
                     'error': 'checked-out',
                     'message': 'Already checked-out.',
-                    'part': {'Part_sn': part_sn, 'Type': part['Type'], 'Capacity': part['Capacity'], 'Size': part['Size']}
+                    'part': {'Part_sn': part_sn,
+                             'Type': part['Type'],
+                             'Capacity': part['Capacity'],
+                             'Size': part['Size'],
+                             'Speed': part['Speed'],
+                             'Brand': part['Brand'],
+                             'Model': part['Model'],
+                             'Location': part['Location']}
                 })
             else:
                 return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
