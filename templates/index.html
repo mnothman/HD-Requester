@@ -5,9 +5,11 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Dynamic Parts Table</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"> <!-- needed for current modal -->
-    <link href="https://pro.fontawesome.com/releases/v5.10.1/css/all.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+	<!-- needed for current modal -->
+	<link href="https://pro.fontawesome.com/releases/v5.10.1/css/all.css" rel="stylesheet">
 
 
 	<style>
@@ -82,11 +84,11 @@
 			border-radius: 30px;
 			cursor: pointer;
 		}
-		
+
 		#btn-group-inout {
 			display: block;
 		}
-		
+
 		#btn-group-inout .btn {
 			width: 50%;
 			padding: 10px 0px;
@@ -96,21 +98,21 @@
 			font-size: 20px;
 			float: left;
 		}
-		
+
 		.btn-primary {
-			background-color: rgb(26, 107, 30); /* green */
-		}
-		.btn-secondary {
-			background-color: rgb(214, 214, 214); /* light grey*/
-			color: rgb(0,0,0);
-		}
-		.btn-check:checked + .btn {
 			background-color: rgb(26, 107, 30);
-			color: rgb(255,255,255)
+			/* green */
 		}
 
-		.btn-group form {
-		/*	background-color: white;*/
+		.btn-secondary {
+			background-color: rgb(214, 214, 214);
+			/* light grey*/
+			color: rgb(0, 0, 0);
+		}
+
+		.btn-check:checked+.btn {
+			background-color: rgb(26, 107, 30);
+			color: rgb(255, 255, 255)
 		}
 
 		.btn-submit {
@@ -119,24 +121,29 @@
 			border: 1px solid black;
 			width: 100%;
 		}
-        #parts-buttons {
+
+		#parts-buttons {
 			height: 100%;
 			margin: 20px 0px;
 		}
-        #parts-buttons .btn {
-            background-color: rgb(214, 214, 214);
+
+		#parts-buttons .btn {
+			background-color: rgb(214, 214, 214);
 			color: black;
 			border: 1px solid black;
-        }
-        #demo-buttons {
-            height: 100%;
-            margin: 0px;
-        }
-        #demo-buttons .btn{
-            color: black;
-            border: 1px solid black;
-            background: #FFFFFF;
-        }
+		}
+
+		#demo-buttons {
+			height: 100%;
+			margin: 0px;
+		}
+
+		#demo-buttons .btn {
+			color: black;
+			border: 1px solid black;
+			background: #FFFFFF;
+		}
+
 		/* TOPBAR AND LOGO */
 		.logo {
 			font-weight: bold;
@@ -156,17 +163,17 @@
 		#partsTableBody .even-row {
 			background-color: rgb(255, 255, 255);
 		}
-        
-        #partsTableBody .odd-row {
-            background-color: rgba(0,0,0,.05);
-        }
-        
-        /* Fix alternate colors upon search */
-        .table > :not(caption) > * > * {
-            background-color: transparent!important;
-            box-shadow: none;
-        }
-        
+
+		#partsTableBody .odd-row {
+			background-color: rgba(0, 0, 0, .05);
+		}
+
+		/* Fix alternate colors upon search */
+		.table> :not(caption)>*>* {
+			background-color: transparent !important;
+			box-shadow: none;
+		}
+
 		.table td,
 		.table th {
 			padding: .25rem;
@@ -189,74 +196,87 @@
 			height: 100%;
 			overflow: auto;
 			background-color: rgba(0, 0, 0, 0.4);
-		  }
-		  .modal-form {
+		}
+
+		.modal-form {
 			background-color: #fefefe;
 			margin: 5% auto;
 			padding: 20px;
 			border: 1px solid #888;
 			width: auto;
 			max-width: 1000px;
-		  }
-		  .modal-header, .modal-footer {
+		}
+
+		.modal-header,
+		.modal-footer {
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
 			padding-bottom: 10px;
-		  }
-		  .modal-header {
+		}
+
+		.modal-header {
 			border-bottom: 1px solid #e5e5e5;
-		  }
-		  .modal-footer {
+		}
+
+		.modal-footer {
 			border-top: 1px solid #e5e5e5;
 			justify-content: flex-start;
-		  }
-		  .modal-content {
+		}
+
+		.modal-content {
 			display: flex;
 			flex-wrap: wrap;
 			align-items: center;
 			justify-content: center;
 			margin-bottom: 20px;
-		  }
-		  .form-control {
+		}
+
+		.form-control {
 			margin: 5px;
 			flex-grow: 1;
-			min-width: 120px; 
-		  }
-		  .close {
+			min-width: 120px;
+		}
+
+		.close {
 			cursor: pointer;
 			font-size: 1.5rem;
-		  }
-		  .btn-success {
-			margin-top: 20px; 
-		  }
-        
-        .input-wrapper {
-            position: relative;
-            margin: 20px 0px;
-        }
+		}
 
-        .input-wrapper::after {
-            content: '\f002';  /* FontAwesome search icon unicode */
-            font-family: 'Font Awesome 5 Pro';
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;  /* Makes the icon non-interactive */
-            color: #ccc;  /* Icon color, can be changed as needed */
-              -moz-osx-font-smoothing: grayscale;
-              -webkit-font-smoothing: antialiased;
-            display: inline-block; 
-            font-style: normal;
-            font-variant: normal;
-            text-rendering: auto;
-            line-height: 1;
-        }
+		.btn-success {
+			margin-top: 20px;
+		}
 
-        .input-wrapper .form-control {
-            padding-right: 30px;  /* Add padding to ensure text does not overlap the icon */
-        }
+		.input-wrapper {
+			position: relative;
+			margin: 20px 0px;
+		}
+
+		.input-wrapper::after {
+			content: '\f002';
+			/* FontAwesome search icon unicode */
+			font-family: 'Font Awesome 5 Pro';
+			position: absolute;
+			right: 10px;
+			top: 50%;
+			transform: translateY(-50%);
+			pointer-events: none;
+			/* Makes the icon non-interactive */
+			color: #ccc;
+			/* Icon color, can be changed as needed */
+			-moz-osx-font-smoothing: grayscale;
+			-webkit-font-smoothing: antialiased;
+			display: inline-block;
+			font-style: normal;
+			font-variant: normal;
+			text-rendering: auto;
+			line-height: 1;
+		}
+
+		.input-wrapper .form-control {
+			padding-right: 30px;
+			/* Add padding to ensure text does not overlap the icon */
+		}
 	</style>
 </head>
 
@@ -272,7 +292,7 @@
 		<div class="row">
 			<div id="left-sidebar-check-inout" class="col-sm-3">
 				<textarea id="textarea-request" class="form-control text-area-custom" rows="5"></textarea>
-				
+
 				<div id="btn-group-inout" class="btn-group" role="group" aria-label="Basic radio toggle button group">
 					<input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
 					<label class="btn btn-secondary" for="btnradio1">IN</label>
@@ -280,7 +300,7 @@
 					<input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
 					<label class="btn btn-secondary" for="btnradio2">OUT</label>
 				</div>
-				
+
 				<button type="button" class="btn btn-primary btn-lg btn-submit" id="btn-submit-request">Submit</button>
 			</div>
 			<div id="parts-buttons-search-table" class="col-sm-9">
@@ -290,21 +310,24 @@
 						<button id="rmvPartBtn" type="button" class="btn">Remove Part</button>
 					</div>
 					<div class="search col-sm-3">
-                        <div class="input-wrapper">
-                            <input type="text" class="form-control" placeholder="Search" id="searchInput">
-                        </div>
-                    </div>
+						<div class="input-wrapper">
+							<input type="text" class="form-control" placeholder="Search" id="searchInput">
+						</div>
+					</div>
 				</div><!-- end row -->
-                <div class="row">
-                    <div id="demo-buttons" style="display: none">
-                        <button id="btnDemoCheckin" type="button" class="btn">Check-in Demo</button>
-						<button id="btnDemoCheckinNotSeenBefore" type="button" class="btn">Check-In Demo Not Seen b4</button>
-						<button id="btnDemoCheckinMismatch" type="button" class="btn">Check-in Demo Mismatch SN and Specs</button>
+				<div class="row">
+					<div id="demo-buttons" style="display: none">
+						<button id="btnDemoCheckin" type="button" class="btn">Check-in Demo</button>
+						<button id="btnDemoCheckinNotSeenBefore" type="button" class="btn">Check-In Demo Not Seen
+							b4</button>
+						<button id="btnDemoCheckinMismatch" type="button" class="btn">Check-in Demo Mismatch SN and
+							Specs</button>
 						<button id="btnDemoCheckout" type="button" class="btn">Check-out Demo</button>
-						<button id="btnDemoCheckoutMismatch" type="button" class="btn">Check-out Demo Mismatch SN and Specs</button>
+						<button id="btnDemoCheckoutMismatch" type="button" class="btn">Check-out Demo Mismatch SN and
+							Specs</button>
 						<button id="btnResetLogTables" type="button" class="btn">Reset Log Tables</button>
-                     </div>
-                </div><!-- end row -->
+					</div>
+				</div><!-- end row -->
 				<table id="partsTable" class="table table-striped">
 					<thead>
 						<tr>
@@ -328,46 +351,49 @@
 
 	<div id="Modal" class="background-modal">
 		<div class="modal-form">
-		  <div class="modal-header">
-			<h3 id="modalTitle">Title</h3>
-			<button type="button" class="close" id="closeModalBtn">&times;</button>
-		  </div>
-		  <div class="modal-body">
-			<p id="modalContent"></p>
-		  </div>
+			<div class="modal-header">
+				<h3 id="modalTitle">Title</h3>
+				<button type="button" class="close" id="closeModalBtn">&times;</button>
+			</div>
+			<div class="modal-body">
+				<p id="modalContent"></p>
+			</div>
 		</div>
-	  </div>
+	</div>
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+		integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+		crossorigin="anonymous"></script>
 
 	<script>
 		$(document).ready(function () {
 			// a commonly used function to
 			// show content of JSON object
 			fetchAndDisplayParts();
+			setupRowClick();
 
 			/* ====== EVENT LISTENERS ===== */
-            // Live Search functionality
-            $('#searchInput').on('keyup', function() {
-                var searchTerm = $(this).val().toLowerCase();
+			// Live Search functionality
+			$('#searchInput').on('keyup', function () {
+				var searchTerm = $(this).val().toLowerCase();
 
-                // Filter table rows based on the search term
-                $('#partsTableBody tr').filter(function() {
-                    $(this).toggle($(this).text().toLowerCase().indexOf(searchTerm) > -1)
-                });
+				// Filter table rows based on the search term
+				$('#partsTableBody tr').filter(function () {
+					$(this).toggle($(this).text().toLowerCase().indexOf(searchTerm) > -1)
+				});
 
-                // Reapply classes to visible rows for alternating colors
-                $('#partsTableBody tr').filter(":visible").each(function(index) {
-                    $(this).removeClass('odd-row even-row');  // Clear previous classes
-                    if (index % 2 === 0) {  // Even index, odd row (0-based index)
-                        $(this).addClass('odd-row');
-                    } else {  // Odd index, even row
-                        $(this).addClass('even-row');
-                    }
-                });
-            }); // end Live Search
-            
+				// Reapply classes to visible rows for alternating colors
+				$('#partsTableBody tr').filter(":visible").each(function (index) {
+					$(this).removeClass('odd-row even-row');  // Clear previous classes
+					if (index % 2 === 0) {  // Even index, odd row (0-based index)
+						$(this).addClass('odd-row');
+					} else {  // Odd index, even row
+						$(this).addClass('even-row');
+					}
+				});
+			}); // end Live Search
+
 			// Sort column
 			$('.sortable-column').click(function () {
 				var column = $(this).text().trim();  // Get the column name
@@ -377,73 +403,98 @@
 				sortOrder = (sortOrder === 'asc' ? 'desc' : 'asc');
 				$(this).attr('data-sort-order', sortOrder);
 			}); // end Sort column
-            
-            $('.adminLogin').click(function() {
-                $('#demo-buttons').toggle(); // This toggles the visibility
-            });
-			
-			$('#btn-submit-request').click(function() {
+
+			$('.adminLogin').click(function () {
+				$('#demo-buttons').toggle(); // This toggles the visibility
+			});
+
+			$('#btn-submit-request').click(function () {
 				var parsedData = parseTextInput();
 				console.log(parsedData);
 			});
-			
-			$('#btnAddPart').click(function() {
+
+			$('#btnAddPart').click(function () {
 				handleAddPart();
 			});
-			
-			$('#btnDemoCheckin').click(function() {
+
+			$('#rmvPartBtn').click(function () {
+				var selectedParts = $('.selected-row');
+				if (selectedParts.length > 0) {
+					var partsList = selectedParts.map(function () {
+						return $(this).children('td').map(function () {
+							return $(this).text().trim();
+						}).get().join(', ');
+					}).get().join('<br/>');
+
+					var modalContent = '<p>Are you sure you want to remove the following parts?</p><p>' + partsList + '</p>';
+					showModal({ title: 'Confirm Removal' }, modalContent, function () {
+						removeSelectedParts(selectedParts);
+					});
+				} else {
+					alert('No parts selected for removal.');
+				}
+			});
+
+			// $('#rmvPartBtn').click(function () {
+			// 	handleRemovePart();
+			// });
+
+			$('#btnDemoCheckin').click(function () {
 				var demoPart = {
 					"tid": "TI000000-00000001",
 					"unit_sn": "123456",
-					"parts": [{"capacity": "1TB","type": "SSD"}],
+					"parts": [{ "capacity": "1TB", "type": "SSD" }],
 					"size": "Laptop",
 					"serial_numbers": ["00000022"]
 				}
 				checkInPart(demoPart);
 			});
-			$('#btnDemoCheckinNotSeenBefore').click(function() {
+			$('#btnDemoCheckinNotSeenBefore').click(function () {
 				var demoPart = {
 					"tid": "TI000000-00000001",
 					"unit_sn": "123456",
-					"parts": [{"capacity": "99TB","type": "SSD"}],
+					"parts": [{ "capacity": "99TB", "type": "SSD" }],
 					"size": "Laptop",
 					"serial_numbers": ["0000011"]
 				}
 				checkInPart(demoPart);
 			});
-			$('#btnDemoCheckinMismatch').click(function() {
+			$('#btnDemoCheckinMismatch').click(function () {
 				var demoPart = {
 					"tid": "TI000000-00000001",
 					"unit_sn": "123456",
-					"parts": [{"capacity": "8GB","type": "PC4"}],
+					"parts": [{ "capacity": "8GB", "type": "PC4" }],
 					"size": "Laptop",
 					"serial_numbers": ["00000010"]
 				}
 				checkInPart(demoPart);
 			});
-			$('#btnDemoCheckout').click(function() {
+			$('#btnDemoCheckout').click(function () {
 				var demoPart = {
 					"tid": "TI000000-00000001",
 					"unit_sn": "123456",
-					"parts": [{"capacity": "2TB","type": "HD"}],
+					"parts": [{ "capacity": "2TB", "type": "HD" }],
 					"size": "3.5",
 					"serial_numbers": ["00000001"]
 				}
 				checkOutPart(demoPart);
 			});
-			$('#btnDemoCheckoutMismatch').click(function() {
+			$('#btnDemoCheckoutMismatch').click(function () {
 				var demoPart = {
 					"tid": "TI000000-00000001",
 					"unit_sn": "123456",
-					"parts": [{"capacity": "1TB","type": "HD"}],
+					"parts": [{ "capacity": "1TB", "type": "HD" }],
 					"size": "3.5",
 					"serial_numbers": ["00000001"]
 				}
 				checkOutPart(demoPart);
 			});
-			$('#btnResetLogTables').click(function() {
+			$('#btnResetLogTables').click(function () {
 				resetLogTables();
 			});
+
+
+
 
 			/* ====== FUNCTIONS ===== */
 			function fetchAndDisplayParts() {
@@ -472,12 +523,20 @@
 					}
 				});
 			} // end fetchAndDisplayParts
-			
+
 			// Modal
-			function showModal(dataObject, htmlContent) {
+			function showModal(dataObject, htmlContent, onConfirm) {
 				// Set the content of the modal
-                // Set the title of the modal if a title is provided in dataObject
+				// Set the title of the modal if a title is provided in dataObject
 				$('#modalContent').html(htmlContent);
+				if (onConfirm) {
+					$('#modalContent').append('<button id="confirmBtn" class="btn btn-success">Confirm</button>');
+					$('#confirmBtn').click(function () {
+						onConfirm();
+						$('#Modal').css('display', 'none');
+					});
+				}
+
 				if (dataObject && dataObject.title) {
 					$('#modalTitle').text(dataObject.title);
 				} else {
@@ -489,56 +548,56 @@
 					console.log("Additional data:", dataObject);
 				}
 				// Display the modal
-                // Setup close button to hide the modal
-                // Handle background clicks to also close the modal
+				// Setup close button to hide the modal
+				// Handle background clicks to also close the modal
 				$('#Modal').css('display', 'block');
-				$('#closeModalBtn').click(function() {
+				$('#closeModalBtn').click(function () {
 					$('#Modal').css('display', 'none');
 				});
-				$(window).click(function(event) {
+				$(window).click(function (event) {
 					if ($(event.target).is('#Modal')) {
 						$('#Modal').css('display', 'none');
 					}
 				});
 			} // end Modal
 
-            function handleSort(column, sortOrder) {
-            // Make an AJAX request to the server to retrieve sorted data
-                $.ajax({
-                    url: '/sort_parts',  // URL for sorting route in app.py
-                    method: 'POST',
-                    data: { 
-                        column: column,
-                        order: sortOrder 
-                    },
-                    success: function (response) {
-                        updateTable(response);
-                    },
-                    error: function (xhr, status, error) {
-                        console.error("Error sorting parts: " + error);
-                    }
-                }); // end handleSort
-            }
-			
-            function updateTable(parts) {
-                var tableBody = $('#partsTableBody');
-                tableBody.empty(); // Clear existing rows
-                parts.forEach(function (part) {
-                    tableBody.append('<tr>' +
-                        `<td>${part.Type}</td>` +
-                        `<td>${part.Capacity}</td>` +
-                        `<td>${part.Size}</td>` +
-                        `<td>${part.Speed}</td>` +
-                        `<td>${part.Brand}</td>` +
-                        `<td>${part.Model}</td>` +
-                        `<td>${part.Location}</td>` +
-                        `<td>${part.Part_sn}</td>` +
-                    '</tr>');
-        	    });
-    	    }
+			function handleSort(column, sortOrder) {
+				// Make an AJAX request to the server to retrieve sorted data
+				$.ajax({
+					url: '/sort_parts',  // URL for sorting route in app.py
+					method: 'POST',
+					data: {
+						column: column,
+						order: sortOrder
+					},
+					success: function (response) {
+						updateTable(response);
+					},
+					error: function (xhr, status, error) {
+						console.error("Error sorting parts: " + error);
+					}
+				}); // end handleSort
+			}
+
+			function updateTable(parts) {
+				var tableBody = $('#partsTableBody');
+				tableBody.empty(); // Clear existing rows
+				parts.forEach(function (part) {
+					tableBody.append('<tr>' +
+						`<td>${part.Type}</td>` +
+						`<td>${part.Capacity}</td>` +
+						`<td>${part.Size}</td>` +
+						`<td>${part.Speed}</td>` +
+						`<td>${part.Brand}</td>` +
+						`<td>${part.Model}</td>` +
+						`<td>${part.Location}</td>` +
+						`<td>${part.Part_sn}</td>` +
+						'</tr>');
+				});
+			}
 
 			function handleAddPart() {
-					const content = `
+				const content = `
 					<p><strong>Add part manually<strong></p>
 					<form id="addPartForm" class="form-inline">
 					<table width="100%" border="1">
@@ -577,9 +636,9 @@
 				</form
 
 				`;
-				showModal({ title: 'Add New Part'}, content);
+				showModal({ title: 'Add New Part' }, content);
 				// Handle form submission
-				$('#add_btn').click(function() {
+				$('#add_btn').click(function () {
 					const partData = {
 						Type: $('#iType').val(),
 						Capacity: $('#iCapacity').val(),
@@ -593,7 +652,54 @@
 					submitPart(partData);
 				});
 			} // end handleAddPart
-			
+
+			//to click on rows to be removed using the remove button from handleRemovePart
+			function setupRowClick() {
+				$('#partsTableBody').on('click', 'tr', function () {
+					$(this).toggleClass('selected-row');
+					if ($(this).hasClass('selected-row')) {
+						$(this).css('outline', '2px solid blue');
+					} else {
+						$(this).css('outline', 'none');
+					}
+				});
+			}
+
+			function removeSelectedParts(selectedRows) {
+				var requests = selectedRows.map(function () {
+					var partSn = $(this).find('td:last').text(); //part_sn is last in line. could be issue HERE
+					var tid = 'System';
+					var unit_sn = 'N/A';
+
+					return $.ajax({
+						url: '/update_part_status',
+						type: 'POST',
+						contentType: 'application/json',
+						data: JSON.stringify({
+							Part_sn: partSn,
+							TID: tid,
+							Unit_sn: unit_sn,
+							Part_status: 'deleted'
+						}),
+						success: function (response) {
+							console.log('Success:', response);
+						},
+						error: function (xhr, status, error) {
+							console.error('Failed to mark part as deleted:', error);
+						}
+					});
+				}).toArray();
+
+			$.when.apply($, requests).then(function () {
+				alert('All selected parts have been marked as deleted.');
+				fetchAndDisplayParts();  // Refresh the parts list
+			}, function () {
+				alert('Failed to mark some or all parts as deleted.');
+			});
+		}
+
+
+
 			// Function to submit part data to the server used by handleAddPart
 			function submitPart(partData) {
 				$.ajax({
@@ -601,7 +707,7 @@
 					type: 'POST',
 					contentType: 'application/json',
 					data: JSON.stringify(partData),
-					success: function(response) {
+					success: function (response) {
 						if (response.status === 'success') {
 							alert('Part added successfully.');
 							$('#Modal').css('display', 'none'); // Close the modal
@@ -610,7 +716,7 @@
 							alert('Failed to add part: ' + response.message);
 						}
 					},
-					error: function(xhr, status, error) {
+					error: function (xhr, status, error) {
 						console.error('Error adding part: ' + error);
 						alert('Error adding part: ' + error);
 					}
@@ -680,14 +786,14 @@
 
 				if (dataObject.parts.length !== dataObject.serial_numbers.length) {
 					console.error("Error: The number of parts does not match the number of serial numbers.");
-                    alert('Error: The number of parts does not match the number of serial numbers.');
+					alert('Error: The number of parts does not match the number of serial numbers.');
 					return null;
 				}
 
 				return dataObject;
 			} // end parseTextInput
-			
-			
+
+
 			function checkInPart(dataObject) {
 				// Assume dataObject has already been parsed and structured
 				dataObject.parts.forEach((part, index) => {
@@ -702,7 +808,7 @@
 						Speed: dataObject.Speed,
 						Brand: dataObject.Brand,
 						Model: dataObject.Model,
-                        Part_status: 'in'
+						Part_status: 'in'
 					};
 
 					$.ajax({
@@ -710,7 +816,7 @@
 						type: 'POST',
 						contentType: 'application/json',
 						data: JSON.stringify(partData),
-						success: function(response) {
+						success: function (response) {
 							if (response.exists) {
 								// If part exists and matches type and capacity, update its status to 'in'
 								$.ajax({
@@ -723,10 +829,10 @@
 										Unit_sn: dataObject.unit_sn,
 										Part_status: 'in'
 									}),
-									success: function(updateResponse) {
-											fetchAndDisplayParts();
+									success: function (updateResponse) {
+										fetchAndDisplayParts();
 									},
-									error: function(err) {
+									error: function (err) {
 										console.error("Error updating part status: ", err);
 									}
 								});
@@ -734,7 +840,7 @@
 								// If part does not exist or does not match, show modal to add part
 								console.log(response.message); // Log the message from the server
 								// Check for specific mismatch error
-								if(response.error == 'mismatch') {
+								if (response.error == 'mismatch') {
 									const expectedDetails = response.expected;
 									const actualDetails = response.actual;
 									const content = `
@@ -744,7 +850,7 @@
 									`;
 									showModal({ title: 'Check-in Error: ' + response.message }, content);
 								}
-								else if (response.error == 'checked-in'){
+								else if (response.error == 'checked-in') {
 									console.log("Error: " + response.message); // Handle other errors
 									const content = `
 										<p><strong>That part is already checked-in.<strong></p>
@@ -774,7 +880,7 @@
 									`;
 									showModal({ title: 'Check-in Error: ' + response.message }, content);
 								}
-								else if(response.error == 'not_in_inventory') {
+								else if (response.error == 'not_in_inventory') {
 									console.log("Error: " + response.message); // Handle other errors
 									const content = `
 										<p><strong>That part has never been added to inventory.<strong></p>
@@ -807,14 +913,14 @@
 								}
 							}
 						},
-						error: function(err) {
+						error: function (err) {
 							console.error("Error checking part in inventory: ", err);
-                            alert('Error checking part in inventory: ' + error);
+							alert('Error checking part in inventory: ' + error);
 						}
 					});
 				});
 			} // end checkinPart
-            
+
 			function checkOutPart(dataObject) {
 				// Assume dataObject has already been parsed and structured
 				dataObject.parts.forEach((part, index) => {
@@ -827,7 +933,7 @@
 						Capacity: part.capacity,
 						Size: dataObject.size,
 						Speed: dataObject.Speed,
-                        Part_status: 'out'
+						Part_status: 'out'
 					};
 
 					$.ajax({
@@ -835,7 +941,7 @@
 						type: 'POST',
 						contentType: 'application/json',
 						data: JSON.stringify(partData),
-						success: function(response) {
+						success: function (response) {
 							if (response.exists) {
 								// If part exists and matches type and capacity, update its status to 'out'
 								$.ajax({
@@ -848,10 +954,10 @@
 										Unit_sn: dataObject.unit_sn,
 										Part_status: 'out'
 									}),
-									success: function(updateResponse) {
-											fetchAndDisplayParts();
+									success: function (updateResponse) {
+										fetchAndDisplayParts();
 									},
-									error: function(err) {
+									error: function (err) {
 										console.error("Error updating part status: ", err);
 									}
 								});
@@ -859,7 +965,7 @@
 								// If part does not exist or does not match, show modal to add part
 								console.log(response.message); // Log the message from the server
 								// Check for specific mismatch error
-								if(response.error == 'mismatch') {
+								if (response.error == 'mismatch') {
 									const expectedDetails = response.expected;
 									const actualDetails = response.actual;
 									const content = `
@@ -869,7 +975,7 @@
 									`;
 									showModal({ title: 'Check-out Error: ' + response.message }, content);
 								}
-								else if (response.error == 'checked-out'){
+								else if (response.error == 'checked-out') {
 									console.log("Error: " + response.message); // Handle other errors
 									const content = `
 										<p><strong>That part is already checked-out.<strong></p>
@@ -899,7 +1005,7 @@
 									`;
 									showModal({ title: 'Check-out Error: ' + response.message }, content);
 								}
-								else if(response.error == 'not_in_inventory') {
+								else if (response.error == 'not_in_inventory') {
 									console.log("Error: " + response.message); // Handle other errors
 									const content = `
 										<p><strong>That part has never been added to inventory.<strong></p>
@@ -933,36 +1039,37 @@
 								}
 							}
 						},
-						error: function(err) {
+						error: function (err) {
 							console.error("Error checking part out inventory: ", err);
-                            alert('Error checking part out inventory: ' + error);
+							alert('Error checking part out inventory: ' + error);
 						}
 					});
 				});
 			} // end checkoutPart
-			
-			function resetLogTables(){
-                $.ajax({
-                    url: '/reset_log_tables',  // URL of the Flask endpoint
-                    type: 'POST',  // Method type, as defined in your Flask route
-                    contentType: 'application/json',  // Data type expected to send (if you are sending data to the server)
-                    success: function(response) {
-                        // This function is called if the request succeeds.
-                        console.log('Response:', response);
-                        alert('Database has been reset successfully.');
+
+			function resetLogTables() {
+				$.ajax({
+					url: '/reset_log_tables',  // URL of the Flask endpoint
+					type: 'POST',  // Method type, as defined in your Flask route
+					contentType: 'application/json',  // Data type expected to send (if you are sending data to the server)
+					success: function (response) {
+						// This function is called if the request succeeds.
+						console.log('Response:', response);
+						alert('Database has been reset successfully.');
 						fetchAndDisplayParts();
-                    },
-                    error: function(xhr, status, error) {
-                        // This function is called if the request fails.
-                        console.error('Error resetting database:', error);
-                        alert('Failed to reset database: ' + error);
-                    }
-                });
+					},
+					error: function (xhr, status, error) {
+						// This function is called if the request fails.
+						console.error('Error resetting database:', error);
+						alert('Failed to reset database: ' + error);
+					}
+				});
 			} // end resetLogTables
-			
+
 		});
-		
+
 	</script>
 
 </body>
+
 </html>
