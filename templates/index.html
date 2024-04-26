@@ -114,6 +114,11 @@
 			background-color: rgb(26, 107, 30);
 			color: rgb(255, 255, 255)
 		}
+        
+        .btn-active {
+            background-color: #007bff;
+            color: white;
+        }
 
 		.btn-submit {
 			background-color: white;
@@ -403,6 +408,22 @@
 				sortOrder = (sortOrder === 'asc' ? 'desc' : 'asc');
 				$(this).attr('data-sort-order', sortOrder);
 			}); // end Sort column
+            
+            // IN/OUT Buttons
+            document.querySelectorAll('.btn-group .btn').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    // Remove the active class from all buttons
+                    button.parentNode.querySelectorAll('.btn').forEach(function(btn) {
+                        btn.classList.remove('btn-active');
+                    });
+
+                    // Add the active class to the clicked button
+                    button.classList.add('btn-active');
+
+                    // Output the active button text (or any other property)
+                    console.log('Active button:', button.textContent);
+                });
+            }); // end in/out buttons
 
 			$('.adminLogin').click(function () {
 				$('#demo-buttons').toggle(); // This toggles the visibility
@@ -410,7 +431,17 @@
 
 			$('#btn-submit-request').click(function () {
 				var parsedData = parseTextInput();
-				console.log(parsedData);
+                var activeButton = document.querySelector('.btn-active');
+                if (activeButton.innerText == "IN") {
+                    checkInPart(parsedData);
+                }
+                else if (activeButton.innerText == "OUT"){
+                    checkOutPart(parsedData);
+                }
+                else {
+                    alert('Select IN or OUT')
+				    console.log(parsedData);
+                }
 			});
 
 			$('#btnAddPart').click(function () {
