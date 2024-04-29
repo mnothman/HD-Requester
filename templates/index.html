@@ -150,14 +150,20 @@
 		}
 
 		/* TOPBAR AND LOGO */
-		.logo {
-			font-weight: bold;
-			width: 100px;
-			height: 50px;
-			margin-bottom: 0px;
-			margin-right: 0px;
-			float: left;
-		}
+        .logo {
+            color: rgba(221,221,221,1.00);
+            font-weight: bold;
+            margin-bottom: 0px;
+            margin-right: 0px;
+            float: left;
+            width: 100%;
+            font-size: 1.5em;
+        }
+        
+        .adminLogin .btnLogin{
+            width: 110px;
+            font-size: 1em;
+        }
 
 		/* TEXT INPUT REQUEST AREA */
 		#textarea-request {
@@ -287,9 +293,9 @@
 
 <body>
 	<nav>
-		<div class="logo">E-WASTE ENTERPRISES</div>
+		<div class="logo">HD Requester</div>
 		<div class="adminLogin">
-			<button type="button">Admin Login</button>
+			<button class="btnLogin" type="button">Admin Login</button>
 		</div>
 	</nav>
 
@@ -321,7 +327,7 @@
 					</div>
 				</div><!-- end row -->
 				<div class="row">
-					<div id="demo-buttons">
+					<div id="demo-buttons" style="display:none;">
 						<button id="btnDemoCheckin" type="button" class="btn">Check-in Demo</button>
 						<button id="btnDemoCheckinNotSeenBefore" type="button" class="btn">Check-In Demo Not Seen
 							b4</button>
@@ -419,9 +425,6 @@
 
                     // Add the active class to the clicked button
                     button.classList.add('btn-active');
-
-                    // Output the active button text (or any other property)
-                    console.log('Active button:', button.textContent);
                 });
             }); // end in/out buttons
 
