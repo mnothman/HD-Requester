@@ -50,6 +50,38 @@ The following is a timeline of key milestones for the HD Requester project, base
 ![Jira Timeline](https://github.com/mnothman/HD-Requester/blob/main/hd_requester_2024-05-05_08.09pm.png?raw=true)
 
 *Note: The timeline is subject to change based on the progress and any unforeseen challenges encountered during the development process.*
+| Date          | Information                                                                   |
+|---------------|-----------------------------------------------------------------------------------|
+| Feb 26, 2024  | Research HTML frameworks and programming languages                                 |
+| Mar 04, 2024  | Create Mockup and app flow.                                                        |
+| Mar 04, 2024  | Decided on Python with Flask, SQLite, and Bootstrap.                                 |
+| Mar 04, 2024  | Created basic homepage.                                                             |
+| Mar 11, 2024  | Started working on Modal feature.                                                   |
+| Mar 24, 2024  | Parse text into local variables.                                                    |
+| Mar 24, 2024  | Make the homepage table show data from the DB.                                       |
+| Mar 24, 2024  | Manually add to inventory working.                                                  |
+| Apr 08, 2024  | Switch from static HTML to AJAX                                                      |
+| Apr 17, 2024  | Sort data, include knowing that Gigabyte is less than Terabyte                       |
+| Apr 21, 2024  | Modal function with parameters created                                               |
+| Apr 24, 2024  | Live search working                                                                  |
+| Apr 25, 2024  | Manually remove to inventory working.                                                |
+| Apr 26, 2024  | Check-in / Check-out buttons get JavaScript to know what is selected.               |
+| Apr 26, 2024  | Check-in / Check-out buttons using text area.                                        |
+
+| Date          | Information                                                                   |
+|---------------|-----------------------------------------------------------------------------------|
+| Sep 09, 2024  | Create Windows Command Prompt script to install Python, Flask and SQLite           |
+| Sep 09, 2024  | Create Windows Command Prompt script to uninstall Pythin, Flask, SQLite, and any configuration files in Windows. |
+| Sep 09, 2024  | Find edge cases when parsing the text and handle those errors.                     |
+| Sep 09, 2024  | Implement search to work with sort.                                                 |
+| Sep 23, 2024  | Sanitize SQL statements for extra security.                                         |
+| Sep 23, 2024  | Create static HTML of Admin Dashboard basic layout as it appears in the mockup.     |
+| Oct 07, 2024  | Create dynamic Admin Dashboard, pulling data from the DB. Have the chart switch when selecting a month in the list |
+| Oct 07, 2024  | Implement search in Admin Dashboard.                                                |
+| Oct 21, 2024  | Implement Admin login from previously made HTML from Sprint 1. Connect it to the admin table in DB |
+| Oct 21, 2024  | Implement Admin password recovery from previously made HTML from Sprint 1. Connect it to the admin table in DB |
+| Nov 04, 2024  | Encrypt the password and security answers in the database.                          |
+
 
 ## Entity-Relationship Diagram (ERD)
 
