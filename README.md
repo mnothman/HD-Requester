@@ -4,7 +4,7 @@
 
 ## Project Synopsis
 
-HD Requester is a secure parts management system designed to streamline the process of checking parts in and out of a secure area. It makes it convenient for authorized personnel to access and manage parts efficiently. The application provides a user-friendly interface for tracking and monitoring parts inventory, ensuring the security and accountability of the process.
+HD Requester is a secure parts management system designed to streamline the process of checking parts in and out of a secure area. It makes it convenient for authorized personnel to access and manage parts efficiently. The application provides a user-friendly interface for tracking and monitoring parts inventory, ensuring the security and accountability of the process. Every action gets logged and provides extra information for the company owner. In the admin dashboard, the company owner can see inventory levels at a glance and also a chart that shows data for laptops, desktops, and servers. The app has a login page for the admin and everything is securely stored in an SQLite database using Argon hash algorithm.
 
 ## App Requirements
 
