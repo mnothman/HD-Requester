@@ -57,9 +57,6 @@ The following is a timeline of key milestones for the HD Requester project, base
 
 The above ERD represents the database schema and relationships between entities in the HD Requester application.
 
-![Additional Logo](https://github.com/mnothman/HD-Requester/blob/main/refresh-icon.png)
-
-
 ## Team Roster
 
 - Mohammad Othman
@@ -70,3 +67,10 @@ The above ERD represents the database schema and relationships between entities 
 - Salvador Del Rio Torres
 - Abdul Karim Nushin
 - Delia Nepomuseno Hernandez
+
+TEAM REFRESH
+
+![Additional Logo](https://github.com/mnothman/HD-Requester/blob/main/refresh-icon.png)
+
+
+
