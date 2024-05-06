@@ -1,6 +1,6 @@
 # HD Requester
 
-![HD Requester Logo](https://github.com/mnothman/HD-Requester/blob/main/Logo2x.png)
+![HD Requester Logo](https://github.com/mnothman/HD-Requester/blob/main/HD-Requester-Logo.png)
 
 ## Project Synopsis
 
@@ -47,7 +47,7 @@ Note: Make sure you have SQLite, Python, and Flask installed before following th
 
 The following is a timeline of key milestones for the HD Requester project, based on the user stories created in the backlog for all the key features with estimates:
 
-
+![Jira Timeline](https://github.com/mnothman/HD-Requester/blob/main/hd_requester_2024-05-05_08.09pm.png?raw=true)
 
 *Note: The timeline is subject to change based on the progress and any unforeseen challenges encountered during the development process.*
 
@@ -57,8 +57,7 @@ The following is a timeline of key milestones for the HD Requester project, base
 
 The above ERD represents the database schema and relationships between entities in the HD Requester application.
 
-
-![Additional Logo](https://github.com/mnothman/HD-Requester/blob/main/HD-Requester-Logo.png)
+![Additional Logo](https://github.com/mnothman/HD-Requester/blob/main/Logo2x.png)
 
 ## Team Roster
 
