@@ -68,7 +68,7 @@ The above ERD represents the database schema and relationships between entities 
 - Abdul Karim Nushin
 - Delia Nepomuseno Hernandez
 
-TEAM REFRESH
+## TEAM REFRESH
 
 ![Additional Logo](https://github.com/mnothman/HD-Requester/blob/main/refresh-icon.png)
 
