@@ -283,6 +283,45 @@ def reset_log_tables():
     finally:
         conn.close()
 
+@app.route('/automated_test')
+def automated_test():
+    """
+    A route to automatically perform SQL injection testing using the TID column of the Log table.
+    This test includes values for all required fields to satisfy NOT NULL constraints.
+    """
+    # Define a potentially malicious input simulating what a user might enter in a text area.
+    malicious_input = "Valid Entry'; DROP TABLE Part; --"
+
+    # Call the function that simulates handling of text area input
+    try:
+        response = simulate_text_area_input(malicious_input)
+        return jsonify({'status': 'success', 'response': response}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+def simulate_text_area_input(user_input):
+    """
+    Simulates the processing of text area input that constructs SQL queries using the TID column.
+    Ensures that all non-nullable columns are given values to prevent NOT NULL constraint failures.
+    """
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        # Simulated insertion into Log table with all necessary fields
+        cursor.execute(
+            "INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status) VALUES (?, ?, ?, ?)",
+            (user_input, 'Unit123', 'Part123', 'in')  # Dummy values for Unit_sn, Part_sn, and Part_status
+        )
+        conn.commit()
+        return "Simulated input was processed safely."
+    except Exception as e:
+        conn.rollback()
+        return f"Failed to process simulated input: {str(e)}"
+    finally:
+        conn.close()
+
+
+
 if __name__ == '__main__':
     # app.run(port=8000)
     app.run(debug=True)
