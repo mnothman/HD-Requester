@@ -33,7 +33,6 @@ def get_parts(): #fetch parts from search
     parts = get_all_parts(search_type)
     return jsonify([dict(part) for part in parts])
 
-
 def get_all_parts(search_type=None):
     db = get_db()
     query = 'SELECT Part.* FROM Part JOIN Part_log ON Part.Part_sn = Part_log.Part_sn WHERE Part_log.Part_status IS "in"'
@@ -44,6 +43,74 @@ def get_all_parts(search_type=None):
     parts = db.execute(query, args).fetchall()
     return parts
 
+@app.route('/get_inventory', methods=['GET'])
+def get_inventory():
+    try:
+        # Fetch inventory summary from the database
+        inventory = get_inventory_db()
+        # Convert the result for JSON
+        inventory_list = [dict(row) for row in inventory]
+        return jsonify(inventory_list)
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+def get_inventory_db():
+    db = get_db()
+    query = '''
+        SELECT
+            p.Type,
+            p.Size,
+            COUNT(*) AS quantity
+        FROM
+            Part p
+        JOIN
+            Part_log pl ON p.Part_sn = pl.Part_sn
+        WHERE
+            pl.Part_status = 'in'
+        GROUP BY
+            p.Type,
+            p.Size
+        ORDER BY
+            p.Type,
+            p.Size;
+    '''
+    try:
+        # Execute the query and fetch all results
+        result = db.execute(query).fetchall()
+        return result
+    except sqlite3.Error as e:
+        raise RuntimeError(f"Database error: {str(e)}")
+
+@app.route('/get_unique_parts', methods=['GET'])
+def get_unique_parts():
+    db = get_db()
+    query = 'SELECT DISTINCT Type FROM Part ORDER BY Type'
+    try:
+        result = db.execute(query).fetchall()
+        names = [row['Type'] for row in result]
+        return jsonify(names)
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/get_part_capacities', methods=['GET'])
+def get_part_capacities():
+    name = request.args.get('name')
+    db = get_db()
+    query = '''
+        SELECT DISTINCT Capacity FROM Part
+        WHERE Type = ?
+    '''
+    try:
+        result = db.execute(query, (name,)).fetchall()
+        capacities = [row['Capacity'] for row in result]
+        return jsonify(capacities)
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/inventory')
+def inventory():
+    return render_template('temp_inventory.html')
 
 # Database function to insert a part
 def insert_part(part_data):
