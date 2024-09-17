@@ -168,6 +168,7 @@ def sort_parts():
     """Sort parts based on a specified column and order, handling numeric values and units properly."""
     column = request.form.get('column')
     order = request.form.get('order', 'asc')  # Default to ascending if not specified
+    search_term = request.form.get('search', '').lower()  # Get search term to allow for sorting
     parts = get_all_parts()  # Assume this function fetches all parts
 
     def extract_number(text):
@@ -181,17 +182,38 @@ def sort_parts():
                 number *= 1024
         return number
 
+  # If items being searched for
+    if search_term:
+        def filter_parts(part):
+            """Returns True if any of the part's attributes match the search term."""
+            return (
+                search_term in str(part['Type']).lower() or
+                search_term in str(part['Capacity']).lower() or
+                search_term in str(part['Size']).lower() or
+                search_term in str(part['Speed']).lower() or
+                search_term in str(part['Brand']).lower() or
+                search_term in str(part['Model']).lower() or
+                search_term in str(part['Location']).lower() or
+                search_term in str(part['Part_sn']).lower()
+            )
+
+        filtered_parts = list(filter(filter_parts, parts))
+    else:
+        # Display all parts if no search term is provided
+        filtered_parts = parts
+
+
     # Check if column is one of the acceptable fields to sort by
     if column in ['Type', 'Capacity', 'Size', 'Speed', 'Brand', 'Model', 'Location', 'Part_sn']:
         # Determine the sorting key and direction
         if column == 'Capacity':
             # Special handling for capacity to sort numerically and consider units
-            sorted_parts = sorted(parts, key=lambda part: (part[column] is None, extract_number(part[column])), reverse=(order == 'desc'))
+            sorted_parts = sorted(filtered_parts, key=lambda part: (part[column] is None, extract_number(part[column])), reverse=(order == 'desc'))
         else:
             # Default sorting for other columns
-            sorted_parts = sorted(parts, key=lambda part: (part[column] is None, part[column]), reverse=(order == 'desc'))
+            sorted_parts = sorted(filtered_parts, key=lambda part: (part[column] is None, part[column]), reverse=(order == 'desc'))
     else:
-        sorted_parts = parts  # Return unsorted if column is not valid
+        sorted_parts = filtered_parts  # Return unsorted if column is not valid
 
     return jsonify([dict(part) for part in sorted_parts])
 

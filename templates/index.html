@@ -414,6 +414,13 @@
                     $('#searchInput').removeClass('inputFilled');
                 }
 
+
+				// Need this to display all parts when search is deleted
+				if (searchTerm === '') {
+					fetchAndDisplayParts();  // Fetch and reset to show all parts
+					return;
+				}
+
                 // Filter table rows based on the search term
                 $('#partsTableBody tr').filter(function () {
                     $(this).toggle($(this).text().toLowerCase().indexOf(searchTerm) > -1);
@@ -454,7 +461,8 @@
 			$('.sortable-column').click(function () {
 				var column = $(this).text().trim();  // Get the column name
 				var sortOrder = $(this).attr('data-sort-order') || 'asc'; //get current sort order, default to ascending
-				handleSort(column, sortOrder);
+				var searchTerm = $('#searchInput').val().toLowerCase();
+				handleSort(column, sortOrder, searchTerm);
 
 				sortOrder = (sortOrder === 'asc' ? 'desc' : 'asc');
 				$(this).attr('data-sort-order', sortOrder);
@@ -585,7 +593,8 @@
 						var tableBody = $('#partsTableBody');
 						tableBody.empty(); // Clear existing rows
 						$.each(data, function (index, part) {
-							tableBody.append('<tr>' +
+							var rowClass = (index % 2 === 0) ? 'odd-row' : 'even-row';
+							tableBody.append('<tr class="' + rowClass + '">' +
 								'<td>' + part.Type + '</td>' +
 								'<td>' + part.Capacity + '</td>' +
 								'<td>' + part.Size + '</td>' +
@@ -641,13 +650,16 @@
 			} // end Modal
 
 			function handleSort(column, sortOrder) {
+				var searchTerm = $('#searchInput').val().toLowerCase(); // Get the current search term to also allow for sorting
+
 				// Make an AJAX request to the server to retrieve sorted data
 				$.ajax({
 					url: '/sort_parts',  // URL for sorting route in app.py
 					method: 'POST',
 					data: {
 						column: column,
-						order: sortOrder
+						order: sortOrder,
+						search: searchTerm
 					},
 					success: function (response) {
 						updateTable(response);
@@ -661,8 +673,9 @@
 			function updateTable(parts) {
 				var tableBody = $('#partsTableBody');
 				tableBody.empty(); // Clear existing rows
-				parts.forEach(function (part) {
-					tableBody.append('<tr>' +
+				parts.forEach(function (part, index) {
+					var rowClass = (index % 2 === 0) ? 'odd-row' : 'even-row';
+					tableBody.append('<tr class="' + rowClass + '">' +
 						`<td>${part.Type}</td>` +
 						`<td>${part.Capacity}</td>` +
 						`<td>${part.Size}</td>` +
