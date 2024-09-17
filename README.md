@@ -71,7 +71,7 @@ The following is a timeline of key milestones for the HD Requester project, base
 | Date          | Information                                                                   |
 |---------------|-----------------------------------------------------------------------------------|
 | Sep 09, 2024  | Create Windows Command Prompt script to install Python, Flask and SQLite           |
-| Sep 09, 2024  | Create Windows Command Prompt script to uninstall Pythin, Flask, SQLite, and any configuration files in Windows. |
+| Sep 09, 2024  | Create Windows Command Prompt script to uninstall Python, Flask, SQLite, and any configuration files in Windows. |
 | Sep 09, 2024  | Find edge cases when parsing the text and handle those errors.                     |
 | Sep 09, 2024  | Implement search to work with sort.                                                 |
 | Sep 23, 2024  | Sanitize SQL statements for extra security.                                         |
