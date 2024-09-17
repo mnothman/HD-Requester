@@ -65,14 +65,24 @@
 		}
 
 		.search button {
-			background-color: black;
-			color: white;
-			border: none;
+			background-color: #FFF;
+			color: black;
 			outline: none;
-			padding: 3px 10px;
-			border-radius: 30px;
+			padding: 0px 10px;
+			border-radius: 20px;
+            border: solid 0px #FFF;
 			cursor: pointer;
 		}
+        
+        #clearButton {
+            display: none;
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+            font-size: 1.3em;
+        }
 
 		.adminLogin button {
 			color: black;
@@ -80,8 +90,8 @@
 			border: none;
 			outline: black;
 			margin-left: auto;
-			padding: 3px 10px;
-			border-radius: 30px;
+			padding: 0px 10px;
+			border-radius: 20px;
 			cursor: pointer;
 		}
 
@@ -321,10 +331,13 @@
 						<button id="rmvPartBtn" type="button" class="btn">Remove Part</button>
 					</div>
 					<div class="search col-sm-3">
-						<div class="input-wrapper">
-							<input type="text" class="form-control" placeholder="Search" id="searchInput">
-						</div>
-					</div>
+                        <div class="input-wrapper" style="position: relative;">
+                            <input type="text" class="form-control" placeholder="Search" id="searchInput">
+                            <button id="clearButton">
+                                &times;
+                            </button>
+                        </div>
+                    </div>
 				</div><!-- end row -->
 				<div class="row">
 					<div id="demo-buttons" style="display:none;">
@@ -379,31 +392,59 @@
 
 	<script>
 		$(document).ready(function () {
-			// a commonly used function to
-			// show content of JSON object
-			fetchAndDisplayParts();
-			setupRowClick();
+            fetchAndDisplayParts();
+            setupRowClick();
 
-			/* ====== EVENT LISTENERS ===== */
-			// Live Search functionality
-			$('#searchInput').on('keyup', function () {
-				var searchTerm = $(this).val().toLowerCase();
+            /* ====== EVENT LISTENERS ===== */
 
-				// Filter table rows based on the search term
-				$('#partsTableBody tr').filter(function () {
-					$(this).toggle($(this).text().toLowerCase().indexOf(searchTerm) > -1)
-				});
+            // Show/hide clear button functionality
+            $('#searchInput').on('input', function () {
+                var searchTerm = $(this).val().toLowerCase();
 
-				// Reapply classes to visible rows for alternating colors
-				$('#partsTableBody tr').filter(":visible").each(function (index) {
-					$(this).removeClass('odd-row even-row');  // Clear previous classes
-					if (index % 2 === 0) {  // Even index, odd row (0-based index)
-						$(this).addClass('odd-row');
-					} else {  // Odd index, even row
-						$(this).addClass('even-row');
-					}
-				});
-			}); // end Live Search
+                // Show clear button if more than one character is entered
+                if (searchTerm.length > 0) {
+                    $('#clearButton').show();
+                    $('#searchInput').addClass('inputFilled');
+                } else {
+                    $('#clearButton').hide();
+                    $('#searchInput').removeClass('inputFilled');
+                }
+
+                // Filter table rows based on the search term
+                $('#partsTableBody tr').filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(searchTerm) > -1);
+                });
+
+                // Reapply classes to visible rows for alternating colors
+                $('#partsTableBody tr').filter(":visible").each(function (index) {
+                    $(this).removeClass('odd-row even-row');  // Clear previous classes
+                    if (index % 2 === 0) {  // Even index, odd row (0-based index)
+                        $(this).addClass('odd-row');
+                    } else {  // Odd index, even row
+                        $(this).addClass('even-row');
+                    }
+                });
+            });
+
+            // Clear input when clear button is clicked
+            $('#clearButton').on('click', function () {
+                $('#searchInput').val('');
+                $(this).hide(); // Hide clear button after clearing the input
+
+                // Show all rows after clearing the input
+                $('#partsTableBody tr').show();
+
+                // Reapply classes to visible rows for alternating colors
+                $('#partsTableBody tr').each(function (index) {
+                    $(this).removeClass('odd-row even-row');
+                    if (index % 2 === 0) {
+                        $(this).addClass('odd-row');
+                    } else {
+                        $(this).addClass('even-row');
+                    }
+                });
+            });
+
 
 			// Sort column
 			$('.sortable-column').click(function () {
