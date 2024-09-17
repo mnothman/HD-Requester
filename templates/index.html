@@ -249,6 +249,10 @@
 			min-width: 120px;
 		}
 
+		.form-col {
+			padding: 5px;
+		}
+
 		.close {
 			cursor: pointer;
 			font-size: 1.5rem;
@@ -632,42 +636,62 @@
 
 			function handleAddPart() {
 				const content = `
-					<p><strong>Add part manually<strong></p>
-					<form id="addPartForm" class="form-inline">
-					<table width="100%" border="1">
-					<tbody>
-					<tr>
-					  <th scope="col">&nbsp;Type</th>
-					  <th scope="col">Capacity&nbsp;</th>
-					  <th scope="col">Size&nbsp;</th>
-					  <th scope="col">Speed&nbsp;</th>
-					  <th scope="col">Brand&nbsp;</th>
-					  <th scope="col">Model&nbsp;</th>
-					  <th scope="col">Location&nbsp;</th>
-					  <th scope="col">Part SN&nbsp;</th>
-					</tr>
-					<tr>
-						<td><input type="text" id="iType" name="Type"></input></td>
-						<td><input type="text" id="iCapacity" name="Capacity"></input></td>
-						<td>
-						<select id="ddSize" name="Size">
-							<option value="" selected> &nbsp; </option>
-							<option value="Desktop">Desktop</option>
-							<option value="Laptop">Laptop</option>
-							<option value="2.5">2.5" HD</option>
-							<option value="3.5">3.5" HD</option>
-						</select>
-						</td>
-						<td><input type="text" id="iSpeed" name="Speed"></input></td>
-						<td><input type="text" id="iBrand" name="Brand"></input></td>
-						<td><input type="text" id="iModel" name="Model"></input></td>
-						<td><input type="text" id="iLocation" name="Location"></input></td>
-						<td><input type="text" id="iPart_sn" name="Part SN"></input></td>
-					</tr>
-					</tbody>
-					</table>
-					<button type="button" id="add_btn" class="btn btn-primary mb-2">OK</button>
-				</form
+							<p><strong>Add part manually</strong></p>
+
+							<form id="addPartForm">
+
+								<div class="form-group" style="display: flex; flex-direction: column; width: 100%; border: 1px solid #000;">
+									<!-- Header Row -->
+									<div class="form-row" style="display: flex; font-weight: bold; border-bottom: 1px solid #000; background-color: #f0f0f0;">
+										<div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Type</div>
+										<div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Capacity</div>
+										<div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Size</div>
+										<div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Speed</div>
+										<div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Brand</div>
+										<div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Model</div>
+										<div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Location</div>
+										<div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Part SN</div>
+									</div>
+
+									<!-- Input Row -->
+									<div class="form-row" style="display: flex;">
+										<div class="form-col" style="flex: 1; padding: 8px;">
+											<input type="text" id="iType" name="Type" style="width: 100%;" />
+										</div>
+										<div class="form-col" style="flex: 1; padding: 8px;">
+											<input type="text" id="iCapacity" name="Capacity" style="width: 100%;" />
+										</div>
+										<div class="form-col" style="flex: 1; padding: 8px;">
+											<select id="ddSize" name="Size" style="width: 100%;">
+												<option value="" selected> &nbsp; </option>
+												<option value="Desktop">Desktop</option>
+												<option value="Laptop">Laptop</option>
+												<option value="2.5">2.5" HD</option>
+												<option value="3.5">3.5" HD</option>
+											</select>
+										</div>
+										<div class="form-col" style="flex: 1; padding: 8px;">
+											<input type="text" id="iSpeed" name="Speed" style="width: 100%;" />
+										</div>
+										<div class="form-col" style="flex: 1; padding: 8px;">
+											<input type="text" id="iBrand" name="Brand" style="width: 100%;" />
+										</div>
+										<div class="form-col" style="flex: 1; padding: 8px;">
+											<input type="text" id="iModel" name="Model" style="width: 100%;" />
+										</div>
+										<div class="form-col" style="flex: 1; padding: 8px;">
+											<input type="text" id="iLocation" name="Location" style="width: 100%;" />
+										</div>
+										<div class="form-col" style="flex: 1; padding: 8px;">
+											<input type="text" id="iPart_sn" name="Part SN" style="width: 100%;" />
+										</div>
+									</div>
+								</div>
+
+								<button type="button" id="add_btn" class="btn btn-primary mb-2">OK</button>
+							</form>
+
+
 
 				`;
 				showModal({ title: 'Add New Part' }, content);
@@ -824,6 +848,7 @@
 					return null;
 				}
 
+				console.log("dataObject: ", dataObject);
 				return dataObject;
 			} // end parseTextInput
 
@@ -884,6 +909,7 @@
 								else if (response.error == 'checked-in') {
 									console.log("Error: " + response.message); // Handle other errors
 									const content = `
+									<!--
 										<p><strong>That part is already checked-in.<strong></p>
 										<p>Serial number: ${partSn}</p>
 										<table width="100%" border="1">
@@ -908,12 +934,38 @@
 										</tr>
 										</tbody>
 										</table>
-									`;
+								-->
+										
+											<p><strong>That part is already checked-in.</strong></p>
+											<p>Serial number: ${partSn}</p>
+
+											<div style="display: flex; flex-direction: column; width: 100%; border: 1px solid #000;">
+												<div style="display: flex; font-weight: bold; border-bottom: 1px solid #000; background-color: #f0f0f0;">
+													<div style="flex: 1; padding: 8px;">Type</div>
+													<div style="flex: 1; padding: 8px;">Capacity</div>
+													<div style="flex: 1; padding: 8px;">Size</div>
+													<div style="flex: 1; padding: 8px;">Speed</div>
+													<div style="flex: 1; padding: 8px;">Brand</div>
+													<div style="flex: 1; padding: 8px;">Model</div>
+													<div style="flex: 1; padding: 8px;">Location</div>
+												</div>
+												<div style="display: flex;">
+													<div style="flex: 1; padding: 8px;">${response.part['Type']}</div>
+													<div style="flex: 1; padding: 8px;">${response.part['Capacity']}</div>
+													<div style="flex: 1; padding: 8px;">${response.part['Size']}</div>
+													<div style="flex: 1; padding: 8px;">${response.part['Speed']}</div>
+													<div style="flex: 1; padding: 8px;">${response.part['Brand']}</div>
+													<div style="flex: 1; padding: 8px;">${response.part['Model']}</div>
+													<div style="flex: 1; padding: 8px;">${response.part['Location']}</div>
+												</div>
+											</div>`
+										;
 									showModal({ title: 'Check-in Error: ' + response.message }, content);
 								}
 								else if (response.error == 'not_in_inventory') {
 									console.log("Error: " + response.message); // Handle other errors
 									const content = `
+									<!--
 										<p><strong>That part has never been added to inventory.<strong></p>
 										<p>Serial number: ${partSn}</p>
 										<p>Add item to inventory. Fill in the blanks.</p>
@@ -938,7 +990,44 @@
 											<td><input type="text" id="iLocation" name="Location"></input></td>
 										</tr>
 										</tbody>
-										</table>
+										</table>-->
+
+										<p><strong>That part has never been added to inventory.</strong></p>
+											<p>Serial number: ${partSn}</p>
+											<p>Add item to inventory. Fill in the blanks.</p>
+
+											<div style="display: flex; flex-direction: column; width: 100%; border: 1px solid #000;">
+												<!-- Header Row -->
+												<div style="display: flex; font-weight: bold; border-bottom: 1px solid #000; background-color: #f0f0f0;">
+													<div style="flex: 1; padding: 8px;">Type</div>
+													<div style="flex: 1; padding: 8px;">Capacity</div>
+													<div style="flex: 1; padding: 8px;">Size</div>
+													<div style="flex: 1; padding: 8px;">Speed</div>
+													<div style="flex: 1; padding: 8px;">Brand</div>
+													<div style="flex: 1; padding: 8px;">Model</div>
+													<div style="flex: 1; padding: 8px;">Location</div>
+												</div>
+												
+												<!-- Data Row -->
+												<div style="display: flex;">
+													<div style="flex: 1; padding: 8px;">${partData.Type}</div>
+													<div style="flex: 1; padding: 8px;">${partData.Capacity}</div>
+													<div style="flex: 1; padding: 8px;">${partData.Size}</div>
+													<div style="flex: 1; padding: 8px;">
+														<input type="text" id="iSpeed" name="Speed" style="width: 100%;" />
+													</div>
+													<div style="flex: 1; padding: 8px;">
+														<input type="text" id="iBrand" name="Brand" style="width: 100%;" />
+													</div>
+													<div style="flex: 1; padding: 8px;">
+														<input type="text" id="iModel" name="Model" style="width: 100%;" />
+													</div>
+													<div style="flex: 1; padding: 8px;">
+														<input type="text" id="iLocation" name="Location" style="width: 100%;" />
+													</div>
+												</div>
+											</div>
+
 									`;
 									showModal({ title: 'Check-in Error: ' + response.message }, content);
 								}
