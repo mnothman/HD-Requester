@@ -89,12 +89,11 @@ def insert_part(part_data):
 @app.route('/add_part', methods=['POST'])
 def add_part():
     data = request.get_json()
-    try:
-        insert_part(data)  # Assuming data is a dictionary matching your database schema
-        return jsonify({'status': 'success', 'message': 'Part added successfully'})
-    
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)})
+    result = insert_part(data)
+    if result['status'] == 'success':
+        return jsonify({'status': 'success', 'message': result['message']})
+    else:
+        return jsonify({'status': 'error', 'message': result['message']}), 400
 
 
 @app.route('/sort_parts', methods=['POST'])
