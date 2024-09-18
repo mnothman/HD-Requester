@@ -26,12 +26,33 @@ def close_db(error):
 def index():
     return render_template('index.html')
 
+@app.route('/dashboard')
+def dashboard():
+    parts = get_all_logs()
+    return render_template('dashboard.html', parts=parts)
+
+def get_all_logs():
+    conn = get_db()
+    query = '''
+
+            SELECT p.Part_sn, pl.Action, pl.Timestamp, pl.TID, pl.Unit_sn, p.Type, p.Capacity, p.Size, p.Speed, p.Brand, p.Model
+            FROM Part_log pl
+            JOIN Part p ON pl.Part_sn = p.Part_sn
+            ORDER BY pl.Timestamp DESC
+
+
+        '''
+    parts = conn.execute(query).fetchall()
+    conn.close()
+    return parts
+
 
 @app.route('/get_parts', methods=['POST'])
 def get_parts(): #fetch parts from search
     search_type = request.form.get('searchType', None)
     parts = get_all_parts(search_type)
     return jsonify([dict(part) for part in parts])
+
 
 def get_all_parts(search_type=None):
     db = get_db()
@@ -43,74 +64,6 @@ def get_all_parts(search_type=None):
     parts = db.execute(query, args).fetchall()
     return parts
 
-@app.route('/get_inventory', methods=['GET'])
-def get_inventory():
-    try:
-        # Fetch inventory summary from the database
-        inventory = get_inventory_db()
-        # Convert the result for JSON
-        inventory_list = [dict(row) for row in inventory]
-        return jsonify(inventory_list)
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
-def get_inventory_db():
-    db = get_db()
-    query = '''
-        SELECT
-            p.Type,
-            p.Size,
-            COUNT(*) AS quantity
-        FROM
-            Part p
-        JOIN
-            Part_log pl ON p.Part_sn = pl.Part_sn
-        WHERE
-            pl.Part_status = 'in'
-        GROUP BY
-            p.Type,
-            p.Size
-        ORDER BY
-            p.Type,
-            p.Size;
-    '''
-    try:
-        # Execute the query and fetch all results
-        result = db.execute(query).fetchall()
-        return result
-    except sqlite3.Error as e:
-        raise RuntimeError(f"Database error: {str(e)}")
-
-@app.route('/get_unique_parts', methods=['GET'])
-def get_unique_parts():
-    db = get_db()
-    query = 'SELECT DISTINCT Type FROM Part ORDER BY Type'
-    try:
-        result = db.execute(query).fetchall()
-        names = [row['Type'] for row in result]
-        return jsonify(names)
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
-@app.route('/get_part_capacities', methods=['GET'])
-def get_part_capacities():
-    name = request.args.get('name')
-    db = get_db()
-    query = '''
-        SELECT DISTINCT Capacity FROM Part
-        WHERE Type = ?
-    '''
-    try:
-        result = db.execute(query, (name,)).fetchall()
-        capacities = [row['Capacity'] for row in result]
-        return jsonify(capacities)
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
-
-@app.route('/inventory')
-def inventory():
-    return render_template('temp_inventory.html')
 
 # Database function to insert a part
 def insert_part(part_data):
@@ -152,15 +105,15 @@ def insert_part(part_data):
 
     return {'status': 'success', 'message': 'Part added successfully and logged as in'}
 
-
 @app.route('/add_part', methods=['POST'])
 def add_part():
     data = request.get_json()
-    result = insert_part(data)
-    if result['status'] == 'success':
-        return jsonify({'status': 'success', 'message': result['message']})
-    else:
-        return jsonify({'status': 'error', 'message': result['message']}), 400
+    try:
+        insert_part(data)  # Assuming data is a dictionary matching your database schema
+        return jsonify({'status': 'success', 'message': 'Part added successfully'})
+    
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
 
 
 @app.route('/sort_parts', methods=['POST'])
@@ -168,7 +121,6 @@ def sort_parts():
     """Sort parts based on a specified column and order, handling numeric values and units properly."""
     column = request.form.get('column')
     order = request.form.get('order', 'asc')  # Default to ascending if not specified
-    search_term = request.form.get('search', '').lower()  # Get search term to allow for sorting
     parts = get_all_parts()  # Assume this function fetches all parts
 
     def extract_number(text):
@@ -182,41 +134,19 @@ def sort_parts():
                 number *= 1024
         return number
 
-  # If items being searched for
-    if search_term:
-        def filter_parts(part):
-            """Returns True if any of the part's attributes match the search term."""
-            return (
-                search_term in str(part['Type']).lower() or
-                search_term in str(part['Capacity']).lower() or
-                search_term in str(part['Size']).lower() or
-                search_term in str(part['Speed']).lower() or
-                search_term in str(part['Brand']).lower() or
-                search_term in str(part['Model']).lower() or
-                search_term in str(part['Location']).lower() or
-                search_term in str(part['Part_sn']).lower()
-            )
-
-        filtered_parts = list(filter(filter_parts, parts))
-    else:
-        # Display all parts if no search term is provided
-        filtered_parts = parts
-
-
     # Check if column is one of the acceptable fields to sort by
     if column in ['Type', 'Capacity', 'Size', 'Speed', 'Brand', 'Model', 'Location', 'Part_sn']:
         # Determine the sorting key and direction
         if column == 'Capacity':
             # Special handling for capacity to sort numerically and consider units
-            sorted_parts = sorted(filtered_parts, key=lambda part: (part[column] is None, extract_number(part[column])), reverse=(order == 'desc'))
+            sorted_parts = sorted(parts, key=lambda part: (part[column] is None, extract_number(part[column])), reverse=(order == 'desc'))
         else:
             # Default sorting for other columns
-            sorted_parts = sorted(filtered_parts, key=lambda part: (part[column] is None, part[column]), reverse=(order == 'desc'))
+            sorted_parts = sorted(parts, key=lambda part: (part[column] is None, part[column]), reverse=(order == 'desc'))
     else:
-        sorted_parts = filtered_parts  # Return unsorted if column is not valid
+        sorted_parts = parts  # Return unsorted if column is not valid
 
     return jsonify([dict(part) for part in sorted_parts])
-
 
 @app.route('/check_part_in_inventory', methods=['POST'])
 def check_part_in_inventory():
@@ -294,7 +224,6 @@ def check_part_in_inventory():
     finally:
         conn.close()
 
-
 @app.route('/update_part_status', methods=['POST'])
 def update_part_status():
     data = request.get_json()
@@ -370,45 +299,6 @@ def reset_log_tables():
         return jsonify({'status': 'error', 'message': str(e)})
     finally:
         conn.close()
-
-@app.route('/automated_test')
-def automated_test():
-    """
-    A route to automatically perform SQL injection testing using the TID column of the Log table.
-    This test includes values for all required fields to satisfy NOT NULL constraints.
-    """
-    # Define a potentially malicious input simulating what a user might enter in a text area.
-    malicious_input = "Valid Entry'; DROP TABLE Part; --"
-
-    # Call the function that simulates handling of text area input
-    try:
-        response = simulate_text_area_input(malicious_input)
-        return jsonify({'status': 'success', 'response': response}), 200
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
-def simulate_text_area_input(user_input):
-    """
-    Simulates the processing of text area input that constructs SQL queries using the TID column.
-    Ensures that all non-nullable columns are given values to prevent NOT NULL constraint failures.
-    """
-    conn = get_db()
-    cursor = conn.cursor()
-    try:
-        # Simulated insertion into Log table with all necessary fields
-        cursor.execute(
-            "INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status) VALUES (?, ?, ?, ?)",
-            (user_input, 'Unit123', 'Part123', 'in')  # Dummy values for Unit_sn, Part_sn, and Part_status
-        )
-        conn.commit()
-        return "Simulated input was processed safely."
-    except Exception as e:
-        conn.rollback()
-        return f"Failed to process simulated input: {str(e)}"
-    finally:
-        conn.close()
-
-
 
 if __name__ == '__main__':
     # app.run(port=8000)
