@@ -7,6 +7,7 @@ db_blueprint = Blueprint('db', __name__)
 DATABASE = 'refresh.db'
 
 def get_db():
+    
     if 'db' not in g:
         g.db = sqlite3.connect(DATABASE)
         g.db.row_factory = sqlite3.Row
