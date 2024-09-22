@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .header {
+            background-color: rgb(26, 107, 30);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+          
+            padding: 10px;
+            background-color: rgba(244, 244, 244, 0.9);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+         }
+
+        .content { 
+            padding: 20px;
+        }
+
+        .table-container {
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            margin-bottom: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: rgb(26, 107, 30);
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Alternating row colors */
+        tbody tr:nth-child(odd) {
+            background-color: grey;  /* Light grey for odd rows */
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: white;  /* White for even rows */
+        }
+        tr:hover {
+            background-color: #f2f2f2;
+        }
+        
+    </style>
+
+    <!-- DataTables CSS for Sorting and Searching -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>Dashboard</h1>
+            <!-- Sidebar Menu -->
+        <div class="sidebar">
+            <a href="/">Home</a>
+        </div>
+    </div>
+
+
+    <!-- Main Content -->
+    <div class="content">
+        <h2>Check-In/Check-Out Records</h2>
+
+        <!-- Table for displaying records -->
+        <div class="table-container">
+            <table id="partsTable">
+                <thead>
+                    <tr>
+                        <th>Date/Time</th>
+                        <th>Action</th>
+                        <th>TID</th>
+                        <th>Unit SN</th>
+                        <th>Type</th>
+                        <th>Capacity</th>
+                        <th>Size</th>
+                        <th>Speed</th>
+                        <th>Brand</th>
+                        <th>Model</th>
+                        <th>Serial Number</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for part in parts %}
+                    <tr>
+                        <td>{{ part.date_time }}</td>
+                        <td>{{ part.action }}</td>
+                        <td>{{ part.tid }}</td>
+                        <td>{{ part.unit_sn }}</td>
+                        <td>{{ part.type }}</td>
+                        <td>{{ part.capacity }}</td>
+                        <td>{{ part.size }}</td>
+                        <td>{{ part.speed }}</td>
+                        <td>{{ part.brand }}</td>
+                        <td>{{ part.model }}</td>
+                        <td>{{ part.part_sn }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- DataTables JS for Search and Sort -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#partsTable').DataTable();  // Initialize DataTables on the table
+        });
+    </script>
+
+</body>
+</html>
