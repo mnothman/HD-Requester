@@ -163,7 +163,7 @@
         $('#partsTable').DataTable().row.add($(newRow)).draw();
     }
 
-    // Assuming you have a function that calls update_part_status
+    
     function checkPartStatus(data) {
         fetch('/update_part_status', {
             method: 'POST',
