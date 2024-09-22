@@ -1,4 +1,5 @@
 from flask import Blueprint, current_app, Flask, g, jsonify, render_template, request, redirect, url_for, session, flash
+from datetime import datetime
 import re, sqlite3
 
 app = Flask(__name__)
@@ -55,9 +56,36 @@ def login():
     return render_template('adminLogin.html')
 
 # Dashboard route
-@app.route('/admin')
+@app.route('/dashboard')
 def admin_dashboard():
-    return render_template('dashboard.html')
+    parts = record()
+    return render_template('dashboard.html', parts=parts)
+
+def record():
+    db = get_db()
+    query = '''
+SELECT l.Date_time, 
+           CASE 
+               WHEN l.Part_status = 'in' THEN 'Check In' 
+               WHEN l.Part_status = 'out' THEN 'Check Out' 
+               ELSE 'Unknown' 
+           END AS Action,
+           l.TID, 
+           l.Unit_sn, 
+           p.Type, 
+           p.Capacity, 
+           p.Size, 
+           p.Speed, 
+           p.Brand, 
+           p.Model, 
+           l.Part_sn
+    FROM Log l 
+    JOIN Part p ON l.Part_sn = p.Part_sn 
+    ORDER BY l.Date_time DESC
+    '''
+    parts = db.execute(query).fetchall()
+    return parts
+
 
 
 @app.route('/get_parts', methods=['POST'])
@@ -341,11 +369,34 @@ def update_part_status():
         conn.execute('BEGIN')
         # Update Part_log to set Part_status to 'in'
         conn.execute('UPDATE Part_log SET Part_status = ? WHERE Part_sn = ?', (part_status, part_sn))
-        conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status) VALUES (?, ?, ?, ?)', 
-                     (tid, unit_sn, part_sn, part_status))
-        conn.commit()
-        return jsonify({'status': 'success', 'message': 'Part status updated and logged successfully.'})
+        # Insert a new log entry with the current timestamp
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time) VALUES (?, ?, ?, ?, ?)', 
+                     (tid, unit_sn, part_sn, part_status, timestamp))
+#        conn.commit()
+ #       return jsonify({'status': 'success', 'message': 'Part status updated and logged successfully.'})
 
+           # Fetch the part details
+        part = conn.execute('SELECT * FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        conn.commit()
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'timestamp': timestamp,
+                'action': part_status,
+                'TID': tid,
+                'unit_sn': unit_sn,
+                'Type': part['Type'],
+                'Capacity': part['Capacity'],
+                'Size': part['Size'],
+                'Speed': part['Speed'],
+                'Brand': part['Brand'],
+                'Model': part['Model'],
+                'Part_sn': part_sn
+            }
+        })
     except sqlite3.Error as e:
         # Roll back any changes if there was an error
         conn.rollback()
