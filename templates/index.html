@@ -589,6 +589,7 @@
 					url: '/get_parts',
 					type: 'POST',
 					dataType: 'json',
+					data: {limit: 50},
 					success: function (data) {
 						var tableBody = $('#partsTableBody');
 						tableBody.empty(); // Clear existing rows

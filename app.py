@@ -30,9 +30,20 @@ def index():
 
 @app.route('/get_parts', methods=['POST'])
 def get_parts(): #fetch parts from search
+    
+    pagInt = request.form.get('limit', type=int)
+    print("pagInt: ", pagInt) # Client want 50 rows.  Prints 50
+    
     search_type = request.form.get('searchType', None)
     parts = get_all_parts(search_type)
-    return jsonify([dict(part) for part in parts])
+    
+    part = [dict(part) for part in parts]
+    
+    print(len(part)) # 5000
+    part = part[:pagInt]
+    print(len(part)) # 50
+    
+    return jsonify(part)
 
 def get_all_parts(search_type=None):
     db = get_db()
