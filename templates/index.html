@@ -586,6 +586,10 @@
 
 
 			/* ====== FUNCTIONS ===== */
+			function formatValue(value) {
+   				 return value !== null && value !== undefined ? value : '-';
+			}
+
 			function fetchAndDisplayParts() {
 				$.ajax({
 					url: '/get_parts',
@@ -597,15 +601,15 @@
 						$.each(data, function (index, part) {
 							var rowClass = (index % 2 === 0) ? 'odd-row' : 'even-row';
 							tableBody.append('<tr class="' + rowClass + '">' +
-								'<td>' + part.Type + '</td>' +
-								'<td>' + part.Capacity + '</td>' +
-								'<td>' + part.Size + '</td>' +
-								'<td>' + part.Speed + '</td>' +
-								'<td>' + part.Brand + '</td>' +
-								'<td>' + part.Model + '</td>' +
-								'<td>' + part.Location + '</td>' +
-								'<td>' + part.Part_sn + '</td>' +
-								'</tr>');
+								'<td>' + formatValue(part.Type) + '</td>' +
+                    			'<td>' + formatValue(part.Capacity) + '</td>' +
+                    			'<td>' + formatValue(part.Size) + '</td>' +
+                   				'<td>' + formatValue(part.Speed) + '</td>' +
+                    			'<td>' + formatValue(part.Brand) + '</td>' +
+                    			'<td>' + formatValue(part.Model) + '</td>' +
+                    			'<td>' + formatValue(part.Location) + '</td>' +
+                    			'<td>' + formatValue(part.Part_sn) + '</td>' +
+                    			'</tr>');
 						});
 					},
 					error: function (xhr, status, error) {
@@ -673,22 +677,23 @@
 			}
 
 			function updateTable(parts) {
-				var tableBody = $('#partsTableBody');
-				tableBody.empty(); // Clear existing rows
-				parts.forEach(function (part, index) {
-					var rowClass = (index % 2 === 0) ? 'odd-row' : 'even-row';
-					tableBody.append('<tr class="' + rowClass + '">' +
-						`<td>${part.Type}</td>` +
-						`<td>${part.Capacity}</td>` +
-						`<td>${part.Size}</td>` +
-						`<td>${part.Speed}</td>` +
-						`<td>${part.Brand}</td>` +
-						`<td>${part.Model}</td>` +
-						`<td>${part.Location}</td>` +
-						`<td>${part.Part_sn}</td>` +
-						'</tr>');
-				});
-			}
+    			var tableBody = $('#partsTableBody');
+    			tableBody.empty(); // Clear existing rows
+    			parts.forEach(function (part, index) {
+        			var rowClass = (index % 2 === 0) ? 'odd-row' : 'even-row';
+        			tableBody.append('<tr class="' + rowClass + '">' +
+            			`<td>${formatValue(part.Type)}</td>` +
+            			`<td>${formatValue(part.Capacity)}</td>` +
+            			`<td>${formatValue(part.Size)}</td>` +
+            			`<td>${formatValue(part.Speed)}</td>` +
+            			`<td>${formatValue(part.Brand)}</td>` +
+            			`<td>${formatValue(part.Model)}</td>` +
+            			`<td>${formatValue(part.Location)}</td>` +
+            			`<td>${formatValue(part.Part_sn)}</td>` +
+            			'</tr>');
+    });
+}
+
 
 			function handleAddPart() {
 				const content = `
