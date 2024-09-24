@@ -458,8 +458,9 @@ def reset_log_tables():
 @app.route('/automated_test')
 def automated_test():
     """
-    A route to automatically perform SQL injection testing using the TID column of the Log table.
-    This test includes values for all required fields to satisfy NOT NULL constraints.
+    This is a route to automatically perform SQL injection testing using the TID column of the Log table.
+    This test includes values for all required fields to satisfy NOT NULL constraints. 
+
     """
     # Define a potentially malicious input simulating what a user might enter in a text area.
     malicious_input = "Valid Entry'; DROP TABLE Part; --"
