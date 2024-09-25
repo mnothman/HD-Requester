@@ -86,6 +86,47 @@ SELECT l.Date_time,
     parts = db.execute(query).fetchall()
     return parts
 
+# Recover Password route
+@app.route('/recover_password', methods=['GET', 'POST'])
+def recover_password():
+    if request.method == 'POST':
+        # Handle the form submission (POST)
+        return check_answers()  # This function should handle form validation and verification
+    else:
+        # Render the form (GET)
+        return render_template('recover-password.html')
+
+def check_answers():
+    user_id = 0
+
+    # Retrieve form data
+    answer1 = request.form['answer1']
+    answer2 = request.form['answer2']
+    answer3 = request.form['answer3']
+
+    # Fetch the stored hash from the database
+    ##db = get_db()
+    ##cursor = db.cursor()
+    ##cursor.execute("SELECT answer1, answer2, answer3, FROM security_questions where user_id = ?", (user_id))
+
+    ##stored_answers = cursor.fetchone()
+    stored_answers = ["Lakers", "Dog", "Hawaii"]
+
+    if stored_answers:
+        try:
+            # Verify input answers against database hashes
+            if (answer1 is stored_answers[answer1] and
+                answer2 is stored_answers[answer2] and
+                answer3 is stored_answers[answer3] ):
+                return True
+            else:
+                return False
+        except:
+            return False
+    else:
+        return "No security answers found for this user."
+
+
 
 
 @app.route('/get_parts', methods=['POST'])
