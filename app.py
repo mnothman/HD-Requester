@@ -115,7 +115,7 @@ def get_inventory():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-# Get all of inventory regardless of current status
+# Get all of inventory regardless of current status 
 def get_inventory_db():
     db = get_db()
     query = '''
