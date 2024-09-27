@@ -474,6 +474,7 @@ def automated_test():
 
     # Call the function that simulates handling of text area input
     try:
+        
         response = simulate_text_area_input(malicious_input)
         return jsonify({'status': 'success', 'response': response}), 200
     except Exception as e:
@@ -505,3 +506,5 @@ def simulate_text_area_input(user_input):
 if __name__ == '__main__':
     # app.run(port=8000)
     app.run(debug=True)
+
+#test blank line
