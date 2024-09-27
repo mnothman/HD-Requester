@@ -142,27 +142,26 @@ def get_inventory_db():
     except sqlite3.Error as e:
         raise RuntimeError(f"Database error: {str(e)}")
 
-@app.route('/get_unique_parts', methods=['GET'])
-def get_unique_parts():
-    db = get_db()
-    query = 'SELECT DISTINCT Type FROM Part ORDER BY Type'
-    try:
-        result = db.execute(query).fetchall()
-        names = [row['Type'] for row in result]
-        return jsonify(names)
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/get_part_capacities', methods=['GET'])
 def get_part_capacities():
-    name = request.args.get('name')
+    type = request.args.get('type')
+    size = request.args.get('size')
     db = get_db()
-    query = '''
-        SELECT DISTINCT Capacity FROM Part
-        WHERE Type = ?
-    '''
+    if size == "null":
+        query = '''
+            SELECT DISTINCT Capacity FROM Part
+            WHERE Type = ?
+        '''
+        params = (type, )
+    else:
+        query = '''
+            SELECT DISTINCT Capacity FROM Part
+            WHERE Type = ? AND Size = ?
+        '''
+        params = (type, size)
     try:
-        result = db.execute(query, (name,)).fetchall()
+        result = db.execute(query, params).fetchall()
         capacities = [row['Capacity'] for row in result]
         return jsonify(capacities)
     except Exception as e:
