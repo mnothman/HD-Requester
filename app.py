@@ -7,9 +7,9 @@ app = Flask(__name__)
 
 app.secret_key = 'key'
 
-#Test Login
-ph = PasswordHasher()
-hashed_password = ph.hash('admin123')
+# Test login
+USERNAME = 'admin'
+PASSWORD = 'admin123'
 
 db_blueprint = Blueprint('db', __name__)
 DATABASE = 'refresh.db'
@@ -20,30 +20,6 @@ def get_db():
         g.db = sqlite3.connect(DATABASE)
         g.db.row_factory = sqlite3.Row
     return g.db
-
-def create_admin_table():
-    db = get_db()
-    try:
-        db.execute('''
-            CREATE TABLE IF NOT EXISTS admin (
-                admin_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL UNIQUE,
-                password_hash TEXT NOT NULL,
-                email TEXT NOT NULL UNIQUE,
-                security_question1 TEXT NOT NULL,
-                security_answer1_hash TEXT NOT NULL,
-                security_question2 TEXT NOT NULL,
-                security_answer2_hash TEXT NOT NULL,
-                security_question3 TEXT,
-                security_answer3_hash TEXT
-            )
-        ''')
-        db.commit()  
-    except sqlite3.Error as e:
-        print(f"Error creating admin table: {str(e)}")
-        db.rollback()
-    finally:
-        db.close()
 
 
 @db_blueprint.teardown_app_request
@@ -59,10 +35,6 @@ def close_db(error):
 def index():
     return render_template('index.html')
 
-if __name__ == '__main__':
-    with app.app_context():
-        create_admin_table()  
-    app.run(debug=True)
 
 # Login route
 @app.route('/login', methods=['GET', 'POST'])
@@ -72,23 +44,17 @@ def login():
         password = request.form.get('password')
 
         # Validate login credentials
-        try: 
-            # Assuming hashed_password is defined elsewhere securely
-            if username == 'admin' and ph.verify(hashed_password, password):
-                # If login is successful, redirect to the admin dashboard
-                return redirect(url_for('admin_dashboard'))
-            else:
-                # If login fails, flash a message and render login again
-                flash('Invalid credentials, please try again.')
-                return redirect(url_for('login'))  # Redirect back to the login page
-        except Exception as e:
-            # This captures any exception, which could include verification failure or other issues
-            flash('Invalid credentials, please try again')
-            return redirect(url_for('login'))
+        if username == USERNAME and password == PASSWORD:
+            # If login is successful, redirect to the admin dashboard
+            return redirect(url_for('admin_dashboard'))
+        else:
+             # If login fails, flash a message and render login again
+            flash('Invalid credentials, please try again.')
+            return redirect(url_for('login'))  # Redirect back to login page
+        
 
-    # If GET request, render the login page
+    # If GET request, render login page
     return render_template('adminLogin.html')
-
 
 # Dashboard route
 @app.route('/dashboard')
@@ -493,16 +459,14 @@ def reset_log_tables():
 @app.route('/automated_test')
 def automated_test():
     """
-    This is a route to automatically perform SQL injection testing using the TID column of the Log table.
-    This test includes values for all required fields to satisfy NOT NULL constraints. 
-
+    A route to automatically perform SQL injection testing using the TID column of the Log table.
+    This test includes values for all required fields to satisfy NOT NULL constraints.
     """
     # Define a potentially malicious input simulating what a user might enter in a text area.
     malicious_input = "Valid Entry'; DROP TABLE Part; --"
 
     # Call the function that simulates handling of text area input
     try:
-        
         response = simulate_text_area_input(malicious_input)
         return jsonify({'status': 'success', 'response': response}), 200
     except Exception as e:
