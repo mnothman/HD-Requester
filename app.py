@@ -121,6 +121,57 @@ SELECT l.Date_time,
     parts = db.execute(query).fetchall()
     return parts
 
+# Recover Password route Step 1
+@app.route('/recover_password', methods=['GET', 'POST'])
+def recover_password():
+    if request.method == 'POST':
+        # Handle the form submission (POST)
+        return check_answers()  # This function should handle form validation and verification
+    else:
+        # Render the form (GET)
+        return render_template('recover-password.html')
+
+# Security Question Check Step 2
+@app.route('/check_answers', methods=['POST'])
+def check_answers():
+    answer1 = request.form['answer1']
+    answer2 = request.form['answer2']
+    answer3 = request.form['answer3']
+
+    # Simulated logic to check answers, replace with actual DB logic
+    stored_answers = {
+        'answer1': 'Kings',
+        'answer2': 'Pet',
+        'answer3': 'Hawaii'
+    }
+
+    if answer1 == stored_answers['answer1'] and answer2 == stored_answers['answer2'] and answer3 == stored_answers['answer3']:
+        return jsonify({'success': True, 'message': 'Answers correct, please set a new password.'})
+    else:
+        return jsonify({'success': False, 'message': 'Incorrect answers, please try again.'})
+
+# Reset Password Endpoint Step 3
+@app.route('/reset_password', methods=['POST'])
+def reset_password():
+    new_password = request.form['new_password']
+
+    # Update the Admin table with the new password in plain text
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        # Update the password in the Admin table (assuming only one admin user)
+        cursor.execute("UPDATE Admin SET Password = ? WHERE AdminID = ?", (new_password, 0))  # Replace 0 with actual Admin ID if necessary
+        conn.commit()
+
+        return jsonify({'success': True, 'message': 'Password has been updated successfully.'})
+    except sqlite3.Error as e:
+        # If an error occurs, rollback the transaction and send an error message
+        conn.rollback()
+        return jsonify({'success': False, 'message': 'An error occurred while updating the password: ' + str(e)})
+    finally:
+        conn.close()
+
+
 
 
 @app.route('/get_parts', methods=['POST'])
