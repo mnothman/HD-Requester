@@ -145,7 +145,7 @@ def get_part_capacities():
     if size == "null":
         query = '''
             SELECT DISTINCT Capacity FROM Part
-            WHERE Type = ?
+            WHERE Type = ? AND Size IS NULL
         '''
         params = (type, )
     else:
