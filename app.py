@@ -1,14 +1,15 @@
 from flask import Blueprint, current_app, Flask, g, jsonify, render_template, request, redirect, url_for, session, flash
 from datetime import datetime
+from argon2 import PasswordHasher
 import re, sqlite3
 
 app = Flask(__name__)
 
 app.secret_key = 'key'
 
-# Test login
-USERNAME = 'admin'
-PASSWORD = 'admin123'
+#Test Login
+ph = PasswordHasher()
+hashed_password = ph.hash('admin123')
 
 db_blueprint = Blueprint('db', __name__)
 DATABASE = 'refresh.db'
@@ -19,6 +20,30 @@ def get_db():
         g.db = sqlite3.connect(DATABASE)
         g.db.row_factory = sqlite3.Row
     return g.db
+
+def create_admin_table():
+    db = get_db()
+    try:
+        db.execute('''
+            CREATE TABLE IF NOT EXISTS admin (
+                admin_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL UNIQUE,
+                password_hash TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                security_question1 TEXT NOT NULL,
+                security_answer1_hash TEXT NOT NULL,
+                security_question2 TEXT NOT NULL,
+                security_answer2_hash TEXT NOT NULL,
+                security_question3 TEXT,
+                security_answer3_hash TEXT
+            )
+        ''')
+        db.commit()  
+    except sqlite3.Error as e:
+        print(f"Error creating admin table: {str(e)}")
+        db.rollback()
+    finally:
+        db.close()
 
 
 @db_blueprint.teardown_app_request
@@ -34,6 +59,10 @@ def close_db(error):
 def index():
     return render_template('index.html')
 
+if __name__ == '__main__':
+    with app.app_context():
+        create_admin_table()  
+    app.run(debug=True)
 
 # Login route
 @app.route('/login', methods=['GET', 'POST'])
@@ -43,17 +72,23 @@ def login():
         password = request.form.get('password')
 
         # Validate login credentials
-        if username == USERNAME and password == PASSWORD:
-            # If login is successful, redirect to the admin dashboard
-            return redirect(url_for('admin_dashboard'))
-        else:
-             # If login fails, flash a message and render login again
-            flash('Invalid credentials, please try again.')
-            return redirect(url_for('login'))  # Redirect back to login page
-        
+        try: 
+            # Assuming hashed_password is defined elsewhere securely
+            if username == 'admin' and ph.verify(hashed_password, password):
+                # If login is successful, redirect to the admin dashboard
+                return redirect(url_for('admin_dashboard'))
+            else:
+                # If login fails, flash a message and render login again
+                flash('Invalid credentials, please try again.')
+                return redirect(url_for('login'))  # Redirect back to the login page
+        except Exception as e:
+            # This captures any exception, which could include verification failure or other issues
+            flash('Invalid credentials, please try again')
+            return redirect(url_for('login'))
 
-    # If GET request, render login page
+    # If GET request, render the login page
     return render_template('adminLogin.html')
+
 
 # Dashboard route
 @app.route('/dashboard')
@@ -85,6 +120,57 @@ SELECT l.Date_time,
     '''
     parts = db.execute(query).fetchall()
     return parts
+
+# Recover Password route Step 1
+@app.route('/recover_password', methods=['GET', 'POST'])
+def recover_password():
+    if request.method == 'POST':
+        # Handle the form submission (POST)
+        return check_answers()  # This function should handle form validation and verification
+    else:
+        # Render the form (GET)
+        return render_template('recover-password.html')
+
+# Security Question Check Step 2
+@app.route('/check_answers', methods=['POST'])
+def check_answers():
+    answer1 = request.form['answer1']
+    answer2 = request.form['answer2']
+    answer3 = request.form['answer3']
+
+    # Simulated logic to check answers, replace with actual DB logic
+    stored_answers = {
+        'answer1': 'Kings',
+        'answer2': 'Pet',
+        'answer3': 'Hawaii'
+    }
+
+    if answer1 == stored_answers['answer1'] and answer2 == stored_answers['answer2'] and answer3 == stored_answers['answer3']:
+        return jsonify({'success': True, 'message': 'Answers correct, please set a new password.'})
+    else:
+        return jsonify({'success': False, 'message': 'Incorrect answers, please try again.'})
+
+# Reset Password Endpoint Step 3
+@app.route('/reset_password', methods=['POST'])
+def reset_password():
+    new_password = request.form['new_password']
+
+    # Update the Admin table with the new password in plain text
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        # Update the password in the Admin table (assuming only one admin user)
+        cursor.execute("UPDATE Admin SET password = ? WHERE username = ?", (new_password, 'admin'))  # Replace 0 with actual Admin ID if necessary
+        conn.commit()
+
+        return jsonify({'success': True, 'message': 'Password has been updated successfully.'})
+    except sqlite3.Error as e:
+        # If an error occurs, rollback the transaction and send an error message
+        conn.rollback()
+        return jsonify({'success': False, 'message': 'An error occurred while updating the password: ' + str(e)})
+    finally:
+        conn.close()
+
 
 
 
@@ -458,14 +544,16 @@ def reset_log_tables():
 @app.route('/automated_test')
 def automated_test():
     """
-    A route to automatically perform SQL injection testing using the TID column of the Log table.
-    This test includes values for all required fields to satisfy NOT NULL constraints.
+    This is a route to automatically perform SQL injection testing using the TID column of the Log table.
+    This test includes values for all required fields to satisfy NOT NULL constraints. 
+
     """
     # Define a potentially malicious input simulating what a user might enter in a text area.
     malicious_input = "Valid Entry'; DROP TABLE Part; --"
 
     # Call the function that simulates handling of text area input
     try:
+        
         response = simulate_text_area_input(malicious_input)
         return jsonify({'status': 'success', 'response': response}), 200
     except Exception as e:
@@ -497,5 +585,3 @@ def simulate_text_area_input(user_input):
 if __name__ == '__main__':
     # app.run(port=8000)
     app.run(debug=True)
-
-#test blank line
