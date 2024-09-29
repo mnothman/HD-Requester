@@ -125,7 +125,7 @@ def reset_password():
     cursor = conn.cursor()
     try:
         # Update the password in the Admin table (assuming only one admin user)
-        cursor.execute("UPDATE Admin SET Password = ? WHERE AdminID = ?", (new_password, 0))  # Replace 0 with actual Admin ID if necessary
+        cursor.execute("UPDATE Admin SET password = ? WHERE username = ?", (new_password, 'admin'))  # Replace 0 with actual Admin ID if necessary
         conn.commit()
 
         return jsonify({'success': True, 'message': 'Password has been updated successfully.'})
