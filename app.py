@@ -86,7 +86,7 @@ SELECT l.Date_time,
     parts = db.execute(query).fetchall()
     return parts
 
-# Recover Password route
+# Recover Password route Step 1
 @app.route('/recover_password', methods=['GET', 'POST'])
 def recover_password():
     if request.method == 'POST':
@@ -96,35 +96,45 @@ def recover_password():
         # Render the form (GET)
         return render_template('recover-password.html')
 
+# Security Question Check Step 2
+@app.route('/check_answers', methods=['POST'])
 def check_answers():
-    user_id = 0
-
-    # Retrieve form data
     answer1 = request.form['answer1']
     answer2 = request.form['answer2']
     answer3 = request.form['answer3']
 
-    # Fetch the stored hash from the database
-    ##db = get_db()
-    ##cursor = db.cursor()
-    ##cursor.execute("SELECT answer1, answer2, answer3, FROM security_questions where user_id = ?", (user_id))
+    # Simulated logic to check answers, replace with actual DB logic
+    stored_answers = {
+        'answer1': 'Kings',
+        'answer2': 'Pet',
+        'answer3': 'Hawaii'
+    }
 
-    ##stored_answers = cursor.fetchone()
-    stored_answers = ["Lakers", "Dog", "Hawaii"]
-
-    if stored_answers:
-        try:
-            # Verify input answers against database hashes
-            if (answer1 is stored_answers[answer1] and
-                answer2 is stored_answers[answer2] and
-                answer3 is stored_answers[answer3] ):
-                return True
-            else:
-                return False
-        except:
-            return False
+    if answer1 == stored_answers['answer1'] and answer2 == stored_answers['answer2'] and answer3 == stored_answers['answer3']:
+        return jsonify({'success': True, 'message': 'Answers correct, please set a new password.'})
     else:
-        return "No security answers found for this user."
+        return jsonify({'success': False, 'message': 'Incorrect answers, please try again.'})
+
+# Reset Password Endpoint Step 3
+@app.route('/reset_password', methods=['POST'])
+def reset_password():
+    new_password = request.form['new_password']
+
+    # Update the Admin table with the new password in plain text
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        # Update the password in the Admin table (assuming only one admin user)
+        cursor.execute("UPDATE Admin SET Password = ? WHERE AdminID = ?", (new_password, 0))  # Replace 0 with actual Admin ID if necessary
+        conn.commit()
+
+        return jsonify({'success': True, 'message': 'Password has been updated successfully.'})
+    except sqlite3.Error as e:
+        # If an error occurs, rollback the transaction and send an error message
+        conn.rollback()
+        return jsonify({'success': False, 'message': 'An error occurred while updating the password: ' + str(e)})
+    finally:
+        conn.close()
 
 
 
