@@ -21,30 +21,6 @@ def get_db():
         g.db.row_factory = sqlite3.Row
     return g.db
 
-def create_admin_table():
-    db = get_db()
-    try:
-        db.execute('''
-            CREATE TABLE IF NOT EXISTS admin (
-                admin_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL UNIQUE,
-                password_hash TEXT NOT NULL,
-                email TEXT NOT NULL UNIQUE,
-                security_question1 TEXT NOT NULL,
-                security_answer1_hash TEXT NOT NULL,
-                security_question2 TEXT NOT NULL,
-                security_answer2_hash TEXT NOT NULL,
-                security_question3 TEXT,
-                security_answer3_hash TEXT
-            )
-        ''')
-        db.commit()  
-    except sqlite3.Error as e:
-        print(f"Error creating admin table: {str(e)}")
-        db.rollback()
-    finally:
-        db.close()
-
 
 @db_blueprint.teardown_app_request
 def close_db(error):
@@ -59,10 +35,6 @@ def close_db(error):
 def index():
     return render_template('index.html')
 
-if __name__ == '__main__':
-    with app.app_context():
-        create_admin_table()  
-    app.run(debug=True)
 
 # Login route
 @app.route('/login', methods=['GET', 'POST'])
