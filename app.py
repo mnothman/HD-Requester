@@ -6,7 +6,7 @@ import re, sqlite3
 app = Flask(__name__)
 
 app.secret_key = 'key'
-
+ 
 #Test Login
 ph = PasswordHasher()
 hashed_password = ph.hash('admin123')
