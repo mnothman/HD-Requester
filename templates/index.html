@@ -896,7 +896,6 @@
 					return null;
 				}
 
-				console.log("dataObject: ", dataObject);
 				return dataObject;
 			} // end parseTextInput
 
@@ -1009,6 +1008,7 @@
 											</div>`
 										;
 									showModal({ title: 'Check-in Error: ' + response.message }, content);
+									
 								}
 								else if (response.error == 'not_in_inventory') {
 									console.log("Error: " + response.message); // Handle other errors
@@ -1054,13 +1054,30 @@
 													<div style="flex: 1; padding: 8px;">Brand</div>
 													<div style="flex: 1; padding: 8px;">Model</div>
 													<div style="flex: 1; padding: 8px;">Location</div>
+													<div style="flex: 1; padding: 8px;">Part SN</div>
 												</div>
 												
 												<!-- Data Row -->
 												<div style="display: flex;">
-													<div style="flex: 1; padding: 8px;">${partData.Type}</div>
-													<div style="flex: 1; padding: 8px;">${partData.Capacity}</div>
-													<div style="flex: 1; padding: 8px;">${partData.Size}</div>
+
+													<!--
+														<div style="flex: 1; padding: 8px;" id="iType">${partData.Type}</div>
+														<div style="flex: 1; padding: 8px;">${partData.Capacity}</div>
+														<div style="flex: 1; padding: 8px;">${partData.Size}</div>
+													-->
+
+													<div style="flex: 1; padding: 8px;">
+														<input type="text" id="iType" name="Type" style="width: 100%;" value="${partData.Type}"/>
+													</div>
+
+													<div style="flex: 1; padding: 8px;">
+														<input type="text" id="iCapacity" name="Type" style="width: 100%;" value="${partData.Capacity}"/>
+													</div>
+
+													<div style="flex: 1; padding: 8px;">
+														<input type="text" id="ddSize" name="Type" style="width: 100%;" value="${partData.Size}"/>
+													</div>
+
 													<div style="flex: 1; padding: 8px;">
 														<input type="text" id="iSpeed" name="Speed" style="width: 100%;" />
 													</div>
@@ -1073,11 +1090,42 @@
 													<div style="flex: 1; padding: 8px;">
 														<input type="text" id="iLocation" name="Location" style="width: 100%;" />
 													</div>
+
+													<div style="flex: 1; padding: 8px;">
+														<input type="text" id="iPart_sn" name="Part SN" style="width: 100%;" value="${partSn}"/>
+													</div>
+
+													
 												</div>
+
+												
 											</div>
+
+											<div style="margin-top: 10px;">
+												<button type="button" id="add_btn" class="btn btn-primary mb-2">Add Part</button>	
+											</div>
+
+											
 
 									`;
 									showModal({ title: 'Check-in Error: ' + response.message }, content);
+
+									// Handle form submission - Add The Part
+									$('#add_btn').click(function () {
+										const partData = {
+											Type: $('#iType').val(),
+											Capacity: $('#iCapacity').val(),
+											Size: $('#ddSize').val(),
+											Speed: $('#iSpeed').val(),
+											Brand: $('#iBrand').val(),
+											Model: $('#iModel').val(),
+											Location: $('#iLocation').val(),
+											Part_sn: $('#iPart_sn').val()
+										};
+
+										console.log(partData);
+										submitPart(partData);
+									});
 								}
 							}
 						},
