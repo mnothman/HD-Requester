@@ -49,7 +49,7 @@ def login():
         else:
              # If login fails, flash a message and render login again
             flash('Invalid credentials, please try again.')
-            return redirect(url_for('login'))  # Redirect back to login page
+            return redirect(url_for('login'))     #Redirect back to login page
         
 
     # If GET request, render login page
