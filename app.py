@@ -56,7 +56,7 @@ def login():
         except Exception as e:
             # This captures any exception, which could include verification failure or other issues
             flash('Invalid credentials, please try again')
-            return redirect(url_for('login'))
+            return redirect(url_for('login')) #redirect to login page once more
 
     # If GET request, render the login page
     return render_template('adminLogin.html')
