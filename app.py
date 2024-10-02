@@ -145,10 +145,13 @@ def reset_password():
 
 
 @app.route('/get_parts', methods=['POST'])
-def get_parts(): #fetch parts from search
-    search_type = request.form.get('searchType', None)
-    parts = get_all_parts(search_type)
-    return jsonify([dict(part) for part in parts])
+def get_parts():
+    parts = get_all_parts()  # Fetch all parts
+    return jsonify({
+        'status': 'success',
+        'data': [dict(part) for part in parts]  # Convert to list of dictionaries
+    })
+
 
 def get_all_parts(search_type=None):
     db = get_db()
