@@ -364,14 +364,9 @@
 					</thead>
 
 					<tbody id="dynamicPartsTableBody">
-	
+						<!-- Dynamic rows will be inserted here -->
 					</tbody>
 
-					<!--
-						<tbody id="partsTableBody">
-							
-						</tbody>
-					-->
 				</table>
 				<!-- END DataTables -->
 
@@ -618,205 +613,38 @@
    				 return value !== null && value !== undefined ? value : '-';
 			}
 
-
-			const test = '';
-
 			function fetchAndDisplayParts() {
-				$.ajax({
-					url: '/get_parts',
-					type: 'POST',
-					dataType: 'json',
-					success: function (data) {
+					$.ajax({
+						url: '/get_parts',
+						type: 'POST',
+						dataType: 'json',
+						success: function (data) {
+							console.log(data); // Optional: just to check the data structure in the console
 
-						/* OLD
-						var tableBody = $('#partsTableBody');
-						tableBody.empty(); // Clear existing rows
-						$.each(data, function (index, part) {
-							var rowClass = (index % 2 === 0) ? 'odd-row' : 'even-row';
-							tableBody.append('<tr class="' + rowClass + '">' +
+							// Use let to select the table body with the ID 'dynamicPartsTableBody'
+							let dynamicPartsTable = $('#dynamicPartsTableBody');
+							dynamicPartsTable.empty(); // Clear previous data if needed
 
+							// Loop through the array of parts
+							data.forEach(function (part) {
+								let row = $('<tr></tr>'); // Create a new table row
 
-								'<td>' + formatValue(part.Type) + '</td>' +
-                    			'<td>' + formatValue(part.Capacity) + '</td>' +
-                    			'<td>' + formatValue(part.Size) + '</td>' +
-                   				'<td>' + formatValue(part.Speed) + '</td>' +
-                    			'<td>' + formatValue(part.Brand) + '</td>' +
-                    			'<td>' + formatValue(part.Model) + '</td>' +
-                    			'<td>' + formatValue(part.Location) + '</td>' +<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-                    			'<td>' + formatValue(part.Part_sn) + '</td>'
+								// For each key-value pair in the object, create a table cell
+								for (let key in part) {
+									if (part.hasOwnProperty(key)) {
+										row.append('<td>' + part[key] + '</td>'); // Add the value inside a <td> tag
+									}
+								}
+
+								console.log(row);
 								
-								+
-                    			'</tr>');
-						});
-						*/
-
-						let dynamicPartsTable = $('#dynamicPartsTableBody');
-						//dynamicPartsTable.empty();
-
-						/*$.each(data, function (index, part) {
-							var rowClass = (index % 2 === 0) ? 'odd-row' : 'even-row';
-							dynamicPartsTable.append(
-
-								
-									'<tr class="' + rowClass + '">' +
-										`<td>${part.Type}</td>` +
-										`<td>${part.Capacity}</td>` +
-										`<td>${part.Size}</td>` +
-										`<td>${part.Speed}</td>` +
-										`<td>${part.Brand}</td>` +
-										`<td>${part.Model}</td>` +
-										`<td>${part.Location}</td>` +
-										`<td>${part.Part_sn}</td>` +
-									'</tr>'
-								
-							)
-						});*/
-
-							dynamicPartsTable.append(
-
-				
-							'<tr>' + 
-								'<td>1</td>' +
-								'<td>2</td>' +
-								'<td>3</td>' +
-								'<td>4</td>' +
-								'<td>5</td>' +
-								'<td>6</td>' +
-								'<td>7</td>' +
-								'<td>8</td>' +
-							'</tr>'
-
-							+ 
-							'<tr>' + 
-								'<td>2</td>' +
-								'<td>2</td>' +
-								'<td>3</td>' +
-								'<td>4</td>' +
-								'<td>5</td>' +
-								'<td>6</td>' +
-								'<td>7</td>' +
-								'<td>8</td>' +
-							'</tr>'
-
-							+ 
-							'<tr>' + 
-								'<td>3</td>' +
-								'<td>2</td>' +
-								'<td>3</td>' +
-								'<td>4</td>' +
-								'<td>5</td>' +
-								'<td>6</td>' +
-								'<td>7</td>' +
-								'<td>8</td>' +
-							'</tr>'
-
-							+ 
-							'<tr>' + 
-								'<td>4</td>' +
-								'<td>2</td>' +
-								'<td>3</td>' +
-								'<td>4</td>' +
-								'<td>5</td>' +
-								'<td>6</td>' +
-								'<td>7</td>' +
-								'<td>8</td>' +
-							'</tr>'
-
-							+ 
-							'<tr>' + 
-								'<td>5</td>' +
-								'<td>2</td>' +
-								'<td>3</td>' +
-								'<td>4</td>' +
-								'<td>5</td>' +
-								'<td>6</td>' +
-								'<td>7</td>' +
-								'<td>8</td>' +
-							'</tr>'
-
-							+ 
-							'<tr>' + 
-								'<td>6</td>' +
-								'<td>2</td>' +
-								'<td>3</td>' +
-								'<td>4</td>' +
-								'<td>5</td>' +
-								'<td>6</td>' +
-								'<td>7</td>' +
-								'<td>8</td>' +
-							'</tr>'
-
-							+ 
-							'<tr>' + 
-								'<td>7</td>' +
-								'<td>2</td>' +
-								'<td>3</td>' +
-								'<td>4</td>' +
-								'<td>5</td>' +
-								'<td>6</td>' +
-								'<td>7</td>' +
-								'<td>8</td>' +
-							'</tr>'
-
-							+ 
-							'<tr>' + 
-								'<td>8</td>' +
-								'<td>2</td>' +
-								'<td>3</td>' +
-								'<td>4</td>' +
-								'<td>5</td>' +
-								'<td>6</td>' +
-								'<td>7</td>' +
-								'<td>8</td>' +
-							'</tr>'+ 
-							'<tr>' + 
-								'<td>9</td>' +
-								'<td>2</td>' +
-								'<td>3</td>' +
-								'<td>4</td>' +
-								'<td>5</td>' +
-								'<td>6</td>' +
-								'<td>7</td>' +
-								'<td>8</td>' +
-							'</tr>'+ 
-							'<tr>' + 
-								'<td>10</td>' +
-								'<td>2</td>' +
-								'<td>3</td>' +
-								'<td>4</td>' +
-								'<td>5</td>' +
-								'<td>6</td>' +
-								'<td>7</td>' +
-								'<td>8</td>' +
-							'</tr>'+ 
-							'<tr>' + 
-								'<td>11</td>' +
-								'<td>2</td>' +
-								'<td>3</td>' +
-								'<td>4</td>' +
-								'<td>5</td>' +
-								'<td>6</td>' +
-								'<td>7</td>' +
-								'<td>8</td>' +
-							'</tr>'+ 
-							'<tr>' + 
-								'<td>2</td>' +
-								'<td>2</td>' +
-								'<td>3</td>' +
-								'<td>4</td>' +
-								'<td>5</td>' +
-								'<td>6</td>' +
-								'<td>7</td>' +
-								'<td>8</td>' +
-							'</tr>'
-								
-							)
-
-					},
-					error: function (xhr, status, error) {
-						console.error("Error fetching parts data: " + error);
-					}
-				});
+								dynamicPartsTable.append(row); // Add the row to the table body
+							});
+						},
+						error: function (xhr, status, error) {
+							console.error('Error fetching parts:', error);
+						}
+					});
 			} // end fetchAndDisplayParts
 
 			// Modal
