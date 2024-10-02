@@ -1,14 +1,15 @@
 from flask import Blueprint, current_app, Flask, g, jsonify, render_template, request, redirect, url_for, session, flash
 from datetime import datetime
+from argon2 import PasswordHasher
 import re, sqlite3
 
 app = Flask(__name__)
 
 app.secret_key = 'key'
-
-# Test login
-USERNAME = 'admin'
-PASSWORD = 'admin123'
+ 
+#Test Login
+ph = PasswordHasher()
+hashed_password = ph.hash('admin123')
 
 db_blueprint = Blueprint('db', __name__)
 DATABASE = 'refresh.db'
@@ -43,17 +44,23 @@ def login():
         password = request.form.get('password')
 
         # Validate login credentials
-        if username == USERNAME and password == PASSWORD:
-            # If login is successful, redirect to the admin dashboard
-            return redirect(url_for('admin_dashboard'))
-        else:
-             # If login fails, flash a message and render login again
-            flash('Invalid credentials, please try again.')
-            return redirect(url_for('login'))     #Redirect back to login page
-        
+        try: 
+            # Assuming hashed_password is defined elsewhere securely
+            if username == 'admin' and ph.verify(hashed_password, password):
+                # If login is successful, redirect to the admin dashboard
+                return redirect(url_for('admin_dashboard'))
+            else:
+                # If login fails, flash a message and render login again
+                flash('Invalid credentials, please try again.')
+                return redirect(url_for('login'))  # Redirect back to the login page
+        except Exception as e:
+            # This captures any exception, which could include verification failure or other issues
+            flash('Invalid credentials, please try again')
+            return redirect(url_for('login'))
 
-    # If GET request, render login page
+    # If GET request, render the login page
     return render_template('adminLogin.html')
+
 
 # Dashboard route
 @app.route('/dashboard')
@@ -86,6 +93,55 @@ SELECT l.Date_time,
     parts = db.execute(query).fetchall()
     return parts
 
+# Recover Password route Step 1
+@app.route('/recover_password', methods=['GET', 'POST'])
+def recover_password():
+    if request.method == 'POST':
+        # Handle the form submission (POST)
+        return check_answers()  # This function should handle form validation and verification
+    else:
+        # Render the form (GET)
+        return render_template('recover-password.html')
+
+# Security Question Check Step 2
+@app.route('/check_answers', methods=['POST'])
+def check_answers():
+    answer1 = request.form['answer1']
+    answer2 = request.form['answer2']
+    answer3 = request.form['answer3']
+
+    # Simulated logic to check answers, replace with actual DB logic
+    stored_answers = {
+        'answer1': 'Kings',
+        'answer2': 'Pet',
+        'answer3': 'Hawaii'
+    }
+
+    if answer1 == stored_answers['answer1'] and answer2 == stored_answers['answer2'] and answer3 == stored_answers['answer3']:
+        return jsonify({'success': True, 'message': 'Answers correct, please set a new password.'})
+    else:
+        return jsonify({'success': False, 'message': 'Incorrect answers, please try again.'})
+
+# Reset Password Endpoint Step 3
+@app.route('/reset_password', methods=['POST'])
+def reset_password():
+    new_password = request.form['new_password']
+
+    # Update the Admin table with the new password in plain text
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        # Update the password in the Admin table (assuming only one admin user)
+        cursor.execute("UPDATE Admin SET password = ? WHERE username = ?", (new_password, 'admin'))  # Replace 0 with actual Admin ID if necessary
+        conn.commit()
+
+        return jsonify({'success': True, 'message': 'Password has been updated successfully.'})
+    except sqlite3.Error as e:
+        # If an error occurs, rollback the transaction and send an error message
+        conn.rollback()
+        return jsonify({'success': False, 'message': 'An error occurred while updating the password: ' + str(e)})
+    finally:
+        conn.close()
 
 
 @app.route('/get_parts', methods=['POST'])
@@ -124,16 +180,9 @@ def get_inventory_db():
             COUNT(*) AS quantity
         FROM
             Part p
-        JOIN
-            Part_log pl ON p.Part_sn = pl.Part_sn
-        WHERE
-            pl.Part_status = 'in'
         GROUP BY
             p.Type,
             p.Size
-        ORDER BY
-            p.Type,
-            p.Size;
     '''
     try:
         # Execute the query and fetch all results
@@ -142,27 +191,30 @@ def get_inventory_db():
     except sqlite3.Error as e:
         raise RuntimeError(f"Database error: {str(e)}")
 
-@app.route('/get_unique_parts', methods=['GET'])
-def get_unique_parts():
-    db = get_db()
-    query = 'SELECT DISTINCT Type FROM Part ORDER BY Type'
-    try:
-        result = db.execute(query).fetchall()
-        names = [row['Type'] for row in result]
-        return jsonify(names)
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/get_part_capacities', methods=['GET'])
 def get_part_capacities():
-    name = request.args.get('name')
+    type = request.args.get('type')
+    size = request.args.get('size')
     db = get_db()
     query = '''
         SELECT DISTINCT Capacity FROM Part
         WHERE Type = ?
     '''
+    if size == "null":
+        query = '''
+            SELECT DISTINCT Capacity FROM Part
+            WHERE Type = ? AND Size IS NULL
+        '''
+        params = (type, )
+    else:
+        query = '''
+            SELECT DISTINCT Capacity FROM Part
+            WHERE Type = ? AND Size = ?
+        '''
+        params = (type, size)
     try:
-        result = db.execute(query, (name,)).fetchall()
+        result = db.execute(query, params).fetchall()
         capacities = [row['Capacity'] for row in result]
         return jsonify(capacities)
     except Exception as e:
@@ -406,55 +458,6 @@ def update_part_status():
         conn.close()
 
 
-@app.route('/reset_log_tables', methods=['POST'])
-def reset_log_tables():
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    try:
-        # Dropping tables
-        cursor.execute("DROP TABLE IF EXISTS Log;")
-        cursor.execute("DROP TABLE IF EXISTS Part_log;")
-        
-        # Recreating tables
-        cursor.execute('''
-            CREATE TABLE "Part_log" (
-                "Part_sn" TEXT NOT NULL UNIQUE,
-                "Part_status" TEXT NOT NULL CHECK("Part_status" IN ('in', 'out', 'deleted')),
-                FOREIGN KEY("Part_sn") REFERENCES "Part"("Part_sn")
-            );
-        ''')
-        cursor.execute('''
-            CREATE TABLE "Log" (
-                "TID" TEXT NOT NULL,
-                "Unit_sn" TEXT NOT NULL,
-                "Part_sn" TEXT NOT NULL,
-                "Part_status" TEXT NOT NULL,
-                "Date_time" TEXT,
-                CONSTRAINT "fk_l_status" FOREIGN KEY("Part_status") REFERENCES "Part_log"("Part_status"),
-                CONSTRAINT "fk_l_unitsn" FOREIGN KEY("Unit_sn") REFERENCES "Part_log"("Unit_sn"),
-                CONSTRAINT "fk_l_partsn" FOREIGN KEY("Part_sn") REFERENCES "Part_log"("Part_sn"),
-                CONSTRAINT "pk_l_datetime_tid" PRIMARY KEY("Date_time","TID")
-            );
-        ''')
-
-        # Inserting initial data into Part_log
-        parts_data = [
-            ('00000001', 'in'), ('00000002', 'in'), ('00000003', 'in'),
-            ('00000004', 'in'), ('00000005', 'in'), ('00000006', 'in'),
-            ('00000007', 'in'), ('00000008', 'in'), ('00000009', 'in'),
-            ('00000010', 'in'), ('00000022', 'out')
-        ]
-        cursor.executemany('INSERT INTO Part_log (Part_sn, Part_status) VALUES (?, ?);', parts_data)
-
-        conn.commit()  # Commit the changes
-        return jsonify({'status': 'success', 'message': 'Database has been reset successfully.'})
-    except sqlite3.Error as e:
-        conn.rollback()  # Roll back any changes if something goes wrong
-        return jsonify({'status': 'error', 'message': str(e)})
-    finally:
-        conn.close()
-
 @app.route('/automated_test')
 def automated_test():
     """
@@ -499,5 +502,3 @@ def simulate_text_area_input(user_input):
 if __name__ == '__main__':
     # app.run(port=8000)
     app.run(debug=True)
-
-#test blank line

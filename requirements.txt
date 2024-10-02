@@ -1,0 +1,4 @@
+Python==3.6.x
+Flask==2.x.x
+sqlite3==3.45.x
+argon2-cffi==21.x.x

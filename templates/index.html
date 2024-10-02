@@ -10,7 +10,7 @@
 	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 	<!-- needed for current modal -->
 	<link href="https://pro.fontawesome.com/releases/v5.10.1/css/all.css" rel="stylesheet">
-
+ 
 
 	<style>
 		* {
@@ -344,19 +344,6 @@
                             </button>
                         </div>
                     </div>
-				</div><!-- end row -->
-				<div class="row">
-					<div id="demo-buttons" style="display:none;">
-						<button id="btnDemoCheckin" type="button" class="btn">Check-in Demo</button>
-						<button id="btnDemoCheckinNotSeenBefore" type="button" class="btn">Check-In Demo Not Seen
-							b4</button>
-						<button id="btnDemoCheckinMismatch" type="button" class="btn">Check-in Demo Mismatch SN and
-							Specs</button>
-						<button id="btnDemoCheckout" type="button" class="btn">Check-out Demo</button>
-						<button id="btnDemoCheckoutMismatch" type="button" class="btn">Check-out Demo Mismatch SN and
-							Specs</button>
-						<button id="btnResetLogTables" type="button" class="btn">Reset Log Tables</button>
-					</div>
 				</div><!-- end row -->
 				<table id="partsTable" class="table table-striped">
 					<thead>
@@ -909,7 +896,6 @@
 					return null;
 				}
 
-				console.log("dataObject: ", dataObject);
 				return dataObject;
 			} // end parseTextInput
 
@@ -1022,9 +1008,26 @@
 											</div>`
 										;
 									showModal({ title: 'Check-in Error: ' + response.message }, content);
+									
 								}
 								else if (response.error == 'not_in_inventory') {
 									console.log("Error: " + response.message); // Handle other errors
+
+									let speedField = ''; // Speed field isn't needed for HD or SSD
+
+									if (!["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type)) {  // Speed field isn't needed for HD or SSD
+										speedField = `
+											<div style="flex: 1; padding: 8px;">Speed</div>
+										`;
+									}
+
+									const speedInput = !["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type) ? `
+										<div style="flex: 1; padding: 8px;">
+											<input type="text" id="iSpeed" name="Speed" style="width: 100%;" />
+										</div>
+									` : '';
+
+
 									const content = `
 									<!--
 										<p><strong>That part has never been added to inventory.<strong></p>
@@ -1036,8 +1039,8 @@
 										  <th scope="col">&nbsp;Type</th>
 										  <th scope="col">Capacity&nbsp;</th>
 										  <th scope="col">Size&nbsp;</th>
-										  <th scope="col">Speed&nbsp;</th>
-										  <th scope="col">Brand&nbsp;</th>
+ 										  ${speedField}
+ 										  <th scope="col">Brand&nbsp;</th>
 										  <th scope="col">Model&nbsp;</th>
 										  <th scope="col">Location&nbsp;</th>
 										</tr>
@@ -1063,19 +1066,35 @@
 													<div style="flex: 1; padding: 8px;">Type</div>
 													<div style="flex: 1; padding: 8px;">Capacity</div>
 													<div style="flex: 1; padding: 8px;">Size</div>
-													<div style="flex: 1; padding: 8px;">Speed</div>
+ 										 			 ${speedField}
 													<div style="flex: 1; padding: 8px;">Brand</div>
 													<div style="flex: 1; padding: 8px;">Model</div>
 													<div style="flex: 1; padding: 8px;">Location</div>
+													<div style="flex: 1; padding: 8px;">Part SN</div>
 												</div>
 												
 												<!-- Data Row -->
 												<div style="display: flex;">
-													<div style="flex: 1; padding: 8px;">${partData.Type}</div>
-													<div style="flex: 1; padding: 8px;">${partData.Capacity}</div>
-													<div style="flex: 1; padding: 8px;">${partData.Size}</div>
+
+													<!--
+														<div style="flex: 1; padding: 8px;" id="iType">${partData.Type}</div>
+														<div style="flex: 1; padding: 8px;">${partData.Capacity}</div>
+														<div style="flex: 1; padding: 8px;">${partData.Size}</div>
+													-->
+
 													<div style="flex: 1; padding: 8px;">
-														<input type="text" id="iSpeed" name="Speed" style="width: 100%;" />
+														<input type="text" id="iType" name="Type" style="width: 100%;" value="${partData.Type}"/>
+													</div>
+
+													<div style="flex: 1; padding: 8px;">
+														<input type="text" id="iCapacity" name="Type" style="width: 100%;" value="${partData.Capacity}"/>
+													</div>
+
+													<div style="flex: 1; padding: 8px;">
+														<input type="text" id="ddSize" name="Type" style="width: 100%;" value="${partData.Size}"/>
+													</div>
+													<div
+													${speedInput}
 													</div>
 													<div style="flex: 1; padding: 8px;">
 														<input type="text" id="iBrand" name="Brand" style="width: 100%;" />
@@ -1086,11 +1105,42 @@
 													<div style="flex: 1; padding: 8px;">
 														<input type="text" id="iLocation" name="Location" style="width: 100%;" />
 													</div>
+
+													<div style="flex: 1; padding: 8px;">
+														<input type="text" id="iPart_sn" name="Part SN" style="width: 100%;" value="${partSn}"/>
+													</div>
+
+													
 												</div>
+
+												
 											</div>
+
+											<div style="margin-top: 10px;">
+												<button type="button" id="add_btn" class="btn btn-primary mb-2">Add Part</button>	
+											</div>
+
+											
 
 									`;
 									showModal({ title: 'Check-in Error: ' + response.message }, content);
+
+									// Handle form submission - Add The Part
+									$('#add_btn').click(function () {
+										const partData = {
+											Type: $('#iType').val(),
+											Capacity: $('#iCapacity').val(),
+											Size: $('#ddSize').val(),
+											Speed: $('#iSpeed').val(),
+											Brand: $('#iBrand').val(),
+											Model: $('#iModel').val(),
+											Location: $('#iLocation').val(),
+											Part_sn: $('#iPart_sn').val()
+										};
+
+										console.log(partData);
+										submitPart(partData);
+									});
 								}
 							}
 						},
