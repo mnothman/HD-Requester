@@ -10,8 +10,6 @@
 	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 	<!-- needed for current modal -->
 	<link href="https://pro.fontawesome.com/releases/v5.10.1/css/all.css" rel="stylesheet">
-
-	<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
  
 
 	<style>
@@ -305,6 +303,8 @@
 			/* Add padding to ensure text does not overlap the icon */
 		}
 	</style>
+	<!-- DataTables CSS for Sorting and Searching -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
 </head>
 
 <body>
@@ -347,52 +347,37 @@
                         </div>
                     </div>
 				</div><!-- end row -->
-
-				<!-- Initialize DataTables -->
-				<table id="dynamicPartsTable" class="display">
-					<thead>
-						<tr>
-							<th>Type</th>
-							<th>Capacity</th>
-							<th>Size</th>
-							<th>Speed</th>
-							<th>Brand</th>
-							<th>Model</th>
-							<th>Location</th>
-							<th>Serial Number</th>
-						</tr>
-					</thead>
-
-					<tbody id="dynamicPartsTableBody">
-						<!-- Dynamic rows will be inserted here -->
-					</tbody>
-
-				</table>
-				<!-- END DataTables -->
-
-				<!--
-				<table id="partsTable" class="table table-striped">
-					<thead>
-						<tr>
-							<th class="sortable-column">Type</th>
-							<th class="sortable-column">Capacity</th>
-							<th class="sortable-column">Size</th>
-							<th class="sortable-column">Speed</th>
-							<th class="sortable-column">Brand</th>
-							<th class="sortable-column">Model</th>
-							<th class="sortable-column">Location</th>
-							<th class="sortable-column">Serial Number</th>
-						</tr>
-					</thead>
-				-->
-
-					<!-- Table data will be loaded here via AJAX
-						<tbody id="partsTableBody">
-
+				<!-- Table for displaying records -->
+				<div class="table-container">
+					<table id="partsTable">
+						<thead>
+							<tr>
+								<th>Type</th>
+								<th>Capacity</th>
+								<th>Size</th>
+								<th>Speed</th>
+								<th>Brand</th>
+								<th>Model</th>
+								<th>Location</th>
+								<th>Serial Number</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for part in parts %}
+							<tr>
+								<td>{{ part.type }}</td>
+								<td>{{ part.capacity }}</td>
+								<td>{{ part.size }}</td>
+								<td>{{ part.speed }}</td>
+								<td>{{ part.brand }}</td>
+								<td>{{ part.model }}</td>
+								<td>{{ part.location }}</td>
+								<td>{{ part.part_sn }}</td>
+							</tr>
+							{% endfor %}
 						</tbody>
-					-->
-				</table>
-
+					</table>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -410,16 +395,79 @@
 	</div>
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-	<!-- DataTables JS for Search and Sort -->
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-	<link rel="stylesheet" href="https://cdn.datatables.net/2.1.7/css/dataTables.dataTables.css" />
-	<script src="https://cdn.datatables.net/2.1.7/js/dataTables.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
 		integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
 		crossorigin="anonymous"></script>
-	<script>
 
+	<!-- DataTables JS for Search and Sort -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+			$('#partsTable').DataTable({
+				"ajax": {
+					"url": "/get_parts",
+					"type": "POST",
+					"dataSrc": "data"
+				},
+				"columns": [
+					{ "data": "Type" },
+					{ "data": "Capacity" },
+					{ "data": "Size" },
+					{ "data": "Speed" },
+					{ "data": "Brand" },
+					{ "data": "Model" },
+					{ "data": "Location" },
+					{ "data": "Part_sn" }  // Serial number column
+				],
+				"order": [[7, "asc"]]  // Sort by the Serial Number (Part_sn) column (index 7) in ascending order
+			});
+		});
+
+
+
+    // Function to update the dashboard table with new records
+    function updateDashboard(data) {
+        const tableBody = document.querySelector('#partsTable tbody');
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td>${data.Type}</td>
+            <td>${data.Capacity}</td>
+            <td>${data.Size}</td>
+            <td>${data.Speed}</td>
+            <td>${data.Brand}</td>
+            <td>${data.Model}</td>
+			<td>${data.Location}</td>
+            <td>${data.Part_sn}</td>
+        `;
+        tableBody.appendChild(newRow);
+
+        // Reinitialize DataTables to recognize the new row
+        $('#partsTable').DataTable().row.add($(newRow)).draw();
+    }
+
+  
+    function checkPartStatus(data) {
+        fetch('/get_parts', {
+            method: 'GET',
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                updateDashboard(data.data);
+            } else {
+                console.error(data.message);
+            }
+        });
+    }
+  
+    </script>
+
+	<script>
 		$(document).ready(function () {
             fetchAndDisplayParts();
             setupRowClick();
@@ -614,37 +662,31 @@
 			}
 
 			function fetchAndDisplayParts() {
-					$.ajax({
-						url: '/get_parts',
-						type: 'POST',
-						dataType: 'json',
-						success: function (data) {
-							console.log(data); // Optional: just to check the data structure in the console
-
-							// Use let to select the table body with the ID 'dynamicPartsTableBody'
-							let dynamicPartsTable = $('#dynamicPartsTableBody');
-							dynamicPartsTable.empty(); // Clear previous data if needed
-
-							// Loop through the array of parts
-							data.forEach(function (part) {
-								let row = $('<tr></tr>'); // Create a new table row
-
-								// For each key-value pair in the object, create a table cell
-								for (let key in part) {
-									if (part.hasOwnProperty(key)) {
-										row.append('<td>' + part[key] + '</td>'); // Add the value inside a <td> tag
-									}
-								}
-
-								console.log(row);
-								
-								dynamicPartsTable.append(row); // Add the row to the table body
-							});
-						},
-						error: function (xhr, status, error) {
-							console.error('Error fetching parts:', error);
-						}
-					});
+				$.ajax({
+					url: '/get_parts',
+					type: 'POST',
+					dataType: 'json',
+					success: function (data) {
+						var tableBody = $('#partsTableBody');
+						tableBody.empty(); // Clear existing rows
+						$.each(data, function (index, part) {
+							var rowClass = (index % 2 === 0) ? 'odd-row' : 'even-row';
+							tableBody.append('<tr class="' + rowClass + '">' +
+								'<td>' + formatValue(part.Type) + '</td>' +
+                    			'<td>' + formatValue(part.Capacity) + '</td>' +
+                    			'<td>' + formatValue(part.Size) + '</td>' +
+                   				'<td>' + formatValue(part.Speed) + '</td>' +
+                    			'<td>' + formatValue(part.Brand) + '</td>' +
+                    			'<td>' + formatValue(part.Model) + '</td>' +
+                    			'<td>' + formatValue(part.Location) + '</td>' +
+                    			'<td>' + formatValue(part.Part_sn) + '</td>' +
+                    			'</tr>');
+						});
+					},
+					error: function (xhr, status, error) {
+						console.error("Error fetching parts data: " + error);
+					}
+				});
 			} // end fetchAndDisplayParts
 
 			// Modal
@@ -1054,6 +1096,22 @@
 								}
 								else if (response.error == 'not_in_inventory') {
 									console.log("Error: " + response.message); // Handle other errors
+
+									let speedField = ''; // Speed field isn't needed for HD or SSD
+
+									if (!["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type)) {  // Speed field isn't needed for HD or SSD
+										speedField = `
+											<div style="flex: 1; padding: 8px;">Speed</div>
+										`;
+									}
+
+									const speedInput = !["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type) ? `
+										<div style="flex: 1; padding: 8px;">
+											<input type="text" id="iSpeed" name="Speed" style="width: 100%;" />
+										</div>
+									` : '';
+
+
 									const content = `
 									<!--
 										<p><strong>That part has never been added to inventory.<strong></p>
@@ -1065,8 +1123,8 @@
 										  <th scope="col">&nbsp;Type</th>
 										  <th scope="col">Capacity&nbsp;</th>
 										  <th scope="col">Size&nbsp;</th>
-										  <th scope="col">Speed&nbsp;</th>
-										  <th scope="col">Brand&nbsp;</th>
+ 										  ${speedField}
+ 										  <th scope="col">Brand&nbsp;</th>
 										  <th scope="col">Model&nbsp;</th>
 										  <th scope="col">Location&nbsp;</th>
 										</tr>
@@ -1092,7 +1150,7 @@
 													<div style="flex: 1; padding: 8px;">Type</div>
 													<div style="flex: 1; padding: 8px;">Capacity</div>
 													<div style="flex: 1; padding: 8px;">Size</div>
-													<div style="flex: 1; padding: 8px;">Speed</div>
+ 										 			 ${speedField}
 													<div style="flex: 1; padding: 8px;">Brand</div>
 													<div style="flex: 1; padding: 8px;">Model</div>
 													<div style="flex: 1; padding: 8px;">Location</div>
@@ -1119,9 +1177,8 @@
 													<div style="flex: 1; padding: 8px;">
 														<input type="text" id="ddSize" name="Type" style="width: 100%;" value="${partData.Size}"/>
 													</div>
-
-													<div style="flex: 1; padding: 8px;">
-														<input type="text" id="iSpeed" name="Speed" style="width: 100%;" />
+													<div
+													${speedInput}
 													</div>
 													<div style="flex: 1; padding: 8px;">
 														<input type="text" id="iBrand" name="Brand" style="width: 100%;" />
@@ -1324,7 +1381,6 @@
 				});
 			} // end resetLogTables
 
-			$('#dynamicPartsTable').DataTable();
 		});
 
 	</script>
