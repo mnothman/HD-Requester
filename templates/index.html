@@ -1012,6 +1012,22 @@
 								}
 								else if (response.error == 'not_in_inventory') {
 									console.log("Error: " + response.message); // Handle other errors
+
+									let speedField = ''; // Speed field isn't needed for HD or SSD
+
+									if (!["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type)) {  // Speed field isn't needed for HD or SSD
+										speedField = `
+											<div style="flex: 1; padding: 8px;">Speed</div>
+										`;
+									}
+
+									const speedInput = !["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type) ? `
+										<div style="flex: 1; padding: 8px;">
+											<input type="text" id="iSpeed" name="Speed" style="width: 100%;" />
+										</div>
+									` : '';
+
+
 									const content = `
 									<!--
 										<p><strong>That part has never been added to inventory.<strong></p>
@@ -1023,8 +1039,8 @@
 										  <th scope="col">&nbsp;Type</th>
 										  <th scope="col">Capacity&nbsp;</th>
 										  <th scope="col">Size&nbsp;</th>
-										  <th scope="col">Speed&nbsp;</th>
-										  <th scope="col">Brand&nbsp;</th>
+ 										  ${speedField}
+ 										  <th scope="col">Brand&nbsp;</th>
 										  <th scope="col">Model&nbsp;</th>
 										  <th scope="col">Location&nbsp;</th>
 										</tr>
@@ -1050,7 +1066,7 @@
 													<div style="flex: 1; padding: 8px;">Type</div>
 													<div style="flex: 1; padding: 8px;">Capacity</div>
 													<div style="flex: 1; padding: 8px;">Size</div>
-													<div style="flex: 1; padding: 8px;">Speed</div>
+ 										 			 ${speedField}
 													<div style="flex: 1; padding: 8px;">Brand</div>
 													<div style="flex: 1; padding: 8px;">Model</div>
 													<div style="flex: 1; padding: 8px;">Location</div>
@@ -1077,9 +1093,8 @@
 													<div style="flex: 1; padding: 8px;">
 														<input type="text" id="ddSize" name="Type" style="width: 100%;" value="${partData.Size}"/>
 													</div>
-
-													<div style="flex: 1; padding: 8px;">
-														<input type="text" id="iSpeed" name="Speed" style="width: 100%;" />
+													<div
+													${speedInput}
 													</div>
 													<div style="flex: 1; padding: 8px;">
 														<input type="text" id="iBrand" name="Brand" style="width: 100%;" />
