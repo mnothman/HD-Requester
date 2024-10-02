@@ -10,6 +10,8 @@
 	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 	<!-- needed for current modal -->
 	<link href="https://pro.fontawesome.com/releases/v5.10.1/css/all.css" rel="stylesheet">
+
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
  
 
 	<style>
@@ -626,7 +628,7 @@
 					dataType: 'json',
 					success: function (data) {
 
-						/*
+						/* OLD
 						var tableBody = $('#partsTableBody');
 						tableBody.empty(); // Clear existing rows
 						$.each(data, function (index, part) {
@@ -640,7 +642,7 @@
                    				'<td>' + formatValue(part.Speed) + '</td>' +
                     			'<td>' + formatValue(part.Brand) + '</td>' +
                     			'<td>' + formatValue(part.Model) + '</td>' +
-                    			'<td>' + formatValue(part.Location) + '</td>' +
+                    			'<td>' + formatValue(part.Location) + '</td>' +<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
                     			'<td>' + formatValue(part.Part_sn) + '</td>'
 								
 								+
@@ -649,25 +651,167 @@
 						*/
 
 						let dynamicPartsTable = $('#dynamicPartsTableBody');
-						dynamicPartsTable.empty();
+						//dynamicPartsTable.empty();
 
-						$.each(data, function (index, part) {
+						/*$.each(data, function (index, part) {
 							var rowClass = (index % 2 === 0) ? 'odd-row' : 'even-row';
 							dynamicPartsTable.append(
-								'<tr class="' + rowClass + '">' +
-									`<td>${part.Type}</td>` +
-									`<td>${part.Capacity}</td>` +
-									`<td>${part.Size}</td>` +
-									`<td>${part.Speed}</td>` +
-									`<td>${part.Brand}</td>` +
-									`<td>${part.Model}</td>` +
-									`<td>${part.Location}</td>` +
-									`<td>${part.Part_sn}</td>` +
-								'</tr>'
-							)
-						});
 
-						console.log(data);
+								
+									'<tr class="' + rowClass + '">' +
+										`<td>${part.Type}</td>` +
+										`<td>${part.Capacity}</td>` +
+										`<td>${part.Size}</td>` +
+										`<td>${part.Speed}</td>` +
+										`<td>${part.Brand}</td>` +
+										`<td>${part.Model}</td>` +
+										`<td>${part.Location}</td>` +
+										`<td>${part.Part_sn}</td>` +
+									'</tr>'
+								
+							)
+						});*/
+
+							dynamicPartsTable.append(
+
+				
+							'<tr>' + 
+								'<td>1</td>' +
+								'<td>2</td>' +
+								'<td>3</td>' +
+								'<td>4</td>' +
+								'<td>5</td>' +
+								'<td>6</td>' +
+								'<td>7</td>' +
+								'<td>8</td>' +
+							'</tr>'
+
+							+ 
+							'<tr>' + 
+								'<td>2</td>' +
+								'<td>2</td>' +
+								'<td>3</td>' +
+								'<td>4</td>' +
+								'<td>5</td>' +
+								'<td>6</td>' +
+								'<td>7</td>' +
+								'<td>8</td>' +
+							'</tr>'
+
+							+ 
+							'<tr>' + 
+								'<td>3</td>' +
+								'<td>2</td>' +
+								'<td>3</td>' +
+								'<td>4</td>' +
+								'<td>5</td>' +
+								'<td>6</td>' +
+								'<td>7</td>' +
+								'<td>8</td>' +
+							'</tr>'
+
+							+ 
+							'<tr>' + 
+								'<td>4</td>' +
+								'<td>2</td>' +
+								'<td>3</td>' +
+								'<td>4</td>' +
+								'<td>5</td>' +
+								'<td>6</td>' +
+								'<td>7</td>' +
+								'<td>8</td>' +
+							'</tr>'
+
+							+ 
+							'<tr>' + 
+								'<td>5</td>' +
+								'<td>2</td>' +
+								'<td>3</td>' +
+								'<td>4</td>' +
+								'<td>5</td>' +
+								'<td>6</td>' +
+								'<td>7</td>' +
+								'<td>8</td>' +
+							'</tr>'
+
+							+ 
+							'<tr>' + 
+								'<td>6</td>' +
+								'<td>2</td>' +
+								'<td>3</td>' +
+								'<td>4</td>' +
+								'<td>5</td>' +
+								'<td>6</td>' +
+								'<td>7</td>' +
+								'<td>8</td>' +
+							'</tr>'
+
+							+ 
+							'<tr>' + 
+								'<td>7</td>' +
+								'<td>2</td>' +
+								'<td>3</td>' +
+								'<td>4</td>' +
+								'<td>5</td>' +
+								'<td>6</td>' +
+								'<td>7</td>' +
+								'<td>8</td>' +
+							'</tr>'
+
+							+ 
+							'<tr>' + 
+								'<td>8</td>' +
+								'<td>2</td>' +
+								'<td>3</td>' +
+								'<td>4</td>' +
+								'<td>5</td>' +
+								'<td>6</td>' +
+								'<td>7</td>' +
+								'<td>8</td>' +
+							'</tr>'+ 
+							'<tr>' + 
+								'<td>9</td>' +
+								'<td>2</td>' +
+								'<td>3</td>' +
+								'<td>4</td>' +
+								'<td>5</td>' +
+								'<td>6</td>' +
+								'<td>7</td>' +
+								'<td>8</td>' +
+							'</tr>'+ 
+							'<tr>' + 
+								'<td>10</td>' +
+								'<td>2</td>' +
+								'<td>3</td>' +
+								'<td>4</td>' +
+								'<td>5</td>' +
+								'<td>6</td>' +
+								'<td>7</td>' +
+								'<td>8</td>' +
+							'</tr>'+ 
+							'<tr>' + 
+								'<td>11</td>' +
+								'<td>2</td>' +
+								'<td>3</td>' +
+								'<td>4</td>' +
+								'<td>5</td>' +
+								'<td>6</td>' +
+								'<td>7</td>' +
+								'<td>8</td>' +
+							'</tr>'+ 
+							'<tr>' + 
+								'<td>2</td>' +
+								'<td>2</td>' +
+								'<td>3</td>' +
+								'<td>4</td>' +
+								'<td>5</td>' +
+								'<td>6</td>' +
+								'<td>7</td>' +
+								'<td>8</td>' +
+							'</tr>'
+								
+							)
+
 					},
 					error: function (xhr, status, error) {
 						console.error("Error fetching parts data: " + error);
