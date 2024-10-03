@@ -1,0 +1,289 @@
+* {
+	margin: 0px;
+	padding: 0px;
+	box-sizing: border-box;
+	font-family: sans-serif;
+
+}
+
+nav {
+	width: 100%;
+	height: 75px;
+	background-color: rgb(26, 107, 30, .9);
+	color: black;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0px 50px;
+	top: 0;
+}
+
+.search form {
+	background-color: white;
+	/* set background color for the search bar */
+	padding: 2px;
+	border: 1px solid black;
+	border-radius: 30px;
+	/* adjust border-radius to make the search bar more elongated */
+	margin-bottom: 20px;
+	margin-top: 20px;
+	margin-left: auto;
+	width: 300px;
+	/* set width for demonstration */
+	display: flex;
+	/* align input and button horizontally */
+	align-items: center;
+	/* center items vertically */
+}
+
+.search input {
+	flex: 1;
+	/* take up remaining space */
+	padding: 3px 8px;
+	outline: none;
+	font-size: 14px;
+	border-radius: 30px;
+}
+
+.search input:hover {
+	border: 1px solid #7babe2;
+}
+
+.search button {
+	background-color: #FFF;
+	color: black;
+	outline: none;
+	padding: 0px 10px;
+	border-radius: 20px;
+	border: solid 0px #FFF;
+	cursor: pointer;
+}
+
+#clearButton {
+	display: none;
+	position: absolute;
+	right: 4px;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 1000;
+	font-size: 1.3em;
+}
+
+.adminLogin button {
+	color: black;
+	font-size: 14px;
+	border: none;
+	outline: black;
+	margin-left: auto;
+	padding: 0px 10px;
+	border-radius: 20px;
+	cursor: pointer;
+}
+
+#btn-group-inout {
+	display: block;
+}
+
+#btn-group-inout .btn {
+	width: 50%;
+	padding: 10px 0px;
+	margin: 10px 0px;
+	box-sizing: border-box;
+	border: 1px solid black;
+	font-size: 20px;
+	float: left;
+}
+
+.btn-primary {
+	background-color: rgb(26, 107, 30);
+	/* green */
+}
+
+.btn-secondary {
+	background-color: rgb(214, 214, 214);
+	/* light grey*/
+	color: rgb(0, 0, 0);
+}
+
+.btn-check:checked+.btn {
+	background-color: rgb(26, 107, 30);
+	color: rgb(255, 255, 255)
+}
+
+.btn-active {
+	background-color: #007bff;
+	color: white;
+}
+
+.btn-submit {
+	background-color: white;
+	color: black;
+	border: 1px solid black;
+	width: 100%;
+}
+
+#parts-buttons {
+	height: 100%;
+	margin: 20px 0px;
+}
+
+#parts-buttons .btn {
+	background-color: rgb(214, 214, 214);
+	color: black;
+	border: 1px solid black;
+}
+
+#demo-buttons {
+	height: 100%;
+	margin: 0px;
+}
+
+#demo-buttons .btn {
+	color: black;
+	border: 1px solid black;
+	background: #FFFFFF;
+}
+
+/* TOPBAR AND LOGO */
+.logo {
+	color: rgba(221, 221, 221, 1.00);
+	font-weight: bold;
+	margin-bottom: 0px;
+	margin-right: 0px;
+	float: left;
+	width: 100%;
+	font-size: 1.5em;
+}
+
+.adminLogin .btnLogin {
+	width: 110px;
+	font-size: 1em;
+}
+
+/* TEXT INPUT REQUEST AREA */
+#textarea-request {
+	margin: 30px 0px 0px;
+}
+
+/* TABLE */
+#partsTableBody .even-row {
+	background-color: rgb(255, 255, 255);
+}
+
+#partsTableBody .odd-row {
+	background-color: rgba(0, 0, 0, .05);
+}
+
+/* Fix alternate colors upon search */
+.table> :not(caption)>*>* {
+	background-color: transparent !important;
+	box-shadow: none;
+}
+
+.table td,
+.table th {
+	padding: .25rem;
+	vertical-align: top;
+	border-top: 1px solid #dee2e6;
+}
+
+.table .sortable-column {
+	cursor: pointer;
+}
+
+/* MODAL */
+.background-modal {
+	display: none;
+	position: fixed;
+	z-index: 1;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-form {
+	background-color: #fefefe;
+	margin: 5% auto;
+	padding: 20px;
+	border: 1px solid #888;
+	width: auto;
+	max-width: 1000px;
+}
+
+.modal-header,
+.modal-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding-bottom: 10px;
+}
+
+.modal-header {
+	border-bottom: 1px solid #e5e5e5;
+}
+
+.modal-footer {
+	border-top: 1px solid #e5e5e5;
+	justify-content: flex-start;
+}
+
+.modal-content {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 20px;
+}
+
+.form-control {
+	margin: 5px;
+	flex-grow: 1;
+	min-width: 120px;
+}
+
+.form-col {
+	padding: 5px;
+}
+
+.close {
+	cursor: pointer;
+	font-size: 1.5rem;
+}
+
+.btn-success {
+	margin-top: 20px;
+}
+
+.input-wrapper {
+	position: relative;
+	margin: 20px 0px;
+}
+
+.input-wrapper::after {
+	content: '\f002';
+	/* FontAwesome search icon unicode */
+	font-family: 'Font Awesome 5 Pro';
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	pointer-events: none;
+	/* Makes the icon non-interactive */
+	color: #ccc;
+	/* Icon color, can be changed as needed */
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	display: inline-block;
+	font-style: normal;
+	font-variant: normal;
+	text-rendering: auto;
+	line-height: 1;
+}
+
+.input-wrapper .form-control {
+	padding-right: 30px;
+	/* Add padding to ensure text does not overlap the icon */
+}

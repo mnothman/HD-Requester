@@ -1,0 +1,70 @@
+  body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+  }
+
+  .header {
+      background-color: rgb(26, 107, 30);
+      color: white;
+      padding: 15px;
+      text-align: center;
+  }
+
+  /* Sidebar styling */
+  .sidebar {
+
+      padding: 10px;
+      background-color: rgba(244, 244, 244, 0.9);
+      border: 1px solid #ddd;
+      border-radius: 5px;
+  }
+
+  .content {
+      padding: 20px;
+  }
+
+  .table-container {
+      margin-top: 20px;
+  }
+
+  table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      margin-bottom: 20px;
+  }
+
+  table,
+  th,
+  td {
+      border: 1px solid #ddd;
+  }
+
+  th,
+  td {
+      padding: 12px;
+      text-align: left;
+  }
+
+  th {
+      background-color: rgb(26, 107, 30);
+      color: white;
+      cursor: pointer;
+  }
+
+  /* Alternating row colors */
+  tbody tr:nth-child(odd) {
+      background-color: grey;
+      /* Light grey for odd rows */
+  }
+
+  tbody tr:nth-child(even) {
+      background-color: white;
+      /* White for even rows */
+  }
+
+  tr:hover {
+      background-color: #f2f2f2;
+  }
