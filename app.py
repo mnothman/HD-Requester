@@ -155,7 +155,7 @@ def get_parts():
 
 def get_all_parts(search_type=None):
     db = get_db()
-    query = 'SELECT Part.* FROM Part JOIN Part_log ON Part.Part_sn = Part_log.Part_sn WHERE Part_log.Part_status IS "in"'
+    query = 'SELECT * FROM Part WHERE Status IS "in"'
     args = ()
     if search_type:
         query += ' AND Type LIKE ?'
@@ -239,15 +239,9 @@ def insert_part(part_data):
         conn.execute('BEGIN')
         cursor.execute('''
             INSERT INTO Part (Type, Capacity, Size, Speed, Brand, Model, Location, Part_sn)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'in')
         ''', (part_data['Type'], part_data['Capacity'], part_data['Size'], part_data['Speed'],
               part_data['Brand'], part_data['Model'], part_data['Location'], part_data['Part_sn']))
-
-        # SQL query to insert a new record into the Part_log table
-        cursor.execute('''
-            INSERT INTO Part_log (Part_sn, Part_status)
-            VALUES (?, 'in')
-        ''', (part_data['Part_sn'],))
 
         # Commit the changes
         conn.commit()
@@ -346,7 +340,7 @@ def check_part_in_inventory():
     conn = get_db()
     try:
         # Query to check if Part_sn exists in the Part table and is currently checked out
-        part = conn.execute('SELECT * FROM Part_log pl JOIN Part p on pl.Part_sn = p.Part_sn WHERE p.Part_sn = ?', (part_sn,)).fetchone()
+        part = conn.execute('SELECT * FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
 
         if part is None:
             return jsonify({'exists': False,
@@ -364,7 +358,7 @@ def check_part_in_inventory():
                 'actual': {'Type': part['Type'], 'Capacity': part['Capacity']}
             })
 		# Check if the existing part is already checked in
-        elif part['Part_status'] == 'in':
+        elif part['Status'] == 'in':
             if expected_part_status == 'in':
                 return jsonify({
                     'exists': False,
@@ -382,7 +376,7 @@ def check_part_in_inventory():
             else:
                 return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
         # Check if the existing part is already checked out
-        elif part['Part_status'] == 'out':
+        elif part['Status'] == 'out':
             if expected_part_status == 'out':
                 return jsonify({
                     'exists': False,
@@ -422,8 +416,8 @@ def update_part_status():
     conn = get_db()
     try:
         conn.execute('BEGIN')
-        # Update Part_log to set Part_status to 'in'
-        conn.execute('UPDATE Part_log SET Part_status = ? WHERE Part_sn = ?', (part_status, part_sn))
+        # Update Part to set Status to 'in'
+        conn.execute('UPDATE Part SET Status = ? WHERE Part_sn = ?', (part_status, part_sn))
         # Insert a new log entry with the current timestamp
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time) VALUES (?, ?, ?, ?, ?)', 

@@ -1,3 +1,5 @@
 /__pycache__
 .metadata/
 .vscode/
+tests/__pycache__/
+refresh.db
