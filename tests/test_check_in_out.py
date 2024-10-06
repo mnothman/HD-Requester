@@ -4,6 +4,9 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 import time
 
 class PartAppTest(unittest.TestCase):
@@ -105,6 +108,75 @@ class PartAppTest(unittest.TestCase):
             "Expected: 256GB HD 3.5\nFound: 512GB PC4"
         )
         self.close_modal()
+
+    def test06_checkout_part_not_in_inventory(self):
+        # Test case: Check-out Error: Mismatch in type or capacity
+        print("\nTest 6: Check-out Error: Part not seen in inventory before")
+        textarea = self.driver.find_element(By.ID, "textarea-request")
+        textarea.clear()
+        # Using Serial number 5001
+        textarea.send_keys("TI000000-00000001\n123456\n256GB HD 3.5\nLaptop\n00005001")
+        self.driver.find_element(By.ID, "btnOut").click()
+        self.driver.find_element(By.ID, "btn-submit-request").click()
+
+        # Expecting modal to show mismatch error
+        self.check_modal(
+            "Check-out Error: Part not found in inventory.",
+            "That part has never been added to inventory.\nSerial number: 00005001\nAdd item to inventory. Fill in the blanks"
+        )
+        self.close_modal()
+
+    def test07_checkin_part_not_in_inventory(self):
+        # Test case: Check-out Error: Mismatch in type or capacity
+        print("\nTest 7: Check-in Error: Part not seen in inventory before")
+        textarea = self.driver.find_element(By.ID, "textarea-request")
+        textarea.clear()
+        # Using Serial number 5001
+        textarea.send_keys("TI000000-00000001\n123456\n256GB HD 3.5\nLaptop\n00005001")
+        self.driver.find_element(By.ID, "btnIn").click()
+        self.driver.find_element(By.ID, "btn-submit-request").click()
+
+        # Expecting modal to show mismatch error
+        self.check_modal(
+            "Check-in Error: Part not found in inventory.",
+            "That part has never been added to inventory.\nSerial number: 00005001\nAdd item to inventory. Fill in the blanks"
+        )
+        self.close_modal()
+
+    def test08_checkout_missing_type_capacity(self):
+        pass
+
+    def test09_checkin_missing_type_capacity(self):
+        pass
+
+    def test10_checkout_missing_unit_sn(self):
+        pass
+
+    def test11_checkin_missing_unit_sn(self):
+        pass
+
+    def test12_checkout_missing_part_serial_number(self):
+        # Test case: Check-out Error: Missing Serial Number
+        print("\nTest 12: Missing Part serial number")
+        textarea = self.driver.find_element(By.ID, "textarea-request")
+        textarea.clear()
+        textarea.send_keys("TI000000-00000001\n123456\n256GB HD 3.5\nLaptop")
+        self.driver.find_element(By.ID, "btnOut").click()
+        self.driver.find_element(By.ID, "btn-submit-request").click()
+
+        # Wait for the alert to be present
+        try:
+            WebDriverWait(self.driver, 10).until(EC.alert_is_present())
+            alert = self.driver.switch_to.alert
+            alert_text = alert.text
+            self.assertEqual(alert_text, "Error: The number of parts does not match the number of serial numbers.", "Alert message should match expected error message.")
+            # Click OK button on the alert
+            alert.accept()
+            print("Alert accepted")
+        except TimeoutException:
+            self.fail("Alert was not displayed when missing Part_sn")
+
+        
 
     @classmethod
     def tearDownClass(cls):
