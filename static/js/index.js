@@ -147,6 +147,9 @@ $(document).ready(function () {
         });
     }); // end in/out buttons
 
+    $('.adminLogin').click(function () {
+        $('#demo-buttons').toggle(); // This toggles the visibility
+    });
 
     $('#btn-submit-request').click(function () {
         var parsedData = parseTextInput();
@@ -184,6 +187,66 @@ $(document).ready(function () {
             alert('No parts selected for removal.');
         }
     });
+
+    // $('#rmvPartBtn').click(function () {
+    // 	handleRemovePart();
+    // });
+
+    $('#btnDemoCheckin').click(function () {
+        var demoPart = {
+            "tid": "TI000000-00000001",
+            "unit_sn": "123456",
+            "parts": [{ "capacity": "1TB", "type": "SSD" }],
+            "size": "Laptop",
+            "serial_numbers": ["00000022"]
+        }
+        checkInPart(demoPart);
+    });
+    $('#btnDemoCheckinNotSeenBefore').click(function () {
+        var demoPart = {
+            "tid": "TI000000-00000001",
+            "unit_sn": "123456",
+            "parts": [{ "capacity": "99TB", "type": "SSD" }],
+            "size": "Laptop",
+            "serial_numbers": ["0000011"]
+        }
+        checkInPart(demoPart);
+    });
+    $('#btnDemoCheckinMismatch').click(function () {
+        var demoPart = {
+            "tid": "TI000000-00000001",
+            "unit_sn": "123456",
+            "parts": [{ "capacity": "8GB", "type": "PC4" }],
+            "size": "Laptop",
+            "serial_numbers": ["00000010"]
+        }
+        checkInPart(demoPart);
+    });
+    $('#btnDemoCheckout').click(function () {
+        var demoPart = {
+            "tid": "TI000000-00000001",
+            "unit_sn": "123456",
+            "parts": [{ "capacity": "2TB", "type": "HD" }],
+            "size": "3.5",
+            "serial_numbers": ["00000001"]
+        }
+        checkOutPart(demoPart);
+    });
+    $('#btnDemoCheckoutMismatch').click(function () {
+        var demoPart = {
+            "tid": "TI000000-00000001",
+            "unit_sn": "123456",
+            "parts": [{ "capacity": "1TB", "type": "HD" }],
+            "size": "3.5",
+            "serial_numbers": ["00000001"]
+        }
+        checkOutPart(demoPart);
+    });
+    $('#btnResetLogTables').click(function () {
+        resetLogTables();
+    });
+
+
 
 
     /* ====== FUNCTIONS ===== */
@@ -294,6 +357,7 @@ $(document).ready(function () {
                 '</tr>');
         });
     }
+
 
     function handleAddPart() {
         const content = `
@@ -459,7 +523,7 @@ $(document).ready(function () {
 
         // Parse TID
         dataObject.tid = lines[0].trim();
-        if (!dataObject.tid.toLowerCase.startsWith("ti") && !dataObject.tid.toLowerCase.startsWith("tzz")) {
+        if (!dataObject.tid.startsWith("TI") && !dataObject.tid.startsWith("TZZ")) {
             console.error("Error: Invalid TID format.");
             return null;
         }

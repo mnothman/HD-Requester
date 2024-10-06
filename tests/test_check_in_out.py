@@ -143,8 +143,8 @@ class PartAppTest(unittest.TestCase):
         )
         self.close_modal()
 
-    def test08_checkout_missing_type_capacity(self):
-        pass
+    def test08_checkout_drive_missing_type(self):
+       pass
 
     def test09_checkin_missing_type_capacity(self):
         pass
