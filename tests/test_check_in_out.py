@@ -1,20 +1,28 @@
 import unittest
+import sqlite3
+import time
+import sys
+import os
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException
-import time
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # Add the root directory to the path
+
 
 class PartAppTest(unittest.TestCase):
+
+
     @classmethod
     def setUpClass(cls):
         # Setup Chrome WebDriver
+        options = Options()  # supress info message in output
+        options.add_argument('--log-level=1') # supress info message in output
         cls.service = Service(executable_path="chromedriver.exe")
-        cls.driver = webdriver.Chrome(service=cls.service)
+        cls.driver = webdriver.Chrome(service=cls.service, options=options)
         cls.driver.get("http://127.0.0.1:5000/")
         time.sleep(2)
 
@@ -51,26 +59,54 @@ class PartAppTest(unittest.TestCase):
         self.driver.find_element(By.ID, "btn-submit-request").click()
         time.sleep(1)
 
+    def execute_query(self, query, params=()):
+        """
+        Connect to the SQLite database, execute a query, and return the result as a string.
+
+        :param query: The SQL query to execute.
+        :param params: The parameters to pass to the query (if any).
+        :return: Query result as a string.
+        """
+        db_path = os.path.join(os.path.dirname(__file__), '..', 'refresh.db')
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+
+        # Execute the query with the provided parameters
+        cursor.execute(query, params)
+        result = cursor.fetchone()
+
+        # Close the database connection
+        conn.close()
+
+        # Convert the result to a string or handle None if no result is found
+        return str(result[0]) if result else "0"
+
 
     def test01_checkout_part(self):
         # Test case: Check Out Part
         print("Test 1: Check-out")
         self.checkout_part()
 
-        # Verify the database Part_log now has 4999 parts with Part_status='in'
-        # Add database query here for verification
-        #
-        result = check_database_part_log_status('in', 4999)  # Mocked function for the example
-        self.assertTrue(result, "There should be 4999 entities in the Part_log with Part_status='in'")
+        # Verify the database Part now has 4999 parts with Status='in'
+        # Execute the SQL query
+        query = 'SELECT COUNT(*) FROM Part WHERE Status = ?'
+        result = self.execute_query(query, ('in',))
+
+        # Assert that the count matches 4999
+        self.assertEqual(result, '4999')
 
     def test02_checkin_part(self):
         # Test case: Check In Part
         print("\nTest 2: Check-in")
         self.checkin_part()
 
-        # Verify the database Part_log now has 5000 parts with Part_status='in'
-        result = check_database_part_log_status('in', 5000)  # Mocked function for the example
-        self.assertTrue(result, "There should be 5000 entities in the Part_log with Part_status='in'")
+        # Verify the database Part now has 5000 parts with Status='in'
+        # Execute the SQL query
+        query = 'SELECT COUNT(*) FROM Part WHERE Status = ?'
+        result = self.execute_query(query, ('in',))
+
+        # Assert that the count matches 5000
+        self.assertEqual(result, '5000')
 
     def test03_checkin_already_checkedin_part(self):
         # Test case: Check In a Part that's Already Checked In
@@ -82,12 +118,11 @@ class PartAppTest(unittest.TestCase):
         self.close_modal()
 
     def test04_checkout_already_checkedout_part(self):
-        # Test case: Check Out a Part that's Already Checked
+        # Test case: Check Out a Part that's Already Checked out
         print("\nTest 4: Check-out already checkedout part")
         self.checkout_part()
         self.checkout_part()
 
-        # Expecting modal to show error
         self.check_modal("Check-out Error: Already checked-out.", "Serial number: 00000001")
         self.close_modal()
         #replace
@@ -102,7 +137,6 @@ class PartAppTest(unittest.TestCase):
         self.driver.find_element(By.ID, "btnOut").click()
         self.driver.find_element(By.ID, "btn-submit-request").click()
 
-        # Expecting modal to show mismatch error
         self.check_modal(
             "Check-out Error: Mismatch in type or capacity.",
             "Expected: 256GB HD 3.5\nFound: 512GB PC4"
@@ -119,7 +153,6 @@ class PartAppTest(unittest.TestCase):
         self.driver.find_element(By.ID, "btnOut").click()
         self.driver.find_element(By.ID, "btn-submit-request").click()
 
-        # Expecting modal to show mismatch error
         self.check_modal(
             "Check-out Error: Part not found in inventory.",
             "That part has never been added to inventory.\nSerial number: 00005001\nAdd item to inventory. Fill in the blanks"
@@ -136,24 +169,108 @@ class PartAppTest(unittest.TestCase):
         self.driver.find_element(By.ID, "btnIn").click()
         self.driver.find_element(By.ID, "btn-submit-request").click()
 
-        # Expecting modal to show mismatch error
         self.check_modal(
             "Check-in Error: Part not found in inventory.",
             "That part has never been added to inventory.\nSerial number: 00005001\nAdd item to inventory. Fill in the blanks"
         )
         self.close_modal()
 
-    def test08_checkout_drive_missing_type(self):
-       pass
+    def test08_checkout_missing_type(self):
+       # Test case: Check-out Error: Missing Type
+        print("\nTest 8: Check-out Error: Missing Type - Skip")
 
-    def test09_checkin_missing_type_capacity(self):
+        ### Need to fix our app and then remove this pass
+        ##  and the ''' '''
+        #
         pass
+        r'''
+        textarea = self.driver.find_element(By.ID, "textarea-request")
+        textarea.clear()
+        # Using Serial number 5001
+        textarea.send_keys("TI000000-00000001\n123456\n256GB\nLaptop\n00005001")
+        self.driver.find_element(By.ID, "btnIn").click()
+        self.driver.find_element(By.ID, "btn-submit-request").click()
+
+        # Expecting modal to show mismatch error
+        
+                        self.check_modal(
+            "Check-out Error: Missing Part Capacity.",
+            "Expected: 256GB HD 3.5\nFound: HD 3.5"
+        )
+        self.close_modal()
+        '''
+
+    def test09_checkout_missing_capacity(self):
+       # Test case: Check-out Error: Missing capacity - Skip
+        print("\nTest 9: Check-out Error: Missing Capacity - Skip")
+
+        ### Need to fix our app and then remove this pass
+        ##  and the ''' '''
+        #
+        pass
+        r'''
+        textarea = self.driver.find_element(By.ID, "textarea-request")
+        textarea.clear()
+        # Using Serial number 00000001
+        textarea.send_keys("TI000000-00000001\n123456\nHD 3.5\nLaptop\n00000001")
+        self.driver.find_element(By.ID, "btnOut").click()
+        self.driver.find_element(By.ID, "btn-submit-request").click()
+
+        # Expecting modal to show mismatch error
+        
+        self.check_modal(
+            "Check-out Error: Missing Part Capacity.",
+            "Expected: 256GB HD 3.5\nFound: HD 3.5"
+        )
+        self.close_modal()
+        '''
 
     def test10_checkout_missing_unit_sn(self):
-        pass
+       # Test case: Check-out Error: Missing Unit Serial Number
+        print("\nTest 10: Check-out Error: Missing Unit Serial Number - Skip")
 
-    def test11_checkin_missing_unit_sn(self):
+        ### Need to fix our app and then remove this pass
+        ##  and the ''' '''
+        #
         pass
+        r'''
+        textarea = self.driver.find_element(By.ID, "textarea-request")
+        textarea.clear()
+        # Using Serial number 00000001
+        textarea.send_keys("TI000000-00000001\n256GB HD 3.5\nLaptop\n00000001")
+        self.driver.find_element(By.ID, "btnOut").click()
+        self.driver.find_element(By.ID, "btn-submit-request").click()
+
+        # Expecting modal to show mismatch error
+        self.check_modal(
+            "Check-out Error: Missing unit serial number.",
+            "Add unit serial number"
+        )
+        self.close_modal()
+        '''
+
+    def test11_checkout_mismatch_size(self):
+        # Test case: Check-out Error: Mismatch in size
+        print("\nTest 11: Check-out Error: Mismatch in Size - skip")
+        ### Need to fix our app and then remove this pass
+        ##  and the ''' '''
+        #
+        pass
+        r'''
+        textarea = self.driver.find_element(By.ID, "textarea-request")
+        textarea.clear()
+        # Using Serial number 00000001
+        textarea.send_keys("TI000000-00000001\n123456\n256GB HD 3.5\Desktop\n00005001")
+        self.driver.find_element(By.ID, "btnOut").click()
+        self.driver.find_element(By.ID, "btn-submit-request").click()
+        
+        # Expecting modal to show mismatch error
+        self.check_modal(
+            "Check-out Error: Mismatch in size.",
+            "Expected: Desktop\n Found: Laptop"
+        )
+        self.close_modal()
+        '''
 
     def test12_checkout_missing_part_serial_number(self):
         # Test case: Check-out Error: Missing Serial Number
@@ -181,12 +298,6 @@ class PartAppTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.driver.quit()
-
-# Mock function to simulate database check
-def check_database_part_log_status(status, expected_count):
-    # Placeholder for actual database query to count entities with a specific Part_status
-    # 
-    return True  # For the sake of the example, always return True
 
 if __name__ == "__main__":
     unittest.main()
