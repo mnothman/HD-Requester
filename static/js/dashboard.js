@@ -21,64 +21,107 @@ const colors = [
 ];
 
 $(document).ready(function () {
-    populateBoxes();
+    loadInventory();
     $('#partsTable').DataTable();  // Initialize DataTables on the table
-
-     // On click, toggle the height of the .box-header
-     $('.box-header').on('click', function() {
-        // Toggle between the default height and expanded height
-        if ($(this).height() === 24) {
-            $(this).css('height', '170px').css('z-index', '2'); // Expand to cover .box-data
-
-        } else {
-            $(this).css('height', '24px'); // Return to default height
-        }
-    });
-    // Listen for the transitionend event
-    $('.box-header').on('transitionend', function() {
-        // Only change z-index if the height has transitioned back to 24px
-        if ($(this).height() === 24) {
-            $(this).css('z-index', '1');
-        }
-    });
+    
 });
 
-// Function to populate the boxes dynamically with cycling colors
-function populateBoxes() {
-    // Select the container where the boxes will be added
-    const container = $('.inventory-levels-container');
-    
-    // Clear the container before adding new boxes
-    container.empty();
-
-    // Iterate through the array of box headers
-    boxHeaders.forEach((header, index) => {
-        // Create the box div
-        const box = $('<div class="box"></div>');
-
-        // Create the box header div with inline background color
-        const boxHeader = $('<div class="box-header" style="z-index: 1;"></div>');
-        const headerTitle = $('<h3></h3>').text(header);
-
-        // Set the background color of the header
-        boxHeader.css('background-color', colors[index % colors.length]);
-        
-        // Append the header title to the header div
-        boxHeader.append(headerTitle);
-
-        // Create the box data div
-        const boxData = $('<div class="box-data">NaN</div>');
-
-        // Append the header and data divs to the box
-        box.append(boxHeader);
-        box.append(boxData);
-
-        // Append the box to the container
-        container.append(box);
-    });
+/// Function to sanitize IDs for CSS selectors
+function sanitizeId(id) {
+    return id.replace(/[^a-zA-Z0-9-_]/g, '_'); // Replace invalid characters with underscores
 }
 
+// Function to fetch inventory data and dynamically create boxes
+function loadInventory() {
+    fetch('/get_inventory')
+        .then(response => response.json())
+        .then(data => {
+            const container = $('.inventory-levels-container'); // Select the container where the boxes will be added
+            container.empty(); // Clear existing content
 
+            // Create a map to aggregate quantities by combined Type and Size
+            const combinedMap = new Map();
+
+            data.forEach(item => {
+                const key = `${item.Type} ${item.Size}`;
+                if (!combinedMap.has(key)) {
+                    combinedMap.set(key, { quantity: item.quantity, capacities: [] });
+                } else {
+                    combinedMap.get(key).quantity += item.quantity;
+                }
+            });
+
+            // Function to fetch capacities for a given Type and Size
+            function fetchCapacities(type, size) {
+                return fetch(`/get_part_capacities?type=${type}&size=${size}`)
+                    .then(response => response.json())
+                    .then(capacities => {
+                        combinedMap.get(`${type} ${size}`).capacities = capacities;
+                    });
+            }
+
+            // Function to create a box for each part type and its details
+            function createBox(type, size, quantity, capacities, index) {
+                const box = $('<div class="box"></div>'); // Create the box div
+
+                // Create the box-header div with z-index and background color
+                const boxHeader = $('<div class="box-header" style="z-index: 1;"></div>');
+                const headerTitle = $('<h3></h3>').text(size === "null" ? `${type}` : `${type} ${size}`);
+
+                // Set the background color based on cycling colors array
+                boxHeader.css('background-color', colors[index % colors.length]);
+
+                // Create a list of capacities to go below the h3 tag
+                const capacitiesList = $('<ul class="capacities"></ul>');
+                capacities.forEach(capacity => {
+                    const li = $('<li></li>').text(capacity);
+                    capacitiesList.append(li);
+                });
+
+                // Append the header title and capacities list to the box-header
+                boxHeader.append(headerTitle);
+                boxHeader.append(capacitiesList);
+
+                // Create the box-data div for the quantity
+                const boxData = $('<div class="box-data"></div>').text(`${quantity}`);
+
+                // Append the box-header and box-data to the box
+                box.append(boxHeader);
+                box.append(boxData);
+
+                // Set up click event to expand/collapse the box-header
+                boxHeader.on('click', function () {
+                    if (boxHeader.height() === 24) {
+                        boxHeader.css('height', '170px').css('z-index', '2');
+                        capacitiesList.toggleClass('show');
+                    } else {
+                        boxHeader.css('height', '24px');
+                        capacitiesList.toggleClass('show');
+                        boxHeader.on('transitionend', function () {
+                            if (boxHeader.height() === 24) {
+                                boxHeader.css('z-index', '1');
+                            }
+                        });
+                    }
+                });
+
+                return box;
+            }
+
+            // Iterate over the part Types and Sizes, fetch capacities, and populate the boxes
+            Promise.all(
+                Array.from(combinedMap.keys()).map((key, index) => {
+                    const [type, size] = key.split(' ');
+                    return fetchCapacities(type, size).then(() => {
+                        const { quantity, capacities } = combinedMap.get(key);
+                        const box = createBox(type, size, quantity, capacities, index);
+                        container.append(box); // Append each box to the container
+                    });
+                })
+            ).catch(error => console.error('Error fetching capacities:', error));
+        })
+        .catch(error => console.error('Error fetching inventory data:', error));
+}
 
 // Function to update the dashboard table with new records
 function updateDashboard(data) {

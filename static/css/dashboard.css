@@ -122,11 +122,23 @@
   #inventory-levels .box-data {
     position: relative;
     top: 20px;
-    height: 60px; /* Space for content */
+    height: 36px; /* Space for content */
     border-radius: 0px 0px 10px 10px;
     background-color: #e0e0e0;
-    padding: 0px;
+    padding: 8px;
     z-index: 0;
+}
+
+#inventory-levels .box-header ul.capacities {
+    list-style: none;
+    padding-bottom: 3px;
+    padding-left: 0px;
+    opacity: 0;
+}
+
+#inventory-levels .box-header ul.capacities.show {
+    opacity: 1;
+    transition: opacity 0.3s ease;
 }
 
   /* Trends */
