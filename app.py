@@ -223,6 +223,22 @@ def get_part_capacities():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+@app.route('/get_part_count', methods=['GET'])
+def get_part_count():
+    part_type = request.args.get('type')
+    capacity = request.args.get('capacity')
+    db = get_db()
+
+    query = '''
+        SELECT COUNT(*) AS count FROM Part
+        WHERE Type = ? AND Capacity = ?
+    '''
+    try:
+        result = db.execute(query, (part_type, capacity)).fetchone()
+        count = result['count']
+        return jsonify({'count': count})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/inventory')
 def inventory():
