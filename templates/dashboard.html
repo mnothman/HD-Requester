@@ -26,10 +26,26 @@
 
     <!-- Main Content -->
     <div class="content">
-        <h2>Check-In/Check-Out Records</h2>
-
+        <div id="inventory-levels" class="table-container">
+            <h2>Inventory Levels</h2>
+            <div class="inventory-levels-container"></div>
+        </div>
+        <div id="monthly-trends" class="table-container">
+            <h2>Monthly Trends</h2>
+            <div class="monthly-trends-container">
+                <div class="monthly-trends-date-column">
+                    <h3>Dates</h3>
+                    <p>This is the first column, which takes up about 1/6 of the width.</p>
+                </div>
+                <div class="monthly-trends-graph-column">
+                    <h3>Graph</h3>
+                    <p>This is the second column, which takes up the rest (5/6) of the width.</p>
+                </div>
+            </div>
+        </div>
         <!-- Table for displaying records -->
         <div class="table-container">
+            <h2>Check-In/Check-Out Records</h2>
             <table id="partsTable">
                 <thead>
                     <tr>
@@ -65,13 +81,13 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </div><!--end main content-->
 
     <!-- DataTables JS for Search and Sort -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" defer></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js" defer></script>
     <!-- link to js for dashboard.html -->
-    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script> <!-- Updated path -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script> <!-- Updated path -->
 
 
 </body>
