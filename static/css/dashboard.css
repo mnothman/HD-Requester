@@ -102,7 +102,8 @@
 
   #inventory-levels .box h3 {
     margin: 0;
-    font-size: 1.2em;
+    font-size: 1em;
+    padding: 3px 0px 0px;
   }
 
   #inventory-levels .box-header {
