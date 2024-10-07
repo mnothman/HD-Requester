@@ -91,6 +91,9 @@
   }
 
   #inventory-levels .box {
+    position: relative;
+    margin-bottom: 20px;
+    padding: 0;
     text-align: center;
     background-color: #f0f0f0;
     border-radius: 12px;
@@ -103,9 +106,28 @@
   }
 
   #inventory-levels .box-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 24px; /* needs to match height in admin.js */
     border-radius: 10px;
     background-color: aqua;
+    transition: height 0.3s ease;
+    cursor: pointer;
+    overflow: visible;
+    z-index: 1;
   }
+
+  #inventory-levels .box-data {
+    position: relative;
+    top: 20px;
+    height: 60px; /* Space for content */
+    border-radius: 0px 0px 10px 10px;
+    background-color: #e0e0e0;
+    padding: 0px;
+    z-index: 0;
+}
 
   /* Trends */
   .monthly-trends-container {

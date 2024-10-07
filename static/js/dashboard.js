@@ -23,6 +23,24 @@ const colors = [
 $(document).ready(function () {
     populateBoxes();
     $('#partsTable').DataTable();  // Initialize DataTables on the table
+
+     // On click, toggle the height of the .box-header
+     $('.box-header').on('click', function() {
+        // Toggle between the default height and expanded height
+        if ($(this).height() === 24) {
+            $(this).css('height', '170px').css('z-index', '2'); // Expand to cover .box-data
+
+        } else {
+            $(this).css('height', '24px'); // Return to default height
+        }
+    });
+    // Listen for the transitionend event
+    $('.box-header').on('transitionend', function() {
+        // Only change z-index if the height has transitioned back to 24px
+        if ($(this).height() === 24) {
+            $(this).css('z-index', '1');
+        }
+    });
 });
 
 // Function to populate the boxes dynamically with cycling colors
@@ -39,7 +57,7 @@ function populateBoxes() {
         const box = $('<div class="box"></div>');
 
         // Create the box header div with inline background color
-        const boxHeader = $('<div class="box-header"></div>');
+        const boxHeader = $('<div class="box-header" style="z-index: 1;"></div>');
         const headerTitle = $('<h3></h3>').text(header);
 
         // Set the background color of the header
