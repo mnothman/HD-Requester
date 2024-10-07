@@ -31,6 +31,18 @@ function sanitizeId(id) {
     return id.replace(/[^a-zA-Z0-9-_]/g, '_'); // Replace invalid characters with underscores
 }
 
+// Function to fetch part counts for the selected capacity
+function fetchPartCount(type, capacity) {
+    return fetch(`/get_part_count?type=${type}&capacity=${capacity}`)
+        .then(response => response.json())
+        .then(data => {
+            return data.count;
+        })
+        .catch(error => {
+            console.error('Error fetching part count:', error);
+        });
+}
+
 // Function to fetch inventory data and dynamically create boxes
 function loadInventory() {
     fetch('/get_inventory')
@@ -66,7 +78,11 @@ function loadInventory() {
 
                 // Create the box-header div with z-index and background color
                 const boxHeader = $('<div class="box-header" style="z-index: 1;"></div>');
-                const headerTitle = $('<h3></h3>').text(size === "null" ? `${type}` : `${type} ${size}`);
+
+                // Store original header title for future reference
+                const originalHeaderTitle = size === "null" ? `${type}` : `${type} ${size}`;
+                const headerTitle = $('<h3></h3>').text(originalHeaderTitle);
+
 
                 // Set the background color based on cycling colors array
                 boxHeader.css('background-color', colors[index % colors.length]);
@@ -76,6 +92,16 @@ function loadInventory() {
                 capacities.forEach(capacity => {
                     const li = $('<li></li>').text(capacity);
                     capacitiesList.append(li);
+
+                    // Add click handler to fetch count of parts for the selected capacity
+                    li.on('click', function () {
+                        fetchPartCount(type, capacity).then(count => {
+                            boxData.text(`${count}`); // Update the quantity displayed
+                            // Prepend the selected capacity to the original part type in the h3
+                            headerTitle.text(`${capacity} ${originalHeaderTitle}`);
+                            boxHeader.toggleClass('show'); // Hide the dropdown after selection
+                        });
+                    });
                 });
 
                 // Append the header title and capacities list to the box-header
@@ -97,6 +123,10 @@ function loadInventory() {
                     } else {
                         boxHeader.css('height', '24px');
                         capacitiesList.toggleClass('show');
+
+                        // Reset the headerTitle to the originalHeaderTitle
+                        headerTitle.text(originalHeaderTitle);
+
                         boxHeader.on('transitionend', function () {
                             if (boxHeader.height() === 24) {
                                 boxHeader.css('z-index', '1');
