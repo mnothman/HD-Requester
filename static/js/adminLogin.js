@@ -130,6 +130,39 @@ document.getElementById('form-new-password').addEventListener('submit', function
     }
 });
 
+// Function to toggle password visibility
+function togglePasswordVisibility(toggleButton, passwordField, eyeIcon) {
+    toggleButton.addEventListener('click', () => {
+        // Toggle between 'password' and 'text' input type
+        const inputType = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordField.setAttribute('type', inputType);
+
+        // Toggle eye icon
+        eyeIcon.classList.toggle('bi-eye');
+        eyeIcon.classList.toggle('bi-eye-slash');
+    });
+}
+
+// Elements for 'New Password' field
+const toggleNewPassword = document.getElementById('toggle-new-password');
+const newPasswordInput = document.getElementById('new-password');
+const eyeNewPassword = document.getElementById('eye-new-password');
+
+// Elements for 'Verify New Password' field
+const toggleVerifyPassword = document.getElementById('toggle-verify-password');
+const verifyPasswordInput = document.getElementById('verify-new-password');
+const eyeVerifyPassword = document.getElementById('eye-verify-password');
+
+// Elements for 'Password' field
+const togglePassword = document.getElementById('toggle-password');
+const passwordInput = document.getElementById('password');
+const eyePassword = document.getElementById('eye-password');
+
+// Apply the toggle function to all password fields
+togglePasswordVisibility(toggleNewPassword, newPasswordInput, eyeNewPassword);
+togglePasswordVisibility(toggleVerifyPassword, verifyPasswordInput, eyeVerifyPassword);
+togglePasswordVisibility(togglePassword, passwordInput, eyePassword);
+
 // Clear the "Passwords do not match!" message when the user starts typing in the password fields
 document.getElementById('security-answer1').addEventListener('input', function () {
     messageBox.textContent = '';  // Clear the message
