@@ -45,6 +45,10 @@
         <!-- Tables will be inserted here -->
     </div>
     <script>
+        // Function to sanitize IDs for CSS selectors
+        function sanitizeId(id) {
+            return id.replace(/[^a-zA-Z0-9-_]/g, '_'); // Replace invalid characters with underscores
+        }
         // Function to fetch inventory data and populate tables
         function loadInventory() {
             fetch('/get_inventory')
@@ -68,7 +72,7 @@
 
                     // Function to fetch capacities for a given Type and Size
                     function fetchCapacities(type, size) {
-                        return fetch(`/get_part_capacities?name=${type}`)
+                        return fetch(`/get_part_capacities?type=${type}&size=${size}`)
                             .then(response => response.json())
                             .then(capacities => {
                                 combinedMap.get(`${type} ${size}`).capacities = capacities;
@@ -84,7 +88,12 @@
                         const titleCell = document.createElement('th');
 
                         titleCell.colSpan = 2;
-                        titleCell.textContent = `${type} ${size}`;
+                        // To remove null from apperaring on table name
+                        if (size === "null") {
+                            titleCell.textContent = `${type}`;
+                        } else {
+                            titleCell.textContent = `${type} ${size}`;
+                        }
                         titleRow.appendChild(titleCell);
                         thead.appendChild(titleRow);
 
@@ -98,8 +107,12 @@
                         table.appendChild(thead);
                         table.appendChild(tbody);
 
+                        // Cleans the type/size so they don't creater errors due to certain special characters
+                        const sanitizedType = sanitizeId(type);
+                        const sanitizedSize = sanitizeId(size);
+
                         table.addEventListener('click', () => {
-                            const capacitiesDiv = document.querySelector(`#capacities-${type}-${size}`);
+                            const capacitiesDiv = document.querySelector(`#capacities-${sanitizedType}-${sanitizedSize}`);
                             if (capacitiesDiv.style.display === 'none') {
                                 capacitiesDiv.style.display = 'block';
                             } else {
@@ -122,7 +135,7 @@
                                 
                                 // Create and add capacities section
                                 const capacitiesDiv = document.createElement('div');
-                                capacitiesDiv.id = `capacities-${type}-${size}`;
+                                capacitiesDiv.id = `capacities-${sanitizeId(type)}-${sanitizeId(size)}`;
                                 capacitiesDiv.className = 'capacities';
                                 const ul = document.createElement('ul');
                                 capacities.forEach(capacity => {
@@ -145,10 +158,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-

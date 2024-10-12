@@ -6,7 +6,7 @@ import re, sqlite3
 app = Flask(__name__)
 
 app.secret_key = 'key'
-
+ 
 #Test Login
 ph = PasswordHasher()
 hashed_password = ph.hash('admin123')
@@ -20,30 +20,6 @@ def get_db():
         g.db = sqlite3.connect(DATABASE)
         g.db.row_factory = sqlite3.Row
     return g.db
-
-def create_admin_table():
-    db = get_db()
-    try:
-        db.execute('''
-            CREATE TABLE IF NOT EXISTS admin (
-                admin_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL UNIQUE,
-                password_hash TEXT NOT NULL,
-                email TEXT NOT NULL UNIQUE,
-                security_question1 TEXT NOT NULL,
-                security_answer1_hash TEXT NOT NULL,
-                security_question2 TEXT NOT NULL,
-                security_answer2_hash TEXT NOT NULL,
-                security_question3 TEXT,
-                security_answer3_hash TEXT
-            )
-        ''')
-        db.commit()  
-    except sqlite3.Error as e:
-        print(f"Error creating admin table: {str(e)}")
-        db.rollback()
-    finally:
-        db.close()
 
 
 @db_blueprint.teardown_app_request
@@ -59,10 +35,6 @@ def close_db(error):
 def index():
     return render_template('index.html')
 
-if __name__ == '__main__':
-    with app.app_context():
-        create_admin_table()  
-    app.run(debug=True)
 
 # Login route
 @app.route('/login', methods=['GET', 'POST'])
@@ -84,7 +56,7 @@ def login():
         except Exception as e:
             # This captures any exception, which could include verification failure or other issues
             flash('Invalid credentials, please try again')
-            return redirect(url_for('login'))
+            return redirect(url_for('login')) #redirect to login page once more
 
     # If GET request, render the login page
     return render_template('adminLogin.html')
@@ -160,7 +132,7 @@ def reset_password():
     cursor = conn.cursor()
     try:
         # Update the password in the Admin table (assuming only one admin user)
-        cursor.execute("UPDATE Admin SET Password = ? WHERE AdminID = ?", (new_password, 0))  # Replace 0 with actual Admin ID if necessary
+        cursor.execute("UPDATE Admin SET password = ? WHERE username = ?", (new_password, 'admin'))  # Replace 0 with actual Admin ID if necessary
         conn.commit()
 
         return jsonify({'success': True, 'message': 'Password has been updated successfully.'})
@@ -172,17 +144,18 @@ def reset_password():
         conn.close()
 
 
-
-
 @app.route('/get_parts', methods=['POST'])
-def get_parts(): #fetch parts from search
-    search_type = request.form.get('searchType', None)
-    parts = get_all_parts(search_type)
-    return jsonify([dict(part) for part in parts])
+def get_parts():
+    parts = get_all_parts()  # Fetch all parts
+    return jsonify({
+        'status': 'success',
+        'data': [dict(part) for part in parts]  # Convert to list of dictionaries
+    })
+
 
 def get_all_parts(search_type=None):
     db = get_db()
-    query = 'SELECT Part.* FROM Part JOIN Part_log ON Part.Part_sn = Part_log.Part_sn WHERE Part_log.Part_status IS "in"'
+    query = 'SELECT * FROM Part WHERE Status IS "in"'
     args = ()
     if search_type:
         query += ' AND Type LIKE ?'
@@ -210,16 +183,9 @@ def get_inventory_db():
             COUNT(*) AS quantity
         FROM
             Part p
-        JOIN
-            Part_log pl ON p.Part_sn = pl.Part_sn
-        WHERE
-            pl.Part_status = 'in'
         GROUP BY
             p.Type,
             p.Size
-        ORDER BY
-            p.Type,
-            p.Size;
     '''
     try:
         # Execute the query and fetch all results
@@ -228,32 +194,51 @@ def get_inventory_db():
     except sqlite3.Error as e:
         raise RuntimeError(f"Database error: {str(e)}")
 
-@app.route('/get_unique_parts', methods=['GET'])
-def get_unique_parts():
-    db = get_db()
-    query = 'SELECT DISTINCT Type FROM Part ORDER BY Type'
-    try:
-        result = db.execute(query).fetchall()
-        names = [row['Type'] for row in result]
-        return jsonify(names)
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/get_part_capacities', methods=['GET'])
 def get_part_capacities():
-    name = request.args.get('name')
+    type = request.args.get('type')
+    size = request.args.get('size')
     db = get_db()
     query = '''
         SELECT DISTINCT Capacity FROM Part
         WHERE Type = ?
     '''
+    if size == "null":
+        query = '''
+            SELECT DISTINCT Capacity FROM Part
+            WHERE Type = ? AND Size IS NULL
+        '''
+        params = (type, )
+    else:
+        query = '''
+            SELECT DISTINCT Capacity FROM Part
+            WHERE Type = ? AND Size = ?
+        '''
+        params = (type, size)
     try:
-        result = db.execute(query, (name,)).fetchall()
+        result = db.execute(query, params).fetchall()
         capacities = [row['Capacity'] for row in result]
         return jsonify(capacities)
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+@app.route('/get_part_count', methods=['GET'])
+def get_part_count():
+    part_type = request.args.get('type')
+    capacity = request.args.get('capacity')
+    db = get_db()
+
+    query = '''
+        SELECT COUNT(*) AS count FROM Part
+        WHERE Type = ? AND Capacity = ?
+    '''
+    try:
+        result = db.execute(query, (part_type, capacity)).fetchone()
+        count = result['count']
+        return jsonify({'count': count})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/inventory')
 def inventory():
@@ -270,15 +255,9 @@ def insert_part(part_data):
         conn.execute('BEGIN')
         cursor.execute('''
             INSERT INTO Part (Type, Capacity, Size, Speed, Brand, Model, Location, Part_sn)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'in')
         ''', (part_data['Type'], part_data['Capacity'], part_data['Size'], part_data['Speed'],
               part_data['Brand'], part_data['Model'], part_data['Location'], part_data['Part_sn']))
-
-        # SQL query to insert a new record into the Part_log table
-        cursor.execute('''
-            INSERT INTO Part_log (Part_sn, Part_status)
-            VALUES (?, 'in')
-        ''', (part_data['Part_sn'],))
 
         # Commit the changes
         conn.commit()
@@ -377,7 +356,7 @@ def check_part_in_inventory():
     conn = get_db()
     try:
         # Query to check if Part_sn exists in the Part table and is currently checked out
-        part = conn.execute('SELECT * FROM Part_log pl JOIN Part p on pl.Part_sn = p.Part_sn WHERE p.Part_sn = ?', (part_sn,)).fetchone()
+        part = conn.execute('SELECT * FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
 
         if part is None:
             return jsonify({'exists': False,
@@ -395,7 +374,7 @@ def check_part_in_inventory():
                 'actual': {'Type': part['Type'], 'Capacity': part['Capacity']}
             })
 		# Check if the existing part is already checked in
-        elif part['Part_status'] == 'in':
+        elif part['Status'] == 'in':
             if expected_part_status == 'in':
                 return jsonify({
                     'exists': False,
@@ -413,7 +392,7 @@ def check_part_in_inventory():
             else:
                 return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
         # Check if the existing part is already checked out
-        elif part['Part_status'] == 'out':
+        elif part['Status'] == 'out':
             if expected_part_status == 'out':
                 return jsonify({
                     'exists': False,
@@ -453,8 +432,8 @@ def update_part_status():
     conn = get_db()
     try:
         conn.execute('BEGIN')
-        # Update Part_log to set Part_status to 'in'
-        conn.execute('UPDATE Part_log SET Part_status = ? WHERE Part_sn = ?', (part_status, part_sn))
+        # Update Part to set Status to 'in'
+        conn.execute('UPDATE Part SET Status = ? WHERE Part_sn = ?', (part_status, part_sn))
         # Insert a new log entry with the current timestamp
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time) VALUES (?, ?, ?, ?, ?)', 
@@ -491,55 +470,6 @@ def update_part_status():
     finally:
         conn.close()
 
-
-@app.route('/reset_log_tables', methods=['POST'])
-def reset_log_tables():
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    try:
-        # Dropping tables
-        cursor.execute("DROP TABLE IF EXISTS Log;")
-        cursor.execute("DROP TABLE IF EXISTS Part_log;")
-        
-        # Recreating tables
-        cursor.execute('''
-            CREATE TABLE "Part_log" (
-                "Part_sn" TEXT NOT NULL UNIQUE,
-                "Part_status" TEXT NOT NULL CHECK("Part_status" IN ('in', 'out', 'deleted')),
-                FOREIGN KEY("Part_sn") REFERENCES "Part"("Part_sn")
-            );
-        ''')
-        cursor.execute('''
-            CREATE TABLE "Log" (
-                "TID" TEXT NOT NULL,
-                "Unit_sn" TEXT NOT NULL,
-                "Part_sn" TEXT NOT NULL,
-                "Part_status" TEXT NOT NULL,
-                "Date_time" TEXT,
-                CONSTRAINT "fk_l_status" FOREIGN KEY("Part_status") REFERENCES "Part_log"("Part_status"),
-                CONSTRAINT "fk_l_unitsn" FOREIGN KEY("Unit_sn") REFERENCES "Part_log"("Unit_sn"),
-                CONSTRAINT "fk_l_partsn" FOREIGN KEY("Part_sn") REFERENCES "Part_log"("Part_sn"),
-                CONSTRAINT "pk_l_datetime_tid" PRIMARY KEY("Date_time","TID")
-            );
-        ''')
-
-        # Inserting initial data into Part_log
-        parts_data = [
-            ('00000001', 'in'), ('00000002', 'in'), ('00000003', 'in'),
-            ('00000004', 'in'), ('00000005', 'in'), ('00000006', 'in'),
-            ('00000007', 'in'), ('00000008', 'in'), ('00000009', 'in'),
-            ('00000010', 'in'), ('00000022', 'out')
-        ]
-        cursor.executemany('INSERT INTO Part_log (Part_sn, Part_status) VALUES (?, ?);', parts_data)
-
-        conn.commit()  # Commit the changes
-        return jsonify({'status': 'success', 'message': 'Database has been reset successfully.'})
-    except sqlite3.Error as e:
-        conn.rollback()  # Roll back any changes if something goes wrong
-        return jsonify({'status': 'error', 'message': str(e)})
-    finally:
-        conn.close()
 
 @app.route('/automated_test')
 def automated_test():
