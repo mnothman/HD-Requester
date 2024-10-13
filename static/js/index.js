@@ -507,13 +507,15 @@ $(document).ready(function () {
     }
     function parseTextInput() {
         var textContent = document.getElementById('textarea-request').value;
+        var noteContent = document.getElementById('textarea-notes').value;
         var lines = textContent.trim().split('\n');
         var dataObject = {
             tid: null,
             unit_sn: null,
             parts: [],
             size: null,
-            serial_numbers: []
+            serial_numbers: [],
+            note: noteContent
         };
 
         if (lines.length < 4) { // Minimum number of lines for valid input
@@ -588,7 +590,8 @@ $(document).ready(function () {
                 Type: part.type,
                 Capacity: part.capacity,
                 Size: dataObject.size,
-                Part_status: 'in'
+                Part_status: 'in',
+                Note: dataObject.note
             };
 
             $.ajax({
@@ -607,7 +610,8 @@ $(document).ready(function () {
                                 Part_sn: partSn,
                                 TID: dataObject.tid,
                                 Unit_sn: dataObject.unit_sn,
-                                Part_status: 'in'
+                                Part_status: 'in',
+                                Note: dataObject.note
                             }),
                             success: function (updateResponse) {
                                 fetchAndDisplayParts();
@@ -841,7 +845,8 @@ $(document).ready(function () {
                 Capacity: part.capacity,
                 Size: dataObject.size,
                 Speed: dataObject.Speed,
-                Part_status: 'out'
+                Part_status: 'out',
+                Note: dataObject.note
             };
 
             $.ajax({
@@ -860,7 +865,8 @@ $(document).ready(function () {
                                 Part_sn: partSn,
                                 TID: dataObject.tid,
                                 Unit_sn: dataObject.unit_sn,
-                                Part_status: 'out'
+                                Part_status: 'out',
+                                Note: dataObject.note
                             }),
                             success: function (updateResponse) {
                                 fetchAndDisplayParts();
@@ -974,4 +980,23 @@ $(document).ready(function () {
         });
     } // end resetLogTables
 
+});
+
+//Code to display a text areas for adding a note to a part
+document.addEventListener("DOMContentLoaded", function() {
+    const toggleNotesBtn = document.getElementById("toggleNotesBtn");
+    const notesContainer = document.getElementById("notesContainer");
+    const textarea = document.getElementById("textarea-notes"); // Get the textarea
+
+    // Ensure notes container is hidden initially
+    notesContainer.style.display = "none";
+
+    toggleNotesBtn.onclick = function() {
+        if (notesContainer.style.display === "none") {
+            notesContainer.style.display = "block";
+        } else {
+            notesContainer.style.display = "none";
+            textarea.value = ""; // Clear the textarea when hiding
+        }
+    };
 });

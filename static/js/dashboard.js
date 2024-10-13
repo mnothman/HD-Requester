@@ -23,7 +23,7 @@ const colors = [
 $(document).ready(function () {
     loadInventory();
     $('#partsTable').DataTable();  // Initialize DataTables on the table
-    
+     
 });
 
 /// Function to sanitize IDs for CSS selectors
@@ -169,6 +169,7 @@ function updateDashboard(data) {
     <td>${data.Brand}</td>
     <td>${data.Model}</td>
     <td>${data.Part_sn}</td>
+    <td>${data.Note}</td>
 `;
     tableBody.appendChild(newRow);
 
