@@ -36,6 +36,27 @@ body {
     background: black;
 }
 
+/* Button hover effect */
+.btn-primary:hover {
+    background-color: rgb(26, 107, 30); 
+    border-color: rgb(26, 107, 30);    
+    color: white;          
+}
+.btn-secondary {
+    width: 40%;
+    border: black;
+    border-radius: 50px;
+    background: grey;
+    margin-top: 30px;
+  
+}
+.container{
+    display: flex;               
+    justify-content: center;   
+    align-items: center;         
+}
+
+
 .form-control {
     color: rgba(0, 0, 0, .87);
     border-bottom-color: rgba(0, 0, 0, .42);
@@ -66,47 +87,3 @@ h3 {
     color: blue;
     text-decoration: underline;
 }
-
-/* old css that was here for some reason but not linked */
-/* @import url('https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-*{
-    padding: 0;
-    margin: 0;
-    box-sizing: border-box;
-}
-body{
-  
-    background: radial-gradient(circle, rgba(126,219,124,1) 0%, rgba(126,127,237,1) 100%);
-    font-family: 'Tinos', sans-serif;
-}
-form{
-    width: 40%;
-    background-color: white;
-    padding: 80px;
-    border-radius: 20px;
-    margin-top: 150px;
-    opacity: 0.85;
-}
-.btn-primary{
-    width: 100%;
-    border: none;
-    border-radius: 50px;
-    background: radial-gradient(circle, rgba(126,219,124,1) 0%, rgba(126,127,237,1) 100%);
-}
-.form-control{
-    color: rgba(0,0,0,.87);
-    border-bottom-color: rgba(0,0,0,.42);
-    box-shadow: none !important;
-    border: none;
-    border-bottom: 1px solid;
-    border-radius: 4px 4px 0 0;
-}
-h3{
-    font-size: 2rem !important;
-    font-weight: 700;
-}
-@media only screen and (max-width: 600px){
-    form{
-        width: 100% !important;
-    }
-} */

@@ -85,7 +85,8 @@ SELECT l.Date_time,
            p.Speed, 
            p.Brand, 
            p.Model, 
-           l.Part_sn
+           l.Part_sn,
+           l.Note
     FROM Log l 
     JOIN Part p ON l.Part_sn = p.Part_sn 
     ORDER BY l.Date_time DESC
@@ -428,6 +429,7 @@ def update_part_status():
     tid = data['TID']
     unit_sn = data['Unit_sn']
     part_status = data['Part_status']  # update the part status given
+    note = data['Note']
 
     conn = get_db()
     try:
@@ -436,8 +438,8 @@ def update_part_status():
         conn.execute('UPDATE Part SET Status = ? WHERE Part_sn = ?', (part_status, part_sn))
         # Insert a new log entry with the current timestamp
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time) VALUES (?, ?, ?, ?, ?)', 
-                     (tid, unit_sn, part_sn, part_status, timestamp))
+        conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', 
+                     (tid, unit_sn, part_sn, part_status, timestamp, note))
 #        conn.commit()
  #       return jsonify({'status': 'success', 'message': 'Part status updated and logged successfully.'})
 
