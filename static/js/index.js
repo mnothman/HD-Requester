@@ -21,8 +21,10 @@ $(document).ready(function () {
 
 
 // Function to update the dashboard table with new records
+// I think this is the old funcitonality that no longer works, unable to log anything as DataTables renders data
 function updateDashboard(data) {
     console.log(data)
+    console.log('teststs')
 
 
     const tableBody = document.querySelector('#partsTable tbody');
@@ -68,7 +70,7 @@ function checkPartStatus(data) {
 // split here
 
 $(document).ready(function () {
-    fetchAndDisplayParts();
+    //fetchAndDisplayParts();
     setupRowClick();
 
     /* ====== EVENT LISTENERS ===== */
@@ -130,6 +132,7 @@ $(document).ready(function () {
 
 
     // Sort column
+    /*
     $('.sortable-column').click(function () {
         var column = $(this).text().trim();  // Get the column name
         var sortOrder = $(this).attr('data-sort-order') || 'asc'; //get current sort order, default to ascending
@@ -138,7 +141,7 @@ $(document).ready(function () {
 
         sortOrder = (sortOrder === 'asc' ? 'desc' : 'asc');
         $(this).attr('data-sort-order', sortOrder);
-    }); // end Sort column
+    });*/ // end Sort column
 
     // IN/OUT Buttons
     document.querySelectorAll('.btn-group .btn').forEach(function (button) {
@@ -491,10 +494,26 @@ $(document).ready(function () {
     }
 
 
+    function updateDataTable(){ // https://datatables.net/reference/api/row().data()
+        var table = new DataTable('#partsTable');
+ 
+        table.rows().every(function () {
+            var d = this.data();
+        
+            d.counter++; // update data source for the row
+        
+            this.invalidate(); // invalidate the data DataTables has cached for this row
+        });
+        
+        // Draw once all updates are done
+        table.draw();
+
+        console.log('test: new table should be drawn')
+    }
 
     // Function to submit part data to the server used by handleAddPart
     function submitPart(partData) {
-        console.log(partData);
+        //console.log(partData);
 
         $.ajax({
             url: '/add_part',
@@ -503,9 +522,10 @@ $(document).ready(function () {
             data: JSON.stringify(partData),
             success: function (response) {
                 if (response.status === 'success') {
-                    alert('Part added successfully.');
+                    alert('Part added successfully!!!!!.');
                     $('#Modal').css('display', 'none'); // Close the modal
-                    fetchAndDisplayParts();
+                    //fetchAndDisplayParts();
+                    updateDataTable();
                 } else {
                     alert('Failed to add part: ' + response.message);
                 }
@@ -926,7 +946,7 @@ $(document).ready(function () {
                                     Part_sn: $('#iPart_sn').val()
                                 };
 
-                                console.log(partData);
+                                //console.log(partData);
                                 submitPart(partData);
                             });
                         }
