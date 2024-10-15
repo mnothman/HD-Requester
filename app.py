@@ -85,8 +85,7 @@ SELECT l.Date_time,
            p.Speed, 
            p.Brand, 
            p.Model, 
-           l.Part_sn,
-           l.Note
+           l.Part_sn
     FROM Log l 
     JOIN Part p ON l.Part_sn = p.Part_sn 
     ORDER BY l.Date_time DESC
@@ -228,18 +227,20 @@ def get_part_capacities():
 def get_part_count():
     part_type = request.args.get('type')
     capacity = request.args.get('capacity')
+    size = request.args.get('size')
     db = get_db()
 
     query = '''
         SELECT COUNT(*) AS count FROM Part
-        WHERE Type = ? AND Capacity = ?
+        WHERE Type = ? AND Capacity = ? AND Size = ?
     '''
     try:
-        result = db.execute(query, (part_type, capacity)).fetchone()
+        result = db.execute(query, (part_type, capacity, size)).fetchone()
         count = result['count']
         return jsonify({'count': count})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 @app.route('/inventory')
 def inventory():
