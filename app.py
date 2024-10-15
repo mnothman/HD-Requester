@@ -85,8 +85,7 @@ SELECT l.Date_time,
            p.Speed, 
            p.Brand, 
            p.Model, 
-           l.Part_sn,
-           l.Note
+           l.Part_sn
     FROM Log l 
     JOIN Part p ON l.Part_sn = p.Part_sn 
     ORDER BY l.Date_time DESC
@@ -228,18 +227,20 @@ def get_part_capacities():
 def get_part_count():
     part_type = request.args.get('type')
     capacity = request.args.get('capacity')
+    size = request.args.get('size')
     db = get_db()
 
     query = '''
         SELECT COUNT(*) AS count FROM Part
-        WHERE Type = ? AND Capacity = ?
+        WHERE Type = ? AND Capacity = ? AND Size = ?
     '''
     try:
-        result = db.execute(query, (part_type, capacity)).fetchone()
+        result = db.execute(query, (part_type, capacity, size)).fetchone()
         count = result['count']
         return jsonify({'count': count})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 @app.route('/inventory')
 def inventory():
@@ -429,7 +430,6 @@ def update_part_status():
     tid = data['TID']
     unit_sn = data['Unit_sn']
     part_status = data['Part_status']  # update the part status given
-    note = data['Note']
 
     conn = get_db()
     try:
@@ -438,8 +438,8 @@ def update_part_status():
         conn.execute('UPDATE Part SET Status = ? WHERE Part_sn = ?', (part_status, part_sn))
         # Insert a new log entry with the current timestamp
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', 
-                     (tid, unit_sn, part_sn, part_status, timestamp, note))
+        conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time) VALUES (?, ?, ?, ?, ?)', 
+                     (tid, unit_sn, part_sn, part_status, timestamp))
 #        conn.commit()
  #       return jsonify({'status': 'success', 'message': 'Part status updated and logged successfully.'})
 
