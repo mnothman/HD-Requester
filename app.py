@@ -284,6 +284,7 @@ def insert_part(part_data):
 def add_part():
     
     data = request.get_json()
+    #data = {'Type': 'HD 3.5', 'timedate_updated': None, 'Capacity': '2TB', 'Size': 'Laptop', 'Speed': '', 'Brand': '', 'Model': '', 'Location': '', 'Status': '', 'Part_sn': '00022444'}
     print(data)
     result = insert_part(data)
     if result['status'] == 'success':

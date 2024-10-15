@@ -375,6 +375,8 @@ $(document).ready(function () {
                                 <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Brand</div>
                                 <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Model</div>
                                 <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Location</div>
+                                <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Status</div>
+                                <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">time_updated</div>
                                 <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Part SN</div>
                             </div>
 
@@ -408,6 +410,12 @@ $(document).ready(function () {
                                     <input type="text" id="iLocation" name="Location" style="width: 100%;" />
                                 </div>
                                 <div class="form-col" style="flex: 1; padding: 8px;">
+                                    <input type="text" id="iStatus" name="Status" style="width: 100%;" />
+                                </div>
+                                <div class="form-col" style="flex: 1; padding: 8px;">
+                                    <input type="text" id="iTimedate_updated" name="timedate_updated" style="width: 100%;" />
+                                </div>
+                                <div class="form-col" style="flex: 1; padding: 8px;">
                                     <input type="text" id="iPart_sn" name="Part SN" style="width: 100%;" />
                                 </div>
                             </div>
@@ -431,6 +439,7 @@ $(document).ready(function () {
                 Model: $('#iModel').val(),
                 Status: $('#iStatus').val(),
                 Location: $('#iLocation').val(),
+                timedate_updated: $('#iTimedate_updated').val(),
                 Part_sn: $('#iPart_sn').val()
             };
             submitPart(partData);
@@ -654,6 +663,7 @@ $(document).ready(function () {
                                   <th scope="col">Model&nbsp;</th>
                                   <th scope="col">Location&nbsp;</th>
                                   <th scope="col">Status&nbsp;</th>
+                                  <th scope="col">timedate_updated&nbsp;</th>
                                 </tr>
                                 <tr>
                                     <td>${response.part['Type']}</td>
@@ -664,6 +674,7 @@ $(document).ready(function () {
                                     <td>${response.part['Model']}</td>
                                     <td>${response.part['Location']}</td>
                                     <td>${response.part['Status']}</td>
+                                    <td>${response.part['timedate_updated']}</td>
                                 </tr>
                                 </tbody>
                                 </table>
@@ -682,6 +693,7 @@ $(document).ready(function () {
                                             <div style="flex: 1; padding: 8px;">Model</div>
                                             <div style="flex: 1; padding: 8px;">Location</div>
                                             <div style="flex: 1; padding: 8px;">Status</div>
+                                            <div style="flex: 1; padding: 8px;">timedate_updated</div>
                                         </div>
                                         <div style="display: flex;">
                                             <div style="flex: 1; padding: 8px;">${response.part['Type']}</div>
@@ -692,6 +704,7 @@ $(document).ready(function () {
                                             <div style="flex: 1; padding: 8px;">${response.part['Model']}</div>
                                             <div style="flex: 1; padding: 8px;">${response.part['Location']}</div>
                                             <div style="flex: 1; padding: 8px;">${response.part['Status']}</div>
+                                            <div style="flex: 1; padding: 8px;">${response.part['timedate_updated']}</div>
                                         </div>
                                     </div>`
                                 ;
@@ -732,6 +745,7 @@ $(document).ready(function () {
                                   <th scope="col">Model&nbsp;</th>
                                   <th scope="col">Location&nbsp;</th>
                                   <th scope="col">Status&nbsp;</th>
+                                  <th scope="col">timedate_updated&nbsp;</th>
                                 </tr>
                                 <tr>
                                     <td>${partData.Type}</td>
@@ -742,6 +756,7 @@ $(document).ready(function () {
                                     <td><input type="text" id="iModel" name="Model"></input></td>
                                     <td><input type="text" id="iLocation" name="Location"></input></td>
                                     <td><input type="text" id="iStatus" name="Status"></input></td>
+                                    <td><input type="text" id="iTimedate_updated" name="timedate_updated"></input></td>
                                 </tr>
                                 </tbody>
                                 </table>-->
@@ -761,6 +776,7 @@ $(document).ready(function () {
                                             <div style="flex: 1; padding: 8px;">Model</div>
                                             <div style="flex: 1; padding: 8px;">Location</div>
                                             <div style="flex: 1; padding: 8px;">Status</div>
+                                            <div style="flex: 1; padding: 8px;">timedate_updated</div>
                                             <div style="flex: 1; padding: 8px;">Part SN</div>
                                         </div>
                                         
@@ -802,6 +818,10 @@ $(document).ready(function () {
                                             </div>
 
                                             <div style="flex: 1; padding: 8px;">
+                                                <input type="text" id="iTimedate_updated" name="timedate_updated" style="width: 100%;" />
+                                            </div>
+
+                                            <div style="flex: 1; padding: 8px;">
                                                 <input type="text" id="iPart_sn" name="Part SN" style="width: 100%;" value="${partSn}"/>
                                             </div>
 
@@ -830,7 +850,10 @@ $(document).ready(function () {
                                     Brand: $('#iBrand').val(),
                                     Model: $('#iModel').val(),
                                     Location: $('#iLocation').val(),
-                                    Status: $('#iStatus').val(),
+                                    //Status: $('#iStatus').val(),
+                                    //timedate_updated: $('#iTimedate_updated').val(),
+                                    Status: "in",
+                                    timedate_updated: null,
                                     Part_sn: $('#iPart_sn').val()
                                 };
 
@@ -919,6 +942,7 @@ $(document).ready(function () {
                                   <th scope="col">Brand&nbsp;</th>
                                   <th scope="col">Model&nbsp;</th>
                                   <th scope="col">Status&nbsp;</th>
+                                  <th scope="col">timedate_updated&nbsp;</th>
                                   <th scope="col">Location&nbsp;</th>
                                 </tr>
                                 <tr>
@@ -929,6 +953,7 @@ $(document).ready(function () {
                                     <td>${response.part['Brand']}</td>
                                     <td>${response.part['Model']}</td>
                                     <td>${response.part['Status']}</td>
+                                    <td>${response.part['timedate_updated']}</td>
                                     <td>${response.part['Location']}</td>
                                 </tr>
                                 </tbody>
@@ -952,6 +977,7 @@ $(document).ready(function () {
                                   <th scope="col">Brand&nbsp;</th>
                                   <th scope="col">Model&nbsp;</th>
                                   <th scope="col">Status&nbsp;</th>
+                                  <th scope="col">timedate_updated&nbsp;</th>
                                   <th scope="col">Location&nbsp;</th>
                                 </tr>
                                 <tr>
@@ -963,6 +989,7 @@ $(document).ready(function () {
                                     <td><input type="text" id="iBrand" name="Brand"></input></td>
                                     <td><input type="text" id="iModel" name="Model"></input></td>
                                     <td><input type="text" id="iStatus" name="Status"></input></td>
+                                    <td><input type="text" id="iTimedate_updated" name="timedate_updated"></input></td>
                                     <td><input type="text" id="iLocation" name="Location"></input></td>
                                 </tr>
                                 </tbody>
