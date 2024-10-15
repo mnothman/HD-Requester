@@ -431,21 +431,34 @@ def update_part_status():
     part_status = data['Part_status']  # update the part status given
     note = data['Note']
 
+  # Handle cases where Location might not be included (like for check-out)
+    location = data['Location'] if 'Location' in data else None
+
     conn = get_db()
     try:
         conn.execute('BEGIN')
         # Update Part to set Status to 'in'
-        conn.execute('UPDATE Part SET Status = ? WHERE Part_sn = ?', (part_status, part_sn))
+        if location:
+            conn.execute('UPDATE Part SET Status = ?, Location = ? WHERE Part_sn = ?', (part_status, location, part_sn))
+        else:
+            conn.execute('UPDATE Part SET Status = ? WHERE Part_sn = ?', (part_status, part_sn))
+
         # Insert a new log entry with the current timestamp
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', 
-                     (tid, unit_sn, part_sn, part_status, timestamp, note))
+        # Do not update log with location since there is no column for location in the log table
+        conn.execute(
+            'INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', 
+            (tid, unit_sn, part_sn, part_status, timestamp, note)
+        )
 #        conn.commit()
  #       return jsonify({'status': 'success', 'message': 'Part status updated and logged successfully.'})
 
            # Fetch the part details
         part = conn.execute('SELECT * FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        if part is None:
+            return jsonify({'status': 'error', 'message': 'Part not found'}), 404
 
         conn.commit()
         return jsonify({
@@ -467,6 +480,7 @@ def update_part_status():
     except sqlite3.Error as e:
         # Roll back any changes if there was an error
         conn.rollback()
+        print(f"Database error: {e}")  # Log the error to the console
         return jsonify({'status': 'error', 'message': 'Database error: ' + str(e)}), 500
 
     finally:
