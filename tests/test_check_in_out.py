@@ -51,6 +51,16 @@ class PartAppTest(unittest.TestCase):
         self.driver.find_element(By.ID, "btn-submit-request").click()
         time.sleep(1)
 
+    def checkin_part_add_location(self):
+        # Add Part Location
+        locationInput = self.driver.find_element(By.ID, "locationInput")
+        locationInput.send_keys("Box 7 C5")
+        self.driver.find_element(By.ID, "locationSubmitBtn").click()
+        #######################
+        # The Modal should close by now, but Mo is still working on this part.
+        # Delete the line below once Mo has the Mo working.
+        self.driver.find_element(By.ID, "closeModalBtn").click()
+
     def checkout_part(self):
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
@@ -99,6 +109,7 @@ class PartAppTest(unittest.TestCase):
         # Test case: Check In Part
         print("\nTest 2: Check-in")
         self.checkin_part()
+        self.checkin_part_add_location()
 
         # Verify the database Part now has 5000 parts with Status='in'
         # Execute the SQL query
@@ -127,6 +138,7 @@ class PartAppTest(unittest.TestCase):
         self.close_modal()
         #replace
         self.checkin_part()
+        self.checkin_part_add_location()
 
     def test05_checkout_mismatch_type_capacity(self):
         # Test case: Check-out Error: Mismatch in type or capacity
