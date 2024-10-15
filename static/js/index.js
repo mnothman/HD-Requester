@@ -22,6 +22,9 @@ $(document).ready(function () {
 
 // Function to update the dashboard table with new records
 function updateDashboard(data) {
+    console.log(data)
+
+
     const tableBody = document.querySelector('#partsTable tbody');
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
@@ -258,6 +261,7 @@ $(document).ready(function () {
         return value !== null && value !== undefined ? value : '-';
     }
 
+    /*
     function fetchAndDisplayParts() {
         $.ajax({
             url: '/get_parts',
@@ -284,7 +288,7 @@ $(document).ready(function () {
                 console.error("Error fetching parts data: " + error);
             }
         });
-    } // end fetchAndDisplayParts
+    }*/ // end fetchAndDisplayParts
 
     // Modal
     function showModal(dataObject, htmlContent, onConfirm) {
