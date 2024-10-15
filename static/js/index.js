@@ -156,6 +156,7 @@ $(document).ready(function () {
         var activeButton = document.querySelector('.btn-active');
         if (activeButton.innerText == "IN") {
             checkInPart(parsedData);
+            // showLocationModal(parsedData);
         }
         else if (activeButton.innerText == "OUT") {
             checkOutPart(parsedData);
@@ -375,8 +376,6 @@ $(document).ready(function () {
                                 <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Brand</div>
                                 <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Model</div>
                                 <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Location</div>
-                                <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Status</div>
-                                <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">time_updated</div>
                                 <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Part SN</div>
                             </div>
 
@@ -410,12 +409,6 @@ $(document).ready(function () {
                                     <input type="text" id="iLocation" name="Location" style="width: 100%;" />
                                 </div>
                                 <div class="form-col" style="flex: 1; padding: 8px;">
-                                    <input type="text" id="iStatus" name="Status" style="width: 100%;" />
-                                </div>
-                                <div class="form-col" style="flex: 1; padding: 8px;">
-                                    <input type="text" id="iTimedate_updated" name="timedate_updated" style="width: 100%;" />
-                                </div>
-                                <div class="form-col" style="flex: 1; padding: 8px;">
                                     <input type="text" id="iPart_sn" name="Part SN" style="width: 100%;" />
                                 </div>
                             </div>
@@ -437,9 +430,7 @@ $(document).ready(function () {
                 Speed: $('#iSpeed').val(),
                 Brand: $('#iBrand').val(),
                 Model: $('#iModel').val(),
-                Status: $('#iStatus').val(),
                 Location: $('#iLocation').val(),
-                timedate_updated: $('#iTimedate_updated').val(),
                 Part_sn: $('#iPart_sn').val()
             };
             submitPart(partData);
@@ -495,8 +486,6 @@ $(document).ready(function () {
 
     // Function to submit part data to the server used by handleAddPart
     function submitPart(partData) {
-        console.log(partData);
-
         $.ajax({
             url: '/add_part',
             type: 'POST',
@@ -590,6 +579,29 @@ $(document).ready(function () {
         return dataObject;
     } // end parseTextInput
 
+    function showLocationModal(partData) {
+        const content = `
+            <p><strong>Enter the location for the part:</strong></p>
+            <form id="locationForm">
+                <label for="locationInput">Location:</label>
+                <input type="text" id="locationInput" name="location" style="width: 100%;" required>
+                <button type="button" id="locationSubmitBtn" class="btn btn-primary mb-2">OK</button>
+            </form>
+        `;
+        showModal({ title: 'Set Part Location' }, content);
+
+        // Handle form submission
+        $('#locationSubmitBtn').click(function () {
+            const location = $('#locationInput').val();
+            if (location) {
+                partData.Location = location; // Set the location in part data
+                checkInPart(partData); // Proceed to check in the part
+                $('#Modal').css('display', 'none'); // Close modal
+            } else {
+                alert('Please enter a location');
+            }
+        });
+    }
 
     function checkInPart(dataObject) {
         // Assume dataObject has already been parsed and structured
@@ -614,24 +626,98 @@ $(document).ready(function () {
                 success: function (response) {
                     if (response.exists) {
                         // If part exists and matches type and capacity, update its status to 'in'
-                        $.ajax({
-                            url: '/update_part_status',
-                            type: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify({
-                                Part_sn: partSn,
-                                TID: dataObject.tid,
-                                Unit_sn: dataObject.unit_sn,
-                                Part_status: 'in',
-                                Note: dataObject.note
-                            }),
-                            success: function (updateResponse) {
-                                fetchAndDisplayParts();
-                            },
-                            error: function (err) {
-                                console.error("Error updating part status: ", err);
+                        const partSpeed = response.part?.Speed || 'N/A';  // Fallback to 'N/A' if undefined
+                        const partBrand = response.part?.Brand || 'N/A';
+                        const partModel = response.part?.Model || 'N/A';
+
+                        const partDetails = `
+                        <tr>
+                            <td>${partData.Type}</td>
+                            <td>${partData.Capacity}</td>
+                            <td>${partData.Size}</td>
+                            <td>${partBrand}</td>
+                            <td>${partModel}</td>
+                            <td><input type="text" id="locationInput" name="location" style="width: 100%;" placeholder="Enter location"></td>
+                            <td>${partSn}</td>
+                        </tr>
+                    `;
+                        const modalContent = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Capacity</th>
+                                    <th>Size</th>
+                                    <th>Brand</th>
+                                    <th>Model</th>
+                                    <th>Location</th>
+                                    <th>Part SN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${partDetails}
+                            </tbody>
+                        </table>
+                        <button type="button" id="locationSubmitBtn" class="btn btn-primary mb-2">OK</button>
+                    `;
+                        showModal({ title: 'Enter Location for Check-in' }, modalContent);
+
+                        // Handle form submission
+                        $('#locationSubmitBtn').click(function () {
+                            const location = $('#locationInput').val();
+                            if (location) {
+                                const partUpdateData = {
+                                    Part_sn: partSn,
+                                    TID: dataObject.tid,
+                                    Unit_sn: dataObject.unit_sn,
+                                    Part_status: 'in',
+                                    Location: location,  // Add location from input
+                                    Note: dataObject.note
+                                };
+
+                                console.log("Data being sent to /update_part_status: ", partUpdateData);
+                                $('#locationSubmitBtn').prop('disabled', true);
+
+                                $.ajax({
+                                    url: '/update_part_status',
+                                    type: 'POST',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify(partUpdateData),
+                                    success: function (updateResponse) {
+                                        // fetchAndDisplayParts();
+                                        console.log("Part checked in successfully", updateResponse);  // Log the response to ensure success
+
+
+                                        if (updateResponse.status === 'success') {
+                                            // Close the modal
+                                            $('#Modal').css('display', 'none');
+
+                                            fetchAndDisplayParts();
+
+
+                                            // Trigger a page reload or fetch updated parts after a small delay
+                                            setTimeout(function () {
+                                                window.location.reload();  // Force page reload
+                                                // location.reload #1
+                                            }, 500);  // Delay to allow the modal to close smoothly
+                                        } else {
+                                            console.error("Failed to check in the part:", updateResponse.message);
+                                            alert("Failed to check in the part: " + updateResponse.message);
+                                        }
+                                    },
+                                    error: function (err) {
+                                        console.error("Error updating part status: ", err);
+                                        $('#locationSubmitBtn').prop('disabled', false);  // Re-enable button after failure
+                                        alert('Failed to update part status: ' + err.responseText); // (Remove later)
+
+                                    }
+                                });
+                                // $('#Modal').css('display', 'none'); // Close the modal
+                            } else {
+                                alert('Please enter a location');
                             }
                         });
+
                     } else {
                         // If part does not exist or does not match, show modal to add part
                         console.log(response.message); // Log the message from the server
@@ -662,8 +748,6 @@ $(document).ready(function () {
                                   <th scope="col">Brand&nbsp;</th>
                                   <th scope="col">Model&nbsp;</th>
                                   <th scope="col">Location&nbsp;</th>
-                                  <th scope="col">Status&nbsp;</th>
-                                  <th scope="col">timedate_updated&nbsp;</th>
                                 </tr>
                                 <tr>
                                     <td>${response.part['Type']}</td>
@@ -673,8 +757,6 @@ $(document).ready(function () {
                                     <td>${response.part['Brand']}</td>
                                     <td>${response.part['Model']}</td>
                                     <td>${response.part['Location']}</td>
-                                    <td>${response.part['Status']}</td>
-                                    <td>${response.part['timedate_updated']}</td>
                                 </tr>
                                 </tbody>
                                 </table>
@@ -692,8 +774,6 @@ $(document).ready(function () {
                                             <div style="flex: 1; padding: 8px;">Brand</div>
                                             <div style="flex: 1; padding: 8px;">Model</div>
                                             <div style="flex: 1; padding: 8px;">Location</div>
-                                            <div style="flex: 1; padding: 8px;">Status</div>
-                                            <div style="flex: 1; padding: 8px;">timedate_updated</div>
                                         </div>
                                         <div style="display: flex;">
                                             <div style="flex: 1; padding: 8px;">${response.part['Type']}</div>
@@ -703,8 +783,6 @@ $(document).ready(function () {
                                             <div style="flex: 1; padding: 8px;">${response.part['Brand']}</div>
                                             <div style="flex: 1; padding: 8px;">${response.part['Model']}</div>
                                             <div style="flex: 1; padding: 8px;">${response.part['Location']}</div>
-                                            <div style="flex: 1; padding: 8px;">${response.part['Status']}</div>
-                                            <div style="flex: 1; padding: 8px;">${response.part['timedate_updated']}</div>
                                         </div>
                                     </div>`
                                 ;
@@ -728,7 +806,7 @@ $(document).ready(function () {
                                 </div>
                             ` : '';
 
-
+                            // This below is for check in error when part is not in inventory
                             const content = `
                             <!--
                                 <p><strong>That part has never been added to inventory.<strong></p>
@@ -744,8 +822,6 @@ $(document).ready(function () {
                                    <th scope="col">Brand&nbsp;</th>
                                   <th scope="col">Model&nbsp;</th>
                                   <th scope="col">Location&nbsp;</th>
-                                  <th scope="col">Status&nbsp;</th>
-                                  <th scope="col">timedate_updated&nbsp;</th>
                                 </tr>
                                 <tr>
                                     <td>${partData.Type}</td>
@@ -755,8 +831,6 @@ $(document).ready(function () {
                                     <td><input type="text" id="iBrand" name="Brand"></input></td>
                                     <td><input type="text" id="iModel" name="Model"></input></td>
                                     <td><input type="text" id="iLocation" name="Location"></input></td>
-                                    <td><input type="text" id="iStatus" name="Status"></input></td>
-                                    <td><input type="text" id="iTimedate_updated" name="timedate_updated"></input></td>
                                 </tr>
                                 </tbody>
                                 </table>-->
@@ -775,8 +849,6 @@ $(document).ready(function () {
                                             <div style="flex: 1; padding: 8px;">Brand</div>
                                             <div style="flex: 1; padding: 8px;">Model</div>
                                             <div style="flex: 1; padding: 8px;">Location</div>
-                                            <div style="flex: 1; padding: 8px;">Status</div>
-                                            <div style="flex: 1; padding: 8px;">timedate_updated</div>
                                             <div style="flex: 1; padding: 8px;">Part SN</div>
                                         </div>
                                         
@@ -800,9 +872,8 @@ $(document).ready(function () {
                                             <div style="flex: 1; padding: 8px;">
                                                 <input type="text" id="ddSize" name="Type" style="width: 100%;" value="${partData.Size}"/>
                                             </div>
-                                            <div
                                             ${speedInput}
-                                            </div>
+                                            
                                             <div style="flex: 1; padding: 8px;">
                                                 <input type="text" id="iBrand" name="Brand" style="width: 100%;" />
                                             </div>
@@ -811,14 +882,6 @@ $(document).ready(function () {
                                             </div>
                                             <div style="flex: 1; padding: 8px;">
                                                 <input type="text" id="iLocation" name="Location" style="width: 100%;" />
-                                            </div>
-
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="iStatus" name="Status" style="width: 100%;" />
-                                            </div>
-
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="iTimedate_updated" name="timedate_updated" style="width: 100%;" />
                                             </div>
 
                                             <div style="flex: 1; padding: 8px;">
@@ -850,10 +913,6 @@ $(document).ready(function () {
                                     Brand: $('#iBrand').val(),
                                     Model: $('#iModel').val(),
                                     Location: $('#iLocation').val(),
-                                    //Status: $('#iStatus').val(),
-                                    //timedate_updated: $('#iTimedate_updated').val(),
-                                    Status: "in",
-                                    timedate_updated: null,
                                     Part_sn: $('#iPart_sn').val()
                                 };
 
@@ -908,6 +967,11 @@ $(document).ready(function () {
                             }),
                             success: function (updateResponse) {
                                 fetchAndDisplayParts();
+
+                                // refreshes page after checking out
+                                location.reload();
+                                print("location reload 2");
+                                // location.reload #2
                             },
                             error: function (err) {
                                 console.error("Error updating part status: ", err);
@@ -941,8 +1005,6 @@ $(document).ready(function () {
                                   <th scope="col">Speed&nbsp;</th>
                                   <th scope="col">Brand&nbsp;</th>
                                   <th scope="col">Model&nbsp;</th>
-                                  <th scope="col">Status&nbsp;</th>
-                                  <th scope="col">timedate_updated&nbsp;</th>
                                   <th scope="col">Location&nbsp;</th>
                                 </tr>
                                 <tr>
@@ -952,8 +1014,6 @@ $(document).ready(function () {
                                     <td>${response.part['Speed']}</td>
                                     <td>${response.part['Brand']}</td>
                                     <td>${response.part['Model']}</td>
-                                    <td>${response.part['Status']}</td>
-                                    <td>${response.part['timedate_updated']}</td>
                                     <td>${response.part['Location']}</td>
                                 </tr>
                                 </tbody>
@@ -961,47 +1021,72 @@ $(document).ready(function () {
                             `;
                             showModal({ title: 'Check-out Error: ' + response.message }, content);
                         }
+                        // This is if the part does not exist in database and needs to be added manually
                         else if (response.error == 'not_in_inventory') {
                             console.log("Error: " + response.message); // Handle other errors
+
                             const content = `
-                                <p><strong>That part has never been added to inventory.<strong></p>
+                                <p><strong>That part has never been added to inventory.</strong></p>
                                 <p>Serial number: ${partSn}</p>
                                 <p>Add item to inventory. Fill in the blanks.</p>
-                                <table width="100%" border="1">
-                                <tbody>
+                                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;">
+                                <thead>
+                                    <tr style="background-color: #f0f0f0; text-align: left; font-weight: bold;">
+                                        <th style="padding: 8px; width: 10%;">Type</th>
+                                        <th style="padding: 8px; width: 10%;">Capacity</th>
+                                        <th style="padding: 8px; width: 10%;">Size</th>
+                                        <th style="padding: 8px; width: 10%;">Speed</th>
+                                        <th style="padding: 8px; width: 10%;">Brand</th>
+                                        <th style="padding: 8px; width: 10%;">Model</th>
+                                        <th style="padding: 8px; width: 15%;">Location</th>
+                                    </tr>
                                 <tr>
-                                  <th scope="col">&nbsp;Type</th>
-                                  <th scope="col">Capacity&nbsp;</th>
-                                  <th scope="col">Size&nbsp;</th>
-                                  <th scope="col">Speed&nbsp;</th>
-                                  <th scope="col">Brand&nbsp;</th>
-                                  <th scope="col">Model&nbsp;</th>
-                                  <th scope="col">Status&nbsp;</th>
-                                  <th scope="col">timedate_updated&nbsp;</th>
-                                  <th scope="col">Location&nbsp;</th>
-                                </tr>
-                                <tr>
-                                    <td>${partData.Type}</td>
-
-                                    <td>${partData.Capacity}</td>
-                                    <td>${partData.Size}</td>
-                                    <td><input type="text" id="iSpeed" name="Speed"></input></td>
-                                    <td><input type="text" id="iBrand" name="Brand"></input></td>
-                                    <td><input type="text" id="iModel" name="Model"></input></td>
-                                    <td><input type="text" id="iStatus" name="Status"></input></td>
-                                    <td><input type="text" id="iTimedate_updated" name="timedate_updated"></input></td>
-                                    <td><input type="text" id="iLocation" name="Location"></input></td>
+                                    <td style="padding: 8px;">${partData.Type}</td>
+                                    <td style="padding: 8px;">${partData.Capacity}</td>
+                                    <td style="padding: 8px;">${partData.Size}</td>
+                                    <td style="padding: 8px;"><input type="text" id="iSpeed" name="Speed" style="width: 100%;"></td>
+                                    <td style="padding: 8px;"><input type="text" id="iBrand" name="Brand" style="width: 100%;"></td>
+                                    <td style="padding: 8px;"><input type="text" id="iModel" name="Model" style="width: 100%;"></td>
+                                    <td style="padding: 8px;"><input type="text" id="iLocation" name="Location" style="width: 100%;">
+                                </td>
                                 </tr>
                                 </tbody>
                                 </table>
+
+                                <div style="margin-top: 10px;">
+                                    <button type="button" id="add_btn" class="btn btn-primary mb-2">Add Part</button>
+                                </div>
                             `;
+
                             showModal({ title: 'Check-out Error: ' + response.message }, content);
+
+                            const originalPartData = partData;  // Store the original partData outside the click handler
+
+
+                            // Handle form submission when the user clicks "Add Part"
+                            $('#add_btn').click(function () {
+                                const newPartData = {
+                                    Type: originalPartData.Type, // Use the original Type
+                                    Capacity: $('#iCapacity').val(),
+                                    Size: $('#ddSize').val(),
+                                    Speed: $('#iSpeed').val(),
+                                    Brand: $('#iBrand').val(),
+                                    Model: $('#iModel').val(),
+                                    Location: $('#iLocation').val(),
+                                    Part_sn: partSn  // Use the original part serial number
+                                };
+
+                                console.log('Part data being sent:', newPartData);
+
+                                // Submit the part to the server
+                                submitPart(newPartData);  
+                            });
                         }
                     }
                 },
                 error: function (err) {
                     console.error("Error checking part out inventory: ", err);
-                    alert('Error checking part out inventory: ' + error);
+                    alert('Error checking part out inventory: ' + err);
                 }
             });
         });
@@ -1029,7 +1114,7 @@ $(document).ready(function () {
 });
 
 //Code to display a text areas for adding a note to a part
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const toggleNotesBtn = document.getElementById("toggleNotesBtn");
     const notesContainer = document.getElementById("notesContainer");
     const textarea = document.getElementById("textarea-notes"); // Get the textarea
@@ -1037,7 +1122,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Ensure notes container is hidden initially
     notesContainer.style.display = "none";
 
-    toggleNotesBtn.onclick = function() {
+    toggleNotesBtn.onclick = function () {
         if (notesContainer.style.display === "none") {
             notesContainer.style.display = "block";
         } else {
