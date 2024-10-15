@@ -589,7 +589,7 @@ $(document).ready(function () {
             </form>
         `;
         showModal({ title: 'Set Part Location' }, content);
-    
+
         // Handle form submission
         $('#locationSubmitBtn').click(function () {
             const location = $('#locationInput').val();
@@ -632,7 +632,7 @@ $(document).ready(function () {
 
                         const partDetails = `
                         <tr>
-                        <td>${partData.Type}</td>
+                            <td>${partData.Type}</td>
                             <td>${partData.Capacity}</td>
                             <td>${partData.Size}</td>
                             <td>${partBrand}</td>
@@ -641,7 +641,7 @@ $(document).ready(function () {
                             <td>${partSn}</td>
                         </tr>
                     `;
-                    const modalContent = `
+                        const modalContent = `
                         <table>
                             <thead>
                                 <tr>
@@ -660,42 +660,63 @@ $(document).ready(function () {
                         </table>
                         <button type="button" id="locationSubmitBtn" class="btn btn-primary mb-2">OK</button>
                     `;
-                    showModal({ title: 'Enter Location for Check-in' }, modalContent);
+                        showModal({ title: 'Enter Location for Check-in' }, modalContent);
 
-                    // Handle form submission
-                    $('#locationSubmitBtn').click(function () {
-                        const location = $('#locationInput').val();
-                        if (location) {
-                            const partUpdateData = {
-                                Part_sn: partSn,
-                                TID: dataObject.tid,
-                                Unit_sn: dataObject.unit_sn,
-                                Part_status: 'in',
-                                Location: location,  // Add location from input
-                                Note: dataObject.note
-                            };
+                        // Handle form submission
+                        $('#locationSubmitBtn').click(function () {
+                            const location = $('#locationInput').val();
+                            if (location) {
+                                const partUpdateData = {
+                                    Part_sn: partSn,
+                                    TID: dataObject.tid,
+                                    Unit_sn: dataObject.unit_sn,
+                                    Part_status: 'in',
+                                    Location: location,  // Add location from input
+                                    Note: dataObject.note
+                                };
 
-                            console.log("Data being sent to /update_part_status: ", partUpdateData);
-                            $('#locationSubmitBtn').prop('disabled', true);
+                                console.log("Data being sent to /update_part_status: ", partUpdateData);
+                                $('#locationSubmitBtn').prop('disabled', true);
 
-                            $.ajax({
-                                url: '/update_part_status',
-                                type: 'POST',
-                                contentType: 'application/json',
-                                data: JSON.stringify(partUpdateData),
-                                success: function (updateResponse) {
-                                    fetchAndDisplayParts();
-                                },
-                                error: function (err) {
-                                    console.error("Error updating part status: ", err);
-                                    $('#locationSubmitBtn').prop('disabled', false);  // Re-enable button after failure
-                                    // alert('Failed to update part status: ' + err.responseText);
-                                }
-                            });
-                        } else {
-                            alert('Please enter a location.');
-                        }
-                    });
+                                $.ajax({
+                                    url: '/update_part_status',
+                                    type: 'POST',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify(partUpdateData),
+                                    success: function (updateResponse) {
+                                        // fetchAndDisplayParts();
+                                        console.log("Part checked in successfully", updateResponse);  // Log the response to ensure success
+
+
+                                        if (updateResponse.status === 'success') {
+                                            // Close the modal
+                                            $('#Modal').css('display', 'none');
+                                
+                                            fetchAndDisplayParts();
+
+
+                                            // Trigger a page reload or fetch updated parts after a small delay
+                                            setTimeout(function () {
+                                                window.location.reload();  // Force page reload
+                                                // location.reload #1
+                                            }, 500);  // Delay to allow the modal to close smoothly
+                                        } else {
+                                            console.error("Failed to check in the part:", updateResponse.message);
+                                            alert("Failed to check in the part: " + updateResponse.message);
+                                        }
+                                    },
+                                    error: function (err) {
+                                        console.error("Error updating part status: ", err);
+                                        $('#locationSubmitBtn').prop('disabled', false);  // Re-enable button after failure
+                                        alert('Failed to update part status: ' + err.responseText); // (Remove later)
+                                        
+                                    }
+                                });
+                                // $('#Modal').css('display', 'none'); // Close the modal
+                            } else {
+                                alert('Please enter a location');
+                            }
+                        });
 
                     } else {
                         // If part does not exist or does not match, show modal to add part
@@ -947,6 +968,11 @@ $(document).ready(function () {
                             }),
                             success: function (updateResponse) {
                                 fetchAndDisplayParts();
+
+                                // refreshes page after checking out
+                                location.reload();
+                                print("location reload 2");
+                                // location.reload #2
                             },
                             error: function (err) {
                                 console.error("Error updating part status: ", err);
@@ -1060,7 +1086,7 @@ $(document).ready(function () {
 });
 
 //Code to display a text areas for adding a note to a part
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const toggleNotesBtn = document.getElementById("toggleNotesBtn");
     const notesContainer = document.getElementById("notesContainer");
     const textarea = document.getElementById("textarea-notes"); // Get the textarea
@@ -1068,7 +1094,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Ensure notes container is hidden initially
     notesContainer.style.display = "none";
 
-    toggleNotesBtn.onclick = function() {
+    toggleNotesBtn.onclick = function () {
         if (notesContainer.style.display === "none") {
             notesContainer.style.display = "block";
         } else {
