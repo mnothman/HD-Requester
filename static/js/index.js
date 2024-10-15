@@ -851,9 +851,8 @@ $(document).ready(function () {
                                             <div style="flex: 1; padding: 8px;">
                                                 <input type="text" id="ddSize" name="Type" style="width: 100%;" value="${partData.Size}"/>
                                             </div>
-                                            <div
                                             ${speedInput}
-                                            </div>
+                                            
                                             <div style="flex: 1; padding: 8px;">
                                                 <input type="text" id="iBrand" name="Brand" style="width: 100%;" />
                                             </div>
