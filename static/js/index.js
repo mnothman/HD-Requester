@@ -156,6 +156,7 @@ $(document).ready(function () {
         var activeButton = document.querySelector('.btn-active');
         if (activeButton.innerText == "IN") {
             checkInPart(parsedData);
+            // showLocationModal(parsedData);
         }
         else if (activeButton.innerText == "OUT") {
             checkOutPart(parsedData);
@@ -578,6 +579,29 @@ $(document).ready(function () {
         return dataObject;
     } // end parseTextInput
 
+    function showLocationModal(partData) {
+        const content = `
+            <p><strong>Enter the location for the part:</strong></p>
+            <form id="locationForm">
+                <label for="locationInput">Location:</label>
+                <input type="text" id="locationInput" name="location" style="width: 100%;" required>
+                <button type="button" id="locationSubmitBtn" class="btn btn-primary mb-2">OK</button>
+            </form>
+        `;
+        showModal({ title: 'Set Part Location' }, content);
+    
+        // Handle form submission
+        $('#locationSubmitBtn').click(function () {
+            const location = $('#locationInput').val();
+            if (location) {
+                partData.Location = location; // Set the location in part data
+                checkInPart(partData); // Proceed to check in the part
+                $('#Modal').css('display', 'none'); // Close modal
+            } else {
+                alert('Please enter a location');
+            }
+        });
+    }
 
     function checkInPart(dataObject) {
         // Assume dataObject has already been parsed and structured
@@ -602,24 +626,77 @@ $(document).ready(function () {
                 success: function (response) {
                     if (response.exists) {
                         // If part exists and matches type and capacity, update its status to 'in'
-                        $.ajax({
-                            url: '/update_part_status',
-                            type: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify({
+                        const partSpeed = response.part?.Speed || 'N/A';  // Fallback to 'N/A' if undefined
+                        const partBrand = response.part?.Brand || 'N/A';
+                        const partModel = response.part?.Model || 'N/A';
+
+                        const partDetails = `
+                        <tr>
+                        <td>${partData.Type}</td>
+                            <td>${partData.Capacity}</td>
+                            <td>${partData.Size}</td>
+                            <td>${partBrand}</td>
+                            <td>${partModel}</td>
+                            <td><input type="text" id="locationInput" name="location" style="width: 100%;" placeholder="Enter location"></td>
+                            <td>${partSn}</td>
+                        </tr>
+                    `;
+                    const modalContent = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Capacity</th>
+                                    <th>Size</th>
+                                    <th>Brand</th>
+                                    <th>Model</th>
+                                    <th>Location</th>
+                                    <th>Part SN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${partDetails}
+                            </tbody>
+                        </table>
+                        <button type="button" id="locationSubmitBtn" class="btn btn-primary mb-2">OK</button>
+                    `;
+                    showModal({ title: 'Enter Location for Check-in' }, modalContent);
+
+                    // Handle form submission
+                    $('#locationSubmitBtn').click(function () {
+                        const location = $('#locationInput').val();
+                        if (location) {
+                            const partUpdateData = {
                                 Part_sn: partSn,
                                 TID: dataObject.tid,
                                 Unit_sn: dataObject.unit_sn,
                                 Part_status: 'in',
+                                Location: location,  // Add location from input
                                 Note: dataObject.note
-                            }),
-                            success: function (updateResponse) {
-                                fetchAndDisplayParts();
-                            },
-                            error: function (err) {
-                                console.error("Error updating part status: ", err);
-                            }
-                        });
+                            };
+
+                            console.log("Data being sent to /update_part_status: ", partUpdateData);
+                            $('#locationSubmitBtn').prop('disabled', true);
+
+                            $.ajax({
+                                url: '/update_part_status',
+                                type: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify(partUpdateData),
+                                success: function (updateResponse) {
+                                    fetchAndDisplayParts();
+                                },
+                                error: function (err) {
+                                    console.error("Error updating part status: ", err);
+                                    $('#locationSubmitBtn').prop('disabled', false);  // Re-enable button after failure
+                                    // alert('Failed to update part status: ' + err.responseText);
+                                }
+                            });
+                        } else {
+                            alert('Please enter a location.');
+                        }
+                    });
+
                     } else {
                         // If part does not exist or does not match, show modal to add part
                         console.log(response.message); // Log the message from the server
