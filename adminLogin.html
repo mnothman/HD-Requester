@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link href="{{ url_for('static', filename='css/adminLogin.css') }}" rel="stylesheet">
+  <!-- Bootstrap Icon -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+
+  <title>Login</title>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <!-- Login form -->
+    <form id="form-login" class="mx-auto" action="/login" method="POST">
+      <h3 class="text-center">LOGIN</h3>
+
+      <!-- Error Message Display -->
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <div class="alert alert-danger" role="alert">
+        {{ messages[0] }}
+      </div>
+      {% endif %}
+      {% endwith %}
+
+      <div class="mb-3 mt-5">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" name="username" required>
+      </div>
+      <div class="mb-3 position-relative">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+        <button type="button" id="toggle-password" class="btn position-absolute end-0 top-50 translate-middle-y me-2" aria-label="Toggle password visibility">
+          <i class="bi bi-eye" id="eye-password"></i>
+        </button> 
+        <div id="forgotPass" class="form-text forgot-password">Forgot Password?</div>
+      </div>
+      <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="rememberMe" name="remember">
+        <label class="form-check-label" for="rememberMe">Remember Me</label>
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+      <!-- Cancel button -->
+      <div class="container">
+        <button id="cancelLogin" type="button" class="btn btn-secondary">Cancel</button>
+      </div>
+    </form>
+
+    <!-- Password Recovery Form -->
+    <form id="form-recover-password" class="mx-auto">
+      <h3 class="text-center">Recover Password</h3>
+
+      <div class="mb-3 mt-5">
+        <label for="security-answer1" class="form-label">Who is your favorite team?</label>
+        <input type="text" class="form-control" id="security-answer1" name="answer1" required autocomplete="off">
+      </div>
+      <div class="mb-3">
+        <label for="security-answer2" class="form-label">What is your favorite pet's name?</label>
+        <input type="text" class="form-control" id="security-answer2" name="answer2" required autocomplete="off">
+      </div>
+      <div class="mb-3">
+        <label for="security-answer3" class="form-label">Where is a good vacation spot?</label>
+        <input type="text" class="form-control" id="security-answer3" name="answer3" required autocomplete="off">
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+      <div id="message-questions"></div>
+
+            <!-- Cancel button -->
+       <div class="container">
+      <button id= "cancelRecovery" type="button" class="btn btn-secondary">Cancel</button>
+      </div>
+      <div id="message-questions"></div>
+  
+    </form>
+
+    <!-- Set New Password Form (Initially hidden) -->
+    <form id="form-new-password" class="mx-auto">
+      <h3 class="text-center">Set New Password</h3>
+
+      <div class="mb-3 mt-5 position-relative">
+        <label for="new-password" class="form-label">New Password</label>
+        <input type="password" class="form-control" id="new-password" name="new_password" required autocomplete="off">
+        <button type="button" id="toggle-new-password" class="btn position-absolute end-0 top-50 translate-middle-y me-2"
+          aria-label="Toggle password visibility">
+          <i class="bi bi-eye" id="eye-new-password"></i>
+        </button>
+      </div>
+
+      <div class="mb-3 position-relative">
+        <label for="verify-new-password" class="form-label">Verify New Password</label>
+        <input type="password" class="form-control" id="verify-new-password" name="verify_new_password" required
+          autocomplete="off">
+        <button type="button" id="toggle-verify-password" class="btn position-absolute end-0 top-50 translate-middle-y me-2"
+          aria-label="Toggle password visibility">
+          <i class="bi bi-eye" id="eye-verify-password"></i>
+        </button>
+
+      </div>
+      <button type="submit" class="btn btn-primary">Set Password</button>
+      <div id="message-password"></div>
+            <!-- Cancel button -->
+      <div class="container">
+        <button id= "cancelNewPass" type="button" class="btn btn-secondary">Cancel</button>
+        </div>
+    </form>
+  </div>
+
+
+  <!-- JavaScript for the Fade, Form Switch, and AJAX -->
+  <script src="{{ url_for('static', filename='js/adminLogin.js') }}"></script> <!-- Updated path -->
+
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+  
+    <script>
+      window.onload = function() {
+          const loginButton = document.getElementById('loginButton'); // Button for "Admin Login" or "Dashboard"
+          const logoutButton = document.getElementById('logoutButton'); // Button for "Log Out"
+      
+          // Check if the "admin_logged_in" cookie exists
+          const isLoggedIn = document.cookie.split('; ').find(row => row.startsWith('admin_logged_in='));
+      
+          if (isLoggedIn) {
+              loginButton.textContent = 'Dashboard';
+              logoutButton.style.display = 'block'; // Show the logout button when logged in
+              loginButton.addEventListener('click', function() {
+                  window.location.href = '/admin_dashboard';  // Redirect to the dashboard if logged in
+              });
+          } else {
+              loginButton.textContent = 'Admin Login';
+              logoutButton.style.display = 'none'; // Hide the logout button when logged out
+              loginButton.addEventListener('click', function() {
+                  window.location.href = '/login';  // Redirect to the login page if not logged in
+              });
+          }
+      
+          // Add event listener for the log out button
+          logoutButton.addEventListener('click', function() {
+              window.location.href = '/logout';  // Redirect to the logout route to delete cookies
+          });
+      };
+      </script>
+      
+      
+      <script>
+        window.onload = function() {
+          const rememberMeCheckbox = document.getElementById('rememberMe');
+          const usernameField = document.getElementById('username');
+          
+          // Check if the "remember_me" cookie exists
+          const rememberMeCookie = document.cookie.split('; ').find(row => row.startsWith('remember_me='));
+          
+          if (rememberMeCookie) {
+              const username = rememberMeCookie.split('=')[1];
+              usernameField.value = username;  // Pre-fill the username
+              rememberMeCheckbox.checked = true;  // Ensure the checkbox is checked
+          } else {
+              usernameField.value = '';  // No cookie, keep fields blank
+              rememberMeCheckbox.checked = false;
+          }
+      
+      // Add event listener for the "Remember Me" checkbox
+          if (isLoggedIn) {
+              // Auto-fill the username and password fields if the "Remember Me" option was used
+              usernameField.value = 'admin';  // Adjust based on actual implementation
+              passwordField.value = 'admin123'; // Adjust based on actual implementation
+              rememberMeCheckbox.checked = true;
+              window.location.href = '/admin_dashboard';  // Redirect to the dashboard if already logged in
+          }
+        };
+        </script>
+        
+      
+      
+    
+      <!-- Bootstrap Bundle with Popper -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    </body>
+    
+    </html>
