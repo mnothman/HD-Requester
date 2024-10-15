@@ -691,7 +691,7 @@ $(document).ready(function () {
                                         if (updateResponse.status === 'success') {
                                             // Close the modal
                                             $('#Modal').css('display', 'none');
-                                
+
                                             fetchAndDisplayParts();
 
 
@@ -709,7 +709,7 @@ $(document).ready(function () {
                                         console.error("Error updating part status: ", err);
                                         $('#locationSubmitBtn').prop('disabled', false);  // Re-enable button after failure
                                         alert('Failed to update part status: ' + err.responseText); // (Remove later)
-                                        
+
                                     }
                                 });
                                 // $('#Modal').css('display', 'none'); // Close the modal
@@ -806,7 +806,7 @@ $(document).ready(function () {
                                 </div>
                             ` : '';
 
-
+                            // This below is for check in error when part is not in inventory
                             const content = `
                             <!--
                                 <p><strong>That part has never been added to inventory.<strong></p>
@@ -1021,43 +1021,72 @@ $(document).ready(function () {
                             `;
                             showModal({ title: 'Check-out Error: ' + response.message }, content);
                         }
+                        // This is if the part does not exist in database and needs to be added manually
                         else if (response.error == 'not_in_inventory') {
                             console.log("Error: " + response.message); // Handle other errors
+
                             const content = `
-                                <p><strong>That part has never been added to inventory.<strong></p>
+                                <p><strong>That part has never been added to inventory.</strong></p>
                                 <p>Serial number: ${partSn}</p>
                                 <p>Add item to inventory. Fill in the blanks.</p>
-                                <table width="100%" border="1">
-                                <tbody>
+                                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;">
+                                <thead>
+                                    <tr style="background-color: #f0f0f0; text-align: left; font-weight: bold;">
+                                        <th style="padding: 8px; width: 10%;">Type</th>
+                                        <th style="padding: 8px; width: 10%;">Capacity</th>
+                                        <th style="padding: 8px; width: 10%;">Size</th>
+                                        <th style="padding: 8px; width: 10%;">Speed</th>
+                                        <th style="padding: 8px; width: 10%;">Brand</th>
+                                        <th style="padding: 8px; width: 10%;">Model</th>
+                                        <th style="padding: 8px; width: 15%;">Location</th>
+                                    </tr>
                                 <tr>
-                                  <th scope="col">&nbsp;Type</th>
-                                  <th scope="col">Capacity&nbsp;</th>
-                                  <th scope="col">Size&nbsp;</th>
-                                  <th scope="col">Speed&nbsp;</th>
-                                  <th scope="col">Brand&nbsp;</th>
-                                  <th scope="col">Model&nbsp;</th>
-                                  <th scope="col">Location&nbsp;</th>
-                                </tr>
-                                <tr>
-                                    <td>${partData.Type}</td>
-
-                                    <td>${partData.Capacity}</td>
-                                    <td>${partData.Size}</td>
-                                    <td><input type="text" id="iSpeed" name="Speed"></input></td>
-                                    <td><input type="text" id="iBrand" name="Brand"></input></td>
-                                    <td><input type="text" id="iModel" name="Model"></input></td>
-                                    <td><input type="text" id="iLocation" name="Location"></input></td>
+                                    <td style="padding: 8px;">${partData.Type}</td>
+                                    <td style="padding: 8px;">${partData.Capacity}</td>
+                                    <td style="padding: 8px;">${partData.Size}</td>
+                                    <td style="padding: 8px;"><input type="text" id="iSpeed" name="Speed" style="width: 100%;"></td>
+                                    <td style="padding: 8px;"><input type="text" id="iBrand" name="Brand" style="width: 100%;"></td>
+                                    <td style="padding: 8px;"><input type="text" id="iModel" name="Model" style="width: 100%;"></td>
+                                    <td style="padding: 8px;"><input type="text" id="iLocation" name="Location" style="width: 100%;">
+                                </td>
                                 </tr>
                                 </tbody>
                                 </table>
+
+                                <div style="margin-top: 10px;">
+                                    <button type="button" id="add_btn" class="btn btn-primary mb-2">Add Part</button>
+                                </div>
                             `;
+
                             showModal({ title: 'Check-out Error: ' + response.message }, content);
+
+                            const originalPartData = partData;  // Store the original partData outside the click handler
+
+
+                            // Handle form submission when the user clicks "Add Part"
+                            $('#add_btn').click(function () {
+                                const newPartData = {
+                                    Type: originalPartData.Type, // Use the original Type
+                                    Capacity: $('#iCapacity').val(),
+                                    Size: $('#ddSize').val(),
+                                    Speed: $('#iSpeed').val(),
+                                    Brand: $('#iBrand').val(),
+                                    Model: $('#iModel').val(),
+                                    Location: $('#iLocation').val(),
+                                    Part_sn: partSn  // Use the original part serial number
+                                };
+
+                                console.log('Part data being sent:', newPartData);
+
+                                // Submit the part to the server
+                                submitPart(newPartData);  
+                            });
                         }
                     }
                 },
                 error: function (err) {
                     console.error("Error checking part out inventory: ", err);
-                    alert('Error checking part out inventory: ' + error);
+                    alert('Error checking part out inventory: ' + err);
                 }
             });
         });
