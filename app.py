@@ -282,11 +282,14 @@ def insert_part(part_data):
 
 @app.route('/add_part', methods=['POST'])
 def add_part():
+    
     data = request.get_json()
+    print(data)
     result = insert_part(data)
     if result['status'] == 'success':
         return jsonify({'status': 'success', 'message': result['message']})
     else:
+        print(result['message'])
         return jsonify({'status': 'error', 'message': result['message']}), 400
 
 
