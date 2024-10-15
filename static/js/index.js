@@ -15,7 +15,7 @@ $(document).ready(function () {
             { "data": "Location" },
             { "data": "Part_sn" }  // Serial number column
         ],
-        "order": [[7, "asc"]]  // Sort by the Serial Number (Part_sn) column (index 7) in ascending order
+        "order": [[7, "dec"]]  // Sort by the Serial Number (Part_sn) column (index 7) in ascending order, "dec" is another option
     });
 });
 
@@ -36,6 +36,8 @@ function updateDashboard(data) {
 `;
     tableBody.appendChild(newRow);
 
+    
+
     // Reinitialize DataTables to recognize the new row
     $('#partsTable').DataTable().row.add($(newRow)).draw();
 }
@@ -53,6 +55,7 @@ function checkPartStatus(data) {
         .then(data => {
             if (data.status === 'success') {
                 updateDashboard(data.data);
+                console.log(data.data)
             } else {
                 console.error(data.message);
             }
@@ -68,7 +71,7 @@ $(document).ready(function () {
     /* ====== EVENT LISTENERS ===== */
 
     // Show/hide clear button functionality
-    $('#searchInput').on('input', function () {
+    /*$('#searchInput').on('input', function () {
         var searchTerm = $(this).val().toLowerCase();
 
         // Show clear button if more than one character is entered
@@ -120,7 +123,7 @@ $(document).ready(function () {
                 $(this).addClass('even-row');
             }
         });
-    });
+    });*/
 
 
     // Sort column
@@ -486,6 +489,8 @@ $(document).ready(function () {
 
     // Function to submit part data to the server used by handleAddPart
     function submitPart(partData) {
+        console.log(partData);
+
         $.ajax({
             url: '/add_part',
             type: 'POST',
@@ -1079,7 +1084,7 @@ $(document).ready(function () {
                                 console.log('Part data being sent:', newPartData);
 
                                 // Submit the part to the server
-                                submitPart(newPartData);  
+                                submitPart(newPartData);
                             });
                         }
                     }
