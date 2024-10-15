@@ -348,6 +348,7 @@ $(document).ready(function () {
         }); // end handleSort
     }
 
+    /*
     function updateTable(parts) {
         var tableBody = $('#partsTableBody');
         tableBody.empty(); // Clear existing rows
@@ -364,7 +365,7 @@ $(document).ready(function () {
                 `<td>${formatValue(part.Part_sn)}</td>` +
                 '</tr>');
         });
-    }
+    }*/
 
 
     function handleAddPart() {
