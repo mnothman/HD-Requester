@@ -256,10 +256,10 @@ def insert_part(part_data):
         # SQL query to insert a new part into the Part table
         conn.execute('BEGIN')
         cursor.execute('''
-            INSERT INTO Part (Type, Capacity, Size, Speed, Brand, Model, Location, Part_sn)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'in')
-        ''', (part_data['Type'], part_data['Capacity'], part_data['Size'], part_data['Speed'],
-              part_data['Brand'], part_data['Model'], part_data['Location'], part_data['Part_sn']))
+            INSERT INTO Part (Part_sn, Type, Capacity, Size, Speed, Brand, Model, Location, Status, timedate_updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'in', 'null')
+        ''', (part_data['Part_sn'], part_data['Type'], part_data['Capacity'], part_data['Size'], part_data['Speed'],
+              part_data['Brand'], part_data['Model'], part_data['Location']))
 
         # Commit the changes
         conn.commit()
@@ -283,11 +283,15 @@ def insert_part(part_data):
 
 @app.route('/add_part', methods=['POST'])
 def add_part():
+    
     data = request.get_json()
+    #data = {'Type': 'HD 3.5', 'timedate_updated': None, 'Capacity': '2TB', 'Size': 'Laptop', 'Speed': '', 'Brand': '', 'Model': '', 'Location': '', 'Status': '', 'Part_sn': '00022444'}
+    print(data)
     result = insert_part(data)
     if result['status'] == 'success':
         return jsonify({'status': 'success', 'message': result['message']})
     else:
+        print(result['message'])
         return jsonify({'status': 'error', 'message': result['message']}), 400
 
 
