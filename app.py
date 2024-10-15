@@ -255,10 +255,10 @@ def insert_part(part_data):
         # SQL query to insert a new part into the Part table
         conn.execute('BEGIN')
         cursor.execute('''
-            INSERT INTO Part (Type, Capacity, Size, Speed, Brand, Model, Location, Part_sn)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'in')
-        ''', (part_data['Type'], part_data['Capacity'], part_data['Size'], part_data['Speed'],
-              part_data['Brand'], part_data['Model'], part_data['Location'], part_data['Part_sn']))
+            INSERT INTO Part (Part_sn, Type, Capacity, Size, Speed, Brand, Model, Location, Status, timedate_updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'in', 'null')
+        ''', (part_data['Part_sn'], part_data['Type'], part_data['Capacity'], part_data['Size'], part_data['Speed'],
+              part_data['Brand'], part_data['Model'], part_data['Location']))
 
         # Commit the changes
         conn.commit()
