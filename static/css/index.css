@@ -191,6 +191,50 @@ nav {
 	cursor: pointer;
 }
 
+/* Context Menu Styles */
+.context-menu {
+	display: none;
+	position: absolute;
+	z-index: 10;
+	width: 150px;
+	background-color: white;
+	border: 1px solid #ddd;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	border-radius: 4px;
+}
+
+.context-menu ul {
+	list-style: none;
+	margin: 0;
+	padding: 10px;
+}
+
+.context-menu ul li {
+	padding: 10px;
+	cursor: pointer;
+	color: #333;
+	font-size: 14px;
+}
+
+.context-menu ul li:hover {
+	background-color: #f2f2f2;
+}
+
+/* Right-click menu item */
+.context-menu ul li.edit {
+	color: #007bff;
+}
+
+.context-menu ul li:hover.edit {
+	background-color: #e0f7ff;
+}
+
+/* Hide the context menu when clicking elsewhere */
+body.hide-menu .context-menu {
+	display: none;
+}
+
+
 /* MODAL */
 .background-modal {
 	display: none;

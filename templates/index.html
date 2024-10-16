@@ -92,6 +92,60 @@
 		</div>
 	</div>
 
+	<!-- Context Menu for Right-Click Actions -->
+	<div class="context-menu">
+  	  <ul>
+        <li class="edit">Edit</li>
+   	  </ul>
+	</div>
+
+	<!-- Modal for Editing Part Details -->
+	<div id="editPartModal" class="background-modal">
+		<div class="modal-form">
+			<div class="modal-header">
+				<h3>Edit Part</h3>
+				<button type="button" class="close" id="closeModalBtn">&times;</button>
+			</div>
+			<div class="modal-body">
+				<form id="editPartForm">
+					<div class="form-group">
+						<label for="editType">Type</label>
+						<input type="text" class="form-control" id="editType" name="type">
+					</div>
+					<div class="form-group">
+						<label for="editCapacity">Capacity</label>
+						<input type="text" class="form-control" id="editCapacity" name="capacity">
+					</div>
+					<div class="form-group">
+						<label for="editSize">Size</label>
+						<input type="text" class="form-control" id="editSize" name="size">
+					</div>
+					<div class="form-group">
+						<label for="editSpeed">Speed</label>
+						<input type="text" class="form-control" id="editSpeed" name="speed">
+					</div>
+					<div class="form-group">
+						<label for="editBrand">Brand</label>
+						<input type="text" class="form-control" id="editBrand" name="brand">
+					</div>
+					<div class="form-group">
+						<label for="editModel">Model</label>
+						<input type="text" class="form-control" id="editModel" name="model">
+					</div>
+					<div class="form-group">
+						<label for="editLocation">Location</label>
+						<input type="text" class="form-control" id="editLocation" name="location">
+					</div>
+					<div class="form-group">
+						<label for="editPart_sn">Serial Number</label>
+						<input type="text" class="form-control" id="editPart_sn" name="part_sn">
+					</div>
+					<button type="submit" class="btn btn-primary">Save Changes</button>
+				</form>
+			</div>
+		</div>
+	</div>
+
 	<div id="Modal" class="background-modal">
 		<div class="modal-form">
 			<div class="modal-header">

@@ -246,6 +246,88 @@ $(document).ready(function () {
         resetLogTables();
     });
 
+    // Handle right-click on table row
+    $('#partsTable tbody').on('contextmenu', 'tr', function (e) {
+        e.preventDefault();  // Prevent the default right-click context menu
+
+        // Get the part data from the row
+        const partData = $(this).children("td").map(function () {
+        return $(this).text();
+        }).get();
+
+        // Show context menu at mouse position
+        $(".context-menu").css({
+        display: "block",
+        left: e.pageX + "px",
+        top: e.pageY + "px"
+        }).data('partData', partData); // Attach part data to the context menu
+    });
+
+    // Hide context menu when clicking elsewhere
+    $(document).on("click", function () {
+        $(".context-menu").hide();
+    });
+
+    // Handle clicking "Edit" in the context menu
+    $(".context-menu .edit").on("click", function () {
+        const partData = $(".context-menu").data('partData');
+
+         // Populate the modal form with the part data
+        $("#editType").val(partData[0]);
+        $("#editCapacity").val(partData[1]);
+        $("#editSize").val(partData[2]);
+        $("#editSpeed").val(partData[3]);
+        $("#editBrand").val(partData[4]);
+        $("#editModel").val(partData[5]);
+        $("#editLocation").val(partData[6]);
+        $("#editPart_sn").val(partData[7]);
+
+        // Show the modal
+        $("#editPartModal").show();
+
+        // Hide the context menu
+        $(".context-menu").hide();
+    });
+
+    // Close the modal when clicking close button
+    $('#closeModalBtn').click(function () {
+        $('#editPartModal').hide();
+    });
+
+    // Handle form submission for editing a part
+    $('#editPartForm').submit(function (e) {
+        e.preventDefault();
+
+        const updatedPartData = {
+        type: $('#editType').val(),
+        capacity: $('#editCapacity').val(),
+        size: $('#editSize').val(),
+        speed: $('#editSpeed').val(),
+        brand: $('#editBrand').val(),
+        model: $('#editModel').val(),
+        location: $('#editLocation').val(),
+        part_sn: $('#editPart_sn').val()
+        };
+
+        // AJAX call to update the part in the database
+        $.ajax({
+            url: '/update_part',
+            type: 'POST',
+            data: JSON.stringify(updatedPartData),
+            contentType: 'application/json',
+            success: function (response) {
+                alert("Part updated successfully.");
+                location.reload();  // Reload the page to reflect the changes
+            },
+        error: function (xhr, status, error) {
+            alert("Error updating part: " + error);
+        }
+        });
+
+        // Close the modal after submission
+        $('#editPartModal').hide();
+    });
+
 
 
 
