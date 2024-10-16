@@ -43,25 +43,29 @@ def login():
         password = request.form['password']
         remember = 'remember' in request.form  # Check if "Remember Me" is selected
 
-        # Example authentication logic (replace with actual authentication)
-        if username == 'admin' and password == 'admin123':
-            response = make_response(redirect(url_for('admin_dashboard')))
-            
-            # Set the session cookie for the admin login state
-            response.set_cookie('admin_logged_in', 'true', max_age=3600)  # Expires in 1 hour
-            
-            if remember:
-                # Set the "Remember Me" cookie for 30 days
-                response.set_cookie('remember_me', username, max_age=30*24*60*60)  # 30 days for the remember me feature
-            else:
-                # If "Remember Me" is unchecked, delete the remember_me cookie if it exists
-                response.set_cookie('remember_me', '', expires=0)
+        # Validate login credentials
+        try: 
+            # Assuming hashed_password is defined elsewhere securely
+            if username == 'admin' and ph.verify(hashed_password, password):
+                response = make_response(redirect(url_for('admin_dashboard')))
+                
+                # Set the session cookie for the admin login state
+                response.set_cookie('admin_logged_in', 'true', max_age=3600)  # Expires in 1 hour
+                
+                if remember:
+                    # Set the "Remember Me" cookie for 30 days
+                    response.set_cookie('remember_me', username, max_age=30*24*60*60)  # 30 days for the remember me feature
+                else:
+                    # If "Remember Me" is unchecked, delete the remember_me cookie if it exists
+                    response.set_cookie('remember_me', '', expires=0)
 
-            return response
-        else:
+                return response
+            else:
+                flash('Invalid username or password')
+                return redirect(url_for('login'))
+        except Exception as e:
             flash('Invalid username or password')
             return redirect(url_for('login'))
-
     # Handle GET request: Check if the admin is already logged in
     if request.cookies.get('admin_logged_in'):
         return redirect(url_for('admin_dashboard'))  # Redirect if already logged in
