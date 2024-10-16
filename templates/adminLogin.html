@@ -114,6 +114,24 @@
     </form>
   </div>
 
+  <!-- JavaScript for Remember Me functionality -->
+  <script>
+    window.onload = function() {
+      // Check if the "remember_me" cookie exists
+      const rememberMeCookie = document.cookie.split('; ').find(row => row.startsWith('remember_me='));
+
+      if (rememberMeCookie) {
+        // Extract the username from the cookie
+        const username = rememberMeCookie.split('=')[1];
+
+        // Set the value of the username input field
+        document.getElementById('username').value = decodeURIComponent(username);
+        
+        // Automatically check the "Remember Me" checkbox
+        document.getElementById('rememberMe').checked = true;
+      }
+    };
+  </script>
 
   <!-- JavaScript for the Fade, Form Switch, and AJAX -->
   <script src="{{ url_for('static', filename='js/adminLogin.js') }}"></script> <!-- Updated path -->
