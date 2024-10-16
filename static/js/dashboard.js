@@ -178,6 +178,9 @@ function loadInventory() {
 
 // Function to update the dashboard table with new records
 function updateDashboard(data) {
+    console.log(data)
+
+
     const tableBody = document.querySelector('#partsTable tbody');
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
@@ -196,8 +199,11 @@ function updateDashboard(data) {
 `;
     tableBody.appendChild(newRow);
 
+
     // Reinitialize DataTables to recognize the new row
     $('#partsTable').DataTable().row.add($(newRow)).draw();
+
+    console.log('updateDashbaord')
 }
 
 

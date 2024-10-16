@@ -15,13 +15,18 @@ $(document).ready(function () {
             { "data": "Location" },
             { "data": "Part_sn" }  // Serial number column
         ],
-        "order": [[7, "asc"]]  // Sort by the Serial Number (Part_sn) column (index 7) in ascending order
+        "order": [[7, "dec"]]  // Sort by the Serial Number (Part_sn) column (index 7) in ascending order, "dec" is another option
     });
 });
 
 
 // Function to update the dashboard table with new records
+// I think this is the old funcitonality that no longer works, unable to log anything as DataTables renders data
 function updateDashboard(data) {
+    console.log(data)
+    console.log('teststs')
+
+
     const tableBody = document.querySelector('#partsTable tbody');
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
@@ -35,6 +40,8 @@ function updateDashboard(data) {
     <td>${data.Part_sn}</td>
 `;
     tableBody.appendChild(newRow);
+
+    
 
     // Reinitialize DataTables to recognize the new row
     $('#partsTable').DataTable().row.add($(newRow)).draw();
@@ -53,6 +60,7 @@ function checkPartStatus(data) {
         .then(data => {
             if (data.status === 'success') {
                 updateDashboard(data.data);
+                console.log(data.data)
             } else {
                 console.error(data.message);
             }
@@ -62,13 +70,13 @@ function checkPartStatus(data) {
 // split here
 
 $(document).ready(function () {
-    fetchAndDisplayParts();
+    //fetchAndDisplayParts();
     setupRowClick();
 
     /* ====== EVENT LISTENERS ===== */
 
     // Show/hide clear button functionality
-    $('#searchInput').on('input', function () {
+    /*$('#searchInput').on('input', function () {
         var searchTerm = $(this).val().toLowerCase();
 
         // Show clear button if more than one character is entered
@@ -120,10 +128,11 @@ $(document).ready(function () {
                 $(this).addClass('even-row');
             }
         });
-    });
+    });*/
 
 
     // Sort column
+    /*
     $('.sortable-column').click(function () {
         var column = $(this).text().trim();  // Get the column name
         var sortOrder = $(this).attr('data-sort-order') || 'asc'; //get current sort order, default to ascending
@@ -132,7 +141,7 @@ $(document).ready(function () {
 
         sortOrder = (sortOrder === 'asc' ? 'desc' : 'asc');
         $(this).attr('data-sort-order', sortOrder);
-    }); // end Sort column
+    });*/ // end Sort column
 
     // IN/OUT Buttons
     document.querySelectorAll('.btn-group .btn').forEach(function (button) {
@@ -255,6 +264,7 @@ $(document).ready(function () {
         return value !== null && value !== undefined ? value : '-';
     }
 
+    /*
     function fetchAndDisplayParts() {
         $.ajax({
             url: '/get_parts',
@@ -281,7 +291,7 @@ $(document).ready(function () {
                 console.error("Error fetching parts data: " + error);
             }
         });
-    } // end fetchAndDisplayParts
+    }*/ // end fetchAndDisplayParts
 
     // Modal
     function showModal(dataObject, htmlContent, onConfirm) {
@@ -341,6 +351,7 @@ $(document).ready(function () {
         }); // end handleSort
     }
 
+    /*
     function updateTable(parts) {
         var tableBody = $('#partsTableBody');
         tableBody.empty(); // Clear existing rows
@@ -357,7 +368,7 @@ $(document).ready(function () {
                 `<td>${formatValue(part.Part_sn)}</td>` +
                 '</tr>');
         });
-    }
+    }*/
 
 
     function handleAddPart() {
@@ -483,9 +494,27 @@ $(document).ready(function () {
     }
 
 
+    function updateDataTable(){ // https://datatables.net/reference/api/row().data()
+        var table = new DataTable('#partsTable');
+ 
+        table.rows().every(function () {
+            var d = this.data();
+        
+            d.counter++; // update data source for the row
+        
+            this.invalidate(); // invalidate the data DataTables has cached for this row
+        });
+        
+        // Draw once all updates are done
+        table.draw();
+
+        console.log('test: new table should be drawn')
+    }
 
     // Function to submit part data to the server used by handleAddPart
     function submitPart(partData) {
+        //console.log(partData);
+
         $.ajax({
             url: '/add_part',
             type: 'POST',
@@ -493,9 +522,10 @@ $(document).ready(function () {
             data: JSON.stringify(partData),
             success: function (response) {
                 if (response.status === 'success') {
-                    alert('Part added successfully.');
+                    alert('Part added successfully!!!!!.');
                     $('#Modal').css('display', 'none'); // Close the modal
-                    fetchAndDisplayParts();
+                    //fetchAndDisplayParts();
+                    updateDataTable();
                 } else {
                     alert('Failed to add part: ' + response.message);
                 }
@@ -916,7 +946,7 @@ $(document).ready(function () {
                                     Part_sn: $('#iPart_sn').val()
                                 };
 
-                                console.log(partData);
+                                //console.log(partData);
                                 submitPart(partData);
                             });
                         }
@@ -1079,7 +1109,7 @@ $(document).ready(function () {
                                 console.log('Part data being sent:', newPartData);
 
                                 // Submit the part to the server
-                                submitPart(newPartData);  
+                                submitPart(newPartData);
                             });
                         }
                     }
