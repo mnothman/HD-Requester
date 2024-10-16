@@ -31,17 +31,24 @@ function sanitizeId(id) {
     return id.replace(/[^a-zA-Z0-9-_]/g, '_'); // Replace invalid characters with underscores
 }
 
-// Function to fetch part counts for the selected capacity
-function fetchPartCount(type, capacity) {
-    return fetch(`/get_part_count?type=${type}&capacity=${capacity}`)
-        .then(response => response.json())
+// Function to fetch part counts for the selected capacity and size
+function fetchPartCount(type, capacity, size) {
+    return fetch(`/get_part_count?type=${type}&capacity=${capacity}&size=${size}`)
+        .then(response => response.json())  // Parse JSON response
         .then(data => {
-            return data.count;
+            if (data.count !== undefined) {
+                return data.count;  // Return the count
+            } else {
+                console.error('No count returned from API');
+                return 0;  // Return 0 if there's an issue
+            }
         })
         .catch(error => {
             console.error('Error fetching part count:', error);
+            return 0;  // Return 0 if there's an error
         });
 }
+
 
 // Function to fetch inventory data and dynamically create boxes
 function loadInventory() {
@@ -83,6 +90,8 @@ function loadInventory() {
                 const originalHeaderTitle = size === "null" ? `${type}` : `${type} ${size}`;
                 const headerTitle = $('<h3></h3>').text(originalHeaderTitle);
 
+                // Store original count for reset later
+                const originalCount = quantity; // Local variable to store the original count for Type and Size
 
                 // Set the background color based on cycling colors array
                 boxHeader.css('background-color', colors[index % colors.length]);
@@ -95,7 +104,7 @@ function loadInventory() {
 
                     // Add click handler to fetch count of parts for the selected capacity
                     li.on('click', function () {
-                        fetchPartCount(type, capacity).then(count => {
+                        fetchPartCount(type, capacity, size).then(count => {
                             boxData.text(`${count}`); // Update the quantity displayed
                             // Prepend the selected capacity to the original part type in the h3
                             headerTitle.text(`${capacity} ${originalHeaderTitle}`);
@@ -127,6 +136,9 @@ function loadInventory() {
                         // Reset the headerTitle to the originalHeaderTitle
                         headerTitle.text(originalHeaderTitle);
 
+                        // Reset the boxData back to the original count when closing
+                        boxData.text(`${originalCount}`); // Reset to original Type and Size count
+
                         boxHeader.on('transitionend', function () {
                             if (boxHeader.height() === 24) {
                                 boxHeader.css('z-index', '1');
@@ -138,23 +150,37 @@ function loadInventory() {
                 return box;
             }
 
-            // Iterate over the part Types and Sizes, fetch capacities, and populate the boxes
-            Promise.all(
-                Array.from(combinedMap.keys()).map((key, index) => {
-                    const [type, size] = key.split(' ');
-                    return fetchCapacities(type, size).then(() => {
-                        const { quantity, capacities } = combinedMap.get(key);
-                        const box = createBox(type, size, quantity, capacities, index);
-                        container.append(box); // Append each box to the container
+           // Iterate over the part Types and Sizes, fetch capacities, and populate the boxes
+           Promise.all(
+            Array.from(combinedMap.keys()).map((key, index) => {
+                const [type, size] = key.split(' ');
+                return fetchCapacities(type, size).then(() => {
+                    const { quantity, capacities } = combinedMap.get(key);
+                    const box = createBox(type, size, quantity, capacities, index);
+                    container.append(box); // Append each box to the container
+
+                    // Fetch the count for each capacity and update the box text
+                    capacities.forEach(capacity => {
+                        fetchPartCount(type, capacity).then(count => {
+                            const sanitizedId = sanitizeId(`${type}_${size}_${capacity}`);
+                            const boxData = document.getElementById(sanitizedId);
+                            if (boxData) {
+                                boxData.textContent = `Count: ${count}`;
+                            }
+                        });
                     });
-                })
-            ).catch(error => console.error('Error fetching capacities:', error));
-        })
-        .catch(error => console.error('Error fetching inventory data:', error));
+                });
+            })
+        ).catch(error => console.error('Error fetching capacities:', error));
+    })
+    .catch(error => console.error('Error fetching inventory data:', error));
 }
 
 // Function to update the dashboard table with new records
 function updateDashboard(data) {
+    console.log(data)
+
+
     const tableBody = document.querySelector('#partsTable tbody');
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
@@ -173,8 +199,11 @@ function updateDashboard(data) {
 `;
     tableBody.appendChild(newRow);
 
+
     // Reinitialize DataTables to recognize the new row
     $('#partsTable').DataTable().row.add($(newRow)).draw();
+
+    console.log('updateDashbaord')
 }
 
 

@@ -15,13 +15,18 @@ $(document).ready(function () {
             { "data": "Location" },
             { "data": "Part_sn" }  // Serial number column
         ],
-        "order": [[7, "asc"]]  // Sort by the Serial Number (Part_sn) column (index 7) in ascending order
+        "order": [[7, "dec"]]  // Sort by the Serial Number (Part_sn) column (index 7) in ascending order, "dec" is another option
     });
 });
 
 
 // Function to update the dashboard table with new records
+// I think this is the old funcitonality that no longer works, unable to log anything as DataTables renders data
 function updateDashboard(data) {
+    console.log(data)
+    console.log('teststs')
+
+
     const tableBody = document.querySelector('#partsTable tbody');
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
@@ -35,6 +40,8 @@ function updateDashboard(data) {
     <td>${data.Part_sn}</td>
 `;
     tableBody.appendChild(newRow);
+
+    
 
     // Reinitialize DataTables to recognize the new row
     $('#partsTable').DataTable().row.add($(newRow)).draw();
@@ -53,6 +60,7 @@ function checkPartStatus(data) {
         .then(data => {
             if (data.status === 'success') {
                 updateDashboard(data.data);
+                console.log(data.data)
             } else {
                 console.error(data.message);
             }
@@ -62,13 +70,13 @@ function checkPartStatus(data) {
 // split here
 
 $(document).ready(function () {
-    fetchAndDisplayParts();
+    //fetchAndDisplayParts();
     setupRowClick();
 
     /* ====== EVENT LISTENERS ===== */
 
     // Show/hide clear button functionality
-    $('#searchInput').on('input', function () {
+    /*$('#searchInput').on('input', function () {
         var searchTerm = $(this).val().toLowerCase();
 
         // Show clear button if more than one character is entered
@@ -120,10 +128,11 @@ $(document).ready(function () {
                 $(this).addClass('even-row');
             }
         });
-    });
+    });*/
 
 
     // Sort column
+    /*
     $('.sortable-column').click(function () {
         var column = $(this).text().trim();  // Get the column name
         var sortOrder = $(this).attr('data-sort-order') || 'asc'; //get current sort order, default to ascending
@@ -132,7 +141,7 @@ $(document).ready(function () {
 
         sortOrder = (sortOrder === 'asc' ? 'desc' : 'asc');
         $(this).attr('data-sort-order', sortOrder);
-    }); // end Sort column
+    });*/ // end Sort column
 
     // IN/OUT Buttons
     document.querySelectorAll('.btn-group .btn').forEach(function (button) {
@@ -156,6 +165,7 @@ $(document).ready(function () {
         var activeButton = document.querySelector('.btn-active');
         if (activeButton.innerText == "IN") {
             checkInPart(parsedData);
+            // showLocationModal(parsedData);
         }
         else if (activeButton.innerText == "OUT") {
             checkOutPart(parsedData);
@@ -246,6 +256,88 @@ $(document).ready(function () {
         resetLogTables();
     });
 
+    // Handle right-click on table row
+    $('#partsTable tbody').on('contextmenu', 'tr', function (e) {
+        e.preventDefault();  // Prevent the default right-click context menu
+
+        // Get the part data from the row
+        const partData = $(this).children("td").map(function () {
+        return $(this).text();
+        }).get();
+
+        // Show context menu at mouse position
+        $(".context-menu").css({
+        display: "block",
+        left: e.pageX + "px",
+        top: e.pageY + "px"
+        }).data('partData', partData); // Attach part data to the context menu
+    });
+
+    // Hide context menu when clicking elsewhere
+    $(document).on("click", function () {
+        $(".context-menu").hide();
+    });
+
+    // Handle clicking "Edit" in the context menu
+    $(".context-menu .edit").on("click", function () {
+        const partData = $(".context-menu").data('partData');
+
+         // Populate the modal form with the part data
+        $("#editType").val(partData[0]);
+        $("#editCapacity").val(partData[1]);
+        $("#editSize").val(partData[2]);
+        $("#editSpeed").val(partData[3]);
+        $("#editBrand").val(partData[4]);
+        $("#editModel").val(partData[5]);
+        $("#editLocation").val(partData[6]);
+        $("#editPart_sn").val(partData[7]);
+
+        // Show the modal
+        $("#editPartModal").show();
+
+        // Hide the context menu
+        $(".context-menu").hide();
+    });
+
+    // Close the modal when clicking close button
+    $('#closeModalBtn').click(function () {
+        $('#editPartModal').hide();
+    });
+
+    // Handle form submission for editing a part
+    $('#editPartForm').submit(function (e) {
+        e.preventDefault();
+
+        const updatedPartData = {
+        type: $('#editType').val(),
+        capacity: $('#editCapacity').val(),
+        size: $('#editSize').val(),
+        speed: $('#editSpeed').val(),
+        brand: $('#editBrand').val(),
+        model: $('#editModel').val(),
+        location: $('#editLocation').val(),
+        part_sn: $('#editPart_sn').val()
+        };
+
+        // AJAX call to update the part in the database
+        $.ajax({
+            url: '/update_part',
+            type: 'POST',
+            data: JSON.stringify(updatedPartData),
+            contentType: 'application/json',
+            success: function (response) {
+                alert("Part updated successfully.");
+                location.reload();  // Reload the page to reflect the changes
+            },
+        error: function (xhr, status, error) {
+            alert("Error updating part: " + error);
+        }
+        });
+
+        // Close the modal after submission
+        $('#editPartModal').hide();
+    });
+
 
 
 
@@ -254,6 +346,7 @@ $(document).ready(function () {
         return value !== null && value !== undefined ? value : '-';
     }
 
+    /*
     function fetchAndDisplayParts() {
         $.ajax({
             url: '/get_parts',
@@ -280,7 +373,7 @@ $(document).ready(function () {
                 console.error("Error fetching parts data: " + error);
             }
         });
-    } // end fetchAndDisplayParts
+    }*/ // end fetchAndDisplayParts
 
     // Modal
     function showModal(dataObject, htmlContent, onConfirm) {
@@ -340,6 +433,7 @@ $(document).ready(function () {
         }); // end handleSort
     }
 
+    /*
     function updateTable(parts) {
         var tableBody = $('#partsTableBody');
         tableBody.empty(); // Clear existing rows
@@ -356,7 +450,7 @@ $(document).ready(function () {
                 `<td>${formatValue(part.Part_sn)}</td>` +
                 '</tr>');
         });
-    }
+    }*/
 
 
     function handleAddPart() {
@@ -482,9 +576,27 @@ $(document).ready(function () {
     }
 
 
+    function updateDataTable(){ // https://datatables.net/reference/api/row().data()
+        var table = new DataTable('#partsTable');
+ 
+        table.rows().every(function () {
+            var d = this.data();
+        
+            d.counter++; // update data source for the row
+        
+            this.invalidate(); // invalidate the data DataTables has cached for this row
+        });
+        
+        // Draw once all updates are done
+        table.draw();
+
+        console.log('test: new table should be drawn')
+    }
 
     // Function to submit part data to the server used by handleAddPart
     function submitPart(partData) {
+        //console.log(partData);
+
         $.ajax({
             url: '/add_part',
             type: 'POST',
@@ -492,9 +604,10 @@ $(document).ready(function () {
             data: JSON.stringify(partData),
             success: function (response) {
                 if (response.status === 'success') {
-                    alert('Part added successfully.');
+                    alert('Part added successfully!!!!!.');
                     $('#Modal').css('display', 'none'); // Close the modal
-                    fetchAndDisplayParts();
+                    //fetchAndDisplayParts();
+                    updateDataTable();
                 } else {
                     alert('Failed to add part: ' + response.message);
                 }
@@ -578,6 +691,29 @@ $(document).ready(function () {
         return dataObject;
     } // end parseTextInput
 
+    function showLocationModal(partData) {
+        const content = `
+            <p><strong>Enter the location for the part:</strong></p>
+            <form id="locationForm">
+                <label for="locationInput">Location:</label>
+                <input type="text" id="locationInput" name="location" style="width: 100%;" required>
+                <button type="button" id="locationSubmitBtn" class="btn btn-primary mb-2">OK</button>
+            </form>
+        `;
+        showModal({ title: 'Set Part Location' }, content);
+
+        // Handle form submission
+        $('#locationSubmitBtn').click(function () {
+            const location = $('#locationInput').val();
+            if (location) {
+                partData.Location = location; // Set the location in part data
+                checkInPart(partData); // Proceed to check in the part
+                $('#Modal').css('display', 'none'); // Close modal
+            } else {
+                alert('Please enter a location');
+            }
+        });
+    }
 
     function checkInPart(dataObject) {
         // Assume dataObject has already been parsed and structured
@@ -602,24 +738,98 @@ $(document).ready(function () {
                 success: function (response) {
                     if (response.exists) {
                         // If part exists and matches type and capacity, update its status to 'in'
-                        $.ajax({
-                            url: '/update_part_status',
-                            type: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify({
-                                Part_sn: partSn,
-                                TID: dataObject.tid,
-                                Unit_sn: dataObject.unit_sn,
-                                Part_status: 'in',
-                                Note: dataObject.note
-                            }),
-                            success: function (updateResponse) {
-                                fetchAndDisplayParts();
-                            },
-                            error: function (err) {
-                                console.error("Error updating part status: ", err);
+                        const partSpeed = response.part?.Speed || 'N/A';  // Fallback to 'N/A' if undefined
+                        const partBrand = response.part?.Brand || 'N/A';
+                        const partModel = response.part?.Model || 'N/A';
+
+                        const partDetails = `
+                        <tr>
+                            <td>${partData.Type}</td>
+                            <td>${partData.Capacity}</td>
+                            <td>${partData.Size}</td>
+                            <td>${partBrand}</td>
+                            <td>${partModel}</td>
+                            <td><input type="text" id="locationInput" name="location" style="width: 100%;" placeholder="Enter location"></td>
+                            <td>${partSn}</td>
+                        </tr>
+                    `;
+                        const modalContent = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Capacity</th>
+                                    <th>Size</th>
+                                    <th>Brand</th>
+                                    <th>Model</th>
+                                    <th>Location</th>
+                                    <th>Part SN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${partDetails}
+                            </tbody>
+                        </table>
+                        <button type="button" id="locationSubmitBtn" class="btn btn-primary mb-2">OK</button>
+                    `;
+                        showModal({ title: 'Enter Location for Check-in' }, modalContent);
+
+                        // Handle form submission
+                        $('#locationSubmitBtn').click(function () {
+                            const location = $('#locationInput').val();
+                            if (location) {
+                                const partUpdateData = {
+                                    Part_sn: partSn,
+                                    TID: dataObject.tid,
+                                    Unit_sn: dataObject.unit_sn,
+                                    Part_status: 'in',
+                                    Location: location,  // Add location from input
+                                    Note: dataObject.note
+                                };
+
+                                console.log("Data being sent to /update_part_status: ", partUpdateData);
+                                $('#locationSubmitBtn').prop('disabled', true);
+
+                                $.ajax({
+                                    url: '/update_part_status',
+                                    type: 'POST',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify(partUpdateData),
+                                    success: function (updateResponse) {
+                                        // fetchAndDisplayParts();
+                                        console.log("Part checked in successfully", updateResponse);  // Log the response to ensure success
+
+
+                                        if (updateResponse.status === 'success') {
+                                            // Close the modal
+                                            $('#Modal').css('display', 'none');
+
+                                            fetchAndDisplayParts();
+
+
+                                            // Trigger a page reload or fetch updated parts after a small delay
+                                            setTimeout(function () {
+                                                window.location.reload();  // Force page reload
+                                                // location.reload #1
+                                            }, 500);  // Delay to allow the modal to close smoothly
+                                        } else {
+                                            console.error("Failed to check in the part:", updateResponse.message);
+                                            alert("Failed to check in the part: " + updateResponse.message);
+                                        }
+                                    },
+                                    error: function (err) {
+                                        console.error("Error updating part status: ", err);
+                                        $('#locationSubmitBtn').prop('disabled', false);  // Re-enable button after failure
+                                        alert('Failed to update part status: ' + err.responseText); // (Remove later)
+
+                                    }
+                                });
+                                // $('#Modal').css('display', 'none'); // Close the modal
+                            } else {
+                                alert('Please enter a location');
                             }
                         });
+
                     } else {
                         // If part does not exist or does not match, show modal to add part
                         console.log(response.message); // Log the message from the server
@@ -708,7 +918,7 @@ $(document).ready(function () {
                                 </div>
                             ` : '';
 
-
+                            // This below is for check in error when part is not in inventory
                             const content = `
                             <!--
                                 <p><strong>That part has never been added to inventory.<strong></p>
@@ -774,9 +984,8 @@ $(document).ready(function () {
                                             <div style="flex: 1; padding: 8px;">
                                                 <input type="text" id="ddSize" name="Type" style="width: 100%;" value="${partData.Size}"/>
                                             </div>
-                                            <div
                                             ${speedInput}
-                                            </div>
+                                            
                                             <div style="flex: 1; padding: 8px;">
                                                 <input type="text" id="iBrand" name="Brand" style="width: 100%;" />
                                             </div>
@@ -819,7 +1028,7 @@ $(document).ready(function () {
                                     Part_sn: $('#iPart_sn').val()
                                 };
 
-                                console.log(partData);
+                                //console.log(partData);
                                 submitPart(partData);
                             });
                         }
@@ -870,6 +1079,11 @@ $(document).ready(function () {
                             }),
                             success: function (updateResponse) {
                                 fetchAndDisplayParts();
+
+                                // refreshes page after checking out
+                                location.reload();
+                                print("location reload 2");
+                                // location.reload #2
                             },
                             error: function (err) {
                                 console.error("Error updating part status: ", err);
@@ -919,43 +1133,72 @@ $(document).ready(function () {
                             `;
                             showModal({ title: 'Check-out Error: ' + response.message }, content);
                         }
+                        // This is if the part does not exist in database and needs to be added manually
                         else if (response.error == 'not_in_inventory') {
                             console.log("Error: " + response.message); // Handle other errors
+
                             const content = `
-                                <p><strong>That part has never been added to inventory.<strong></p>
+                                <p><strong>That part has never been added to inventory.</strong></p>
                                 <p>Serial number: ${partSn}</p>
                                 <p>Add item to inventory. Fill in the blanks.</p>
-                                <table width="100%" border="1">
-                                <tbody>
+                                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;">
+                                <thead>
+                                    <tr style="background-color: #f0f0f0; text-align: left; font-weight: bold;">
+                                        <th style="padding: 8px; width: 10%;">Type</th>
+                                        <th style="padding: 8px; width: 10%;">Capacity</th>
+                                        <th style="padding: 8px; width: 10%;">Size</th>
+                                        <th style="padding: 8px; width: 10%;">Speed</th>
+                                        <th style="padding: 8px; width: 10%;">Brand</th>
+                                        <th style="padding: 8px; width: 10%;">Model</th>
+                                        <th style="padding: 8px; width: 15%;">Location</th>
+                                    </tr>
                                 <tr>
-                                  <th scope="col">&nbsp;Type</th>
-                                  <th scope="col">Capacity&nbsp;</th>
-                                  <th scope="col">Size&nbsp;</th>
-                                  <th scope="col">Speed&nbsp;</th>
-                                  <th scope="col">Brand&nbsp;</th>
-                                  <th scope="col">Model&nbsp;</th>
-                                  <th scope="col">Location&nbsp;</th>
-                                </tr>
-                                <tr>
-                                    <td>${partData.Type}</td>
-
-                                    <td>${partData.Capacity}</td>
-                                    <td>${partData.Size}</td>
-                                    <td><input type="text" id="iSpeed" name="Speed"></input></td>
-                                    <td><input type="text" id="iBrand" name="Brand"></input></td>
-                                    <td><input type="text" id="iModel" name="Model"></input></td>
-                                    <td><input type="text" id="iLocation" name="Location"></input></td>
+                                    <td style="padding: 8px;">${partData.Type}</td>
+                                    <td style="padding: 8px;">${partData.Capacity}</td>
+                                    <td style="padding: 8px;">${partData.Size}</td>
+                                    <td style="padding: 8px;"><input type="text" id="iSpeed" name="Speed" style="width: 100%;"></td>
+                                    <td style="padding: 8px;"><input type="text" id="iBrand" name="Brand" style="width: 100%;"></td>
+                                    <td style="padding: 8px;"><input type="text" id="iModel" name="Model" style="width: 100%;"></td>
+                                    <td style="padding: 8px;"><input type="text" id="iLocation" name="Location" style="width: 100%;">
+                                </td>
                                 </tr>
                                 </tbody>
                                 </table>
+
+                                <div style="margin-top: 10px;">
+                                    <button type="button" id="add_btn" class="btn btn-primary mb-2">Add Part</button>
+                                </div>
                             `;
+
                             showModal({ title: 'Check-out Error: ' + response.message }, content);
+
+                            const originalPartData = partData;  // Store the original partData outside the click handler
+
+
+                            // Handle form submission when the user clicks "Add Part"
+                            $('#add_btn').click(function () {
+                                const newPartData = {
+                                    Type: originalPartData.Type, // Use the original Type
+                                    Capacity: $('#iCapacity').val(),
+                                    Size: $('#ddSize').val(),
+                                    Speed: $('#iSpeed').val(),
+                                    Brand: $('#iBrand').val(),
+                                    Model: $('#iModel').val(),
+                                    Location: $('#iLocation').val(),
+                                    Part_sn: partSn  // Use the original part serial number
+                                };
+
+                                console.log('Part data being sent:', newPartData);
+
+                                // Submit the part to the server
+                                submitPart(newPartData);
+                            });
                         }
                     }
                 },
                 error: function (err) {
                     console.error("Error checking part out inventory: ", err);
-                    alert('Error checking part out inventory: ' + error);
+                    alert('Error checking part out inventory: ' + err);
                 }
             });
         });
@@ -983,7 +1226,7 @@ $(document).ready(function () {
 });
 
 //Code to display a text areas for adding a note to a part
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const toggleNotesBtn = document.getElementById("toggleNotesBtn");
     const notesContainer = document.getElementById("notesContainer");
     const textarea = document.getElementById("textarea-notes"); // Get the textarea
@@ -991,7 +1234,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // Ensure notes container is hidden initially
     notesContainer.style.display = "none";
 
-    toggleNotesBtn.onclick = function() {
+    toggleNotesBtn.onclick = function () {
         if (notesContainer.style.display === "none") {
             notesContainer.style.display = "block";
         } else {

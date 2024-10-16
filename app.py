@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, Flask, g, jsonify, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, current_app, Flask, g, jsonify, render_template, request, redirect, url_for, session, flash, make_response
 from datetime import datetime
 from argon2 import PasswordHasher
 import re, sqlite3
@@ -6,8 +6,8 @@ import re, sqlite3
 app = Flask(__name__)
 
 app.secret_key = 'key'
- 
-#Test Login
+
+# Test Login
 ph = PasswordHasher()
 hashed_password = ph.hash('admin123')
 
@@ -15,58 +15,91 @@ db_blueprint = Blueprint('db', __name__)
 DATABASE = 'refresh.db'
 
 def get_db():
-    
     if 'db' not in g:
         g.db = sqlite3.connect(DATABASE)
         g.db.row_factory = sqlite3.Row
     return g.db
-
 
 @db_blueprint.teardown_app_request
 def close_db(error):
     db = g.pop('db', None)
     if db is not None:
         db.close()
-
     current_app.logger.info("Database is connected")
-
 
 @app.route('/')
 def index():
-    return render_template('index.html')
-
+    admin_cookie = request.cookies.get('admin')
+    if admin_cookie == 'true':
+        return render_template('index.html', logged_in=True)
+    else:
+        return render_template('index.html', logged_in=False)
 
 # Login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+        username = request.form['username']
+        password = request.form['password']
+        remember = 'remember' in request.form  # Check if "Remember Me" is selected
 
         # Validate login credentials
         try: 
             # Assuming hashed_password is defined elsewhere securely
             if username == 'admin' and ph.verify(hashed_password, password):
-                # If login is successful, redirect to the admin dashboard
-                return redirect(url_for('admin_dashboard'))
+                response = make_response(redirect(url_for('admin_dashboard')))
+                
+                # Set the session cookie for the admin login state
+                response.set_cookie('admin_logged_in', 'true', max_age=3600)  # Expires in 1 hour
+                
+                if remember:
+                    # Set the "Remember Me" cookie for 30 days
+                    response.set_cookie('remember_me', username, max_age=30*24*60*60)  # 30 days for the remember me feature
+                else:
+                    # If "Remember Me" is unchecked, delete the remember_me cookie if it exists
+                    response.set_cookie('remember_me', '', expires=0)
+
+                return response
             else:
-                # If login fails, flash a message and render login again
-                flash('Invalid credentials, please try again.')
-                return redirect(url_for('login'))  # Redirect back to the login page
+                flash('Invalid username or password')
+                return redirect(url_for('login'))
         except Exception as e:
-            # This captures any exception, which could include verification failure or other issues
-            flash('Invalid credentials, please try again')
-            return redirect(url_for('login')) #redirect to login page once more
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+    # Handle GET request: Check if the admin is already logged in
+    if request.cookies.get('admin_logged_in'):
+        return redirect(url_for('admin_dashboard'))  # Redirect if already logged in
+    
+    # If not logged in, check if "remember_me" exists to pre-fill the login form
+    remember_me_username = request.cookies.get('remember_me')
+    return render_template('adminLogin.html', remember_me=remember_me_username)
 
-    # If GET request, render the login page
-    return render_template('adminLogin.html')
+
+@app.route('/logout')
+def logout():
+    response = make_response(redirect(url_for('index')))  # Redirect to the homepage
+    
+    # Remove the session cookie that tracks login state
+    response.set_cookie('admin_logged_in', '', expires=0)
+
+    # Do not delete the remember_me cookie, so it remains for future login pre-filling
+
+    return response
 
 
-# Dashboard route
-@app.route('/dashboard')
+
+
+# Admin Dashboard route
+@app.route('/admin_dashboard')
 def admin_dashboard():
     parts = record()
-    return render_template('dashboard.html', parts=parts)
+    # Check if the user is logged in by checking the 'admin_logged_in' cookie
+    if request.cookies.get('admin_logged_in'):
+        return render_template('dashboard.html',parts=parts)  # Render dashboard page
+    else:
+        # If not logged in, redirect back to login page
+        return redirect(url_for('login'))
+
 
 def record():
     db = get_db()
@@ -255,10 +288,10 @@ def insert_part(part_data):
         # SQL query to insert a new part into the Part table
         conn.execute('BEGIN')
         cursor.execute('''
-            INSERT INTO Part (Type, Capacity, Size, Speed, Brand, Model, Location, Part_sn)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'in')
-        ''', (part_data['Type'], part_data['Capacity'], part_data['Size'], part_data['Speed'],
-              part_data['Brand'], part_data['Model'], part_data['Location'], part_data['Part_sn']))
+            INSERT INTO Part (Part_sn, Type, Capacity, Size, Speed, Brand, Model, Location, Status, timedate_updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'in', 'null')
+        ''', (part_data['Part_sn'], part_data['Type'], part_data['Capacity'], part_data['Size'], part_data['Speed'],
+              part_data['Brand'], part_data['Model'], part_data['Location']))
 
         # Commit the changes
         conn.commit()
@@ -283,6 +316,7 @@ def insert_part(part_data):
 @app.route('/add_part', methods=['POST'])
 def add_part():
     data = request.get_json()
+    print(data)
     result = insert_part(data)
     if result['status'] == 'success':
         return jsonify({'status': 'success', 'message': result['message']})
