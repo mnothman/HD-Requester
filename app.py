@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, Flask, g, jsonify, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, current_app, Flask, g, jsonify, render_template, request, redirect, url_for, session, flash, make_response
 from datetime import datetime
 from argon2 import PasswordHasher
 import re, sqlite3
@@ -6,8 +6,8 @@ import re, sqlite3
 app = Flask(__name__)
 
 app.secret_key = 'key'
- 
-#Test Login
+
+# Test Login
 ph = PasswordHasher()
 hashed_password = ph.hash('admin123')
 
@@ -15,58 +15,91 @@ db_blueprint = Blueprint('db', __name__)
 DATABASE = 'refresh.db'
 
 def get_db():
-    
     if 'db' not in g:
         g.db = sqlite3.connect(DATABASE)
         g.db.row_factory = sqlite3.Row
     return g.db
-
 
 @db_blueprint.teardown_app_request
 def close_db(error):
     db = g.pop('db', None)
     if db is not None:
         db.close()
-
     current_app.logger.info("Database is connected")
-
 
 @app.route('/')
 def index():
-    return render_template('index.html')
-
+    admin_cookie = request.cookies.get('admin')
+    if admin_cookie == 'true':
+        return render_template('index.html', logged_in=True)
+    else:
+        return render_template('index.html', logged_in=False)
 
 # Login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+        username = request.form['username']
+        password = request.form['password']
+        remember = 'remember' in request.form  # Check if "Remember Me" is selected
 
         # Validate login credentials
         try: 
             # Assuming hashed_password is defined elsewhere securely
             if username == 'admin' and ph.verify(hashed_password, password):
-                # If login is successful, redirect to the admin dashboard
-                return redirect(url_for('admin_dashboard'))
+                response = make_response(redirect(url_for('admin_dashboard')))
+                
+                # Set the session cookie for the admin login state
+                response.set_cookie('admin_logged_in', 'true', max_age=3600)  # Expires in 1 hour
+                
+                if remember:
+                    # Set the "Remember Me" cookie for 30 days
+                    response.set_cookie('remember_me', username, max_age=30*24*60*60)  # 30 days for the remember me feature
+                else:
+                    # If "Remember Me" is unchecked, delete the remember_me cookie if it exists
+                    response.set_cookie('remember_me', '', expires=0)
+
+                return response
             else:
-                # If login fails, flash a message and render login again
-                flash('Invalid credentials, please try again.')
-                return redirect(url_for('login'))  # Redirect back to the login page
+                flash('Invalid username or password')
+                return redirect(url_for('login'))
         except Exception as e:
-            # This captures any exception, which could include verification failure or other issues
-            flash('Invalid credentials, please try again')
-            return redirect(url_for('login')) #redirect to login page once more
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+    # Handle GET request: Check if the admin is already logged in
+    if request.cookies.get('admin_logged_in'):
+        return redirect(url_for('admin_dashboard'))  # Redirect if already logged in
+    
+    # If not logged in, check if "remember_me" exists to pre-fill the login form
+    remember_me_username = request.cookies.get('remember_me')
+    return render_template('adminLogin.html', remember_me=remember_me_username)
 
-    # If GET request, render the login page
-    return render_template('adminLogin.html')
+
+@app.route('/logout')
+def logout():
+    response = make_response(redirect(url_for('index')))  # Redirect to the homepage
+    
+    # Remove the session cookie that tracks login state
+    response.set_cookie('admin_logged_in', '', expires=0)
+
+    # Do not delete the remember_me cookie, so it remains for future login pre-filling
+
+    return response
 
 
-# Dashboard route
-@app.route('/dashboard')
+
+
+# Admin Dashboard route
+@app.route('/admin_dashboard')
 def admin_dashboard():
     parts = record()
-    return render_template('dashboard.html', parts=parts)
+    # Check if the user is logged in by checking the 'admin_logged_in' cookie
+    if request.cookies.get('admin_logged_in'):
+        return render_template('dashboard.html',parts=parts)  # Render dashboard page
+    else:
+        # If not logged in, redirect back to login page
+        return redirect(url_for('login'))
+
 
 def record():
     db = get_db()
@@ -85,7 +118,8 @@ SELECT l.Date_time,
            p.Speed, 
            p.Brand, 
            p.Model, 
-           l.Part_sn
+           l.Part_sn,
+           l.Note
     FROM Log l 
     JOIN Part p ON l.Part_sn = p.Part_sn 
     ORDER BY l.Date_time DESC
@@ -227,20 +261,18 @@ def get_part_capacities():
 def get_part_count():
     part_type = request.args.get('type')
     capacity = request.args.get('capacity')
-    size = request.args.get('size')
     db = get_db()
 
     query = '''
         SELECT COUNT(*) AS count FROM Part
-        WHERE Type = ? AND Capacity = ? AND Size = ?
+        WHERE Type = ? AND Capacity = ?
     '''
     try:
-        result = db.execute(query, (part_type, capacity, size)).fetchone()
+        result = db.execute(query, (part_type, capacity)).fetchone()
         count = result['count']
         return jsonify({'count': count})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
-
 
 @app.route('/inventory')
 def inventory():
@@ -283,15 +315,12 @@ def insert_part(part_data):
 
 @app.route('/add_part', methods=['POST'])
 def add_part():
-    
     data = request.get_json()
-    #data = {'Type': 'HD 3.5', 'timedate_updated': None, 'Capacity': '2TB', 'Size': 'Laptop', 'Speed': '', 'Brand': '', 'Model': '', 'Location': '', 'Status': '', 'Part_sn': '00022444'}
     print(data)
     result = insert_part(data)
     if result['status'] == 'success':
         return jsonify({'status': 'success', 'message': result['message']})
     else:
-        print(result['message'])
         return jsonify({'status': 'error', 'message': result['message']}), 400
 
 
@@ -436,34 +465,21 @@ def update_part_status():
     part_status = data['Part_status']  # update the part status given
     note = data['Note']
 
-  # Handle cases where Location might not be included (like for check-out)
-    location = data['Location'] if 'Location' in data else None
-
     conn = get_db()
     try:
         conn.execute('BEGIN')
         # Update Part to set Status to 'in'
-        if location:
-            conn.execute('UPDATE Part SET Status = ?, Location = ? WHERE Part_sn = ?', (part_status, location, part_sn))
-        else:
-            conn.execute('UPDATE Part SET Status = ? WHERE Part_sn = ?', (part_status, part_sn))
-
+        conn.execute('UPDATE Part SET Status = ? WHERE Part_sn = ?', (part_status, part_sn))
         # Insert a new log entry with the current timestamp
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        # Do not update log with location since there is no column for location in the log table
-        conn.execute(
-            'INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', 
-            (tid, unit_sn, part_sn, part_status, timestamp, note)
-        )
+        conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', 
+                     (tid, unit_sn, part_sn, part_status, timestamp, note))
 #        conn.commit()
  #       return jsonify({'status': 'success', 'message': 'Part status updated and logged successfully.'})
 
            # Fetch the part details
         part = conn.execute('SELECT * FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-        if part is None:
-            return jsonify({'status': 'error', 'message': 'Part not found'}), 404
 
         conn.commit()
         return jsonify({
@@ -485,7 +501,6 @@ def update_part_status():
     except sqlite3.Error as e:
         # Roll back any changes if there was an error
         conn.rollback()
-        print(f"Database error: {e}")  # Log the error to the console
         return jsonify({'status': 'error', 'message': 'Database error: ' + str(e)}), 500
 
     finally:
