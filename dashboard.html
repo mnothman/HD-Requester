@@ -18,9 +18,9 @@
     <div class="header">
         <h1>Dashboard</h1>
         <!-- Sidebar Menu -->
-        <div class="sidebar">
-            <a href="/">Home</a>
-            <button id="logoutButton" class="btn btn-danger">Logout</button> <!-- Added logout button -->
+        <div class="sidebar d-flex justify-content-center align-items-center">
+            <a href="/" class="btn btn-primary me-2">Home</a> <!-- 'me-2' adds margin to the right of the Home button -->
+            <button id="logoutButton" class="btn btn-danger" style="display:none;">Log Out</button>
         </div>
     </div>
 
@@ -90,6 +90,29 @@
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js" defer></script>
     <!-- link to js for dashboard.html -->
     <script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script> <!-- Updated path -->
+
+    <script>
+        window.onload = function() {
+        const logoutButton = document.getElementById('logoutButton'); // Button for "Log Out"
+
+        // Check if the "admin_logged_in" cookie exists
+        const isLoggedIn = document.cookie.split('; ').find(row => row.startsWith('admin_logged_in='));
+
+        if (isLoggedIn) {
+            // User is logged in, show the logout button
+            logoutButton.style.display = 'block';
+        } else {
+            // User is not logged in, hide the logout button
+            logoutButton.style.display = 'none';
+        }
+
+        // Add event listener for the log out button
+        logoutButton.addEventListener('click', function() {
+            window.location.href = '/logout';  // Redirect to the logout route
+        });
+    };
+
+    </script>
 
 </body>
 

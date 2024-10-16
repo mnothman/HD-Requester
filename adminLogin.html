@@ -8,11 +8,13 @@
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
     integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-  <link href="{{ url_for('static', filename='css/adminLogin.css') }}" rel="stylesheet">
+  <!-- <link href="./style.css" rel="stylesheet" > -->
+  <link href="{{ url_for('static', filename='css/adminLogin.css') }}" rel="stylesheet"> <!-- Updated path -->
   <!-- Bootstrap Icon -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
 
   <title>Login</title>
+
 </head>
 
 <body>
@@ -47,9 +49,9 @@
         <label class="form-check-label" for="rememberMe">Remember Me</label>
       </div>
       <button type="submit" class="btn btn-primary">Login</button>
-      <!-- Cancel button -->
+          <!-- Cancel button -->
       <div class="container">
-        <button id="cancelLogin" type="button" class="btn btn-secondary">Cancel</button>
+      <button id="cancelLogin" type="button" class="btn btn-secondary">Cancel</button>
       </div>
     </form>
 
@@ -112,6 +114,24 @@
     </form>
   </div>
 
+  <!-- JavaScript for Remember Me functionality -->
+  <script>
+    window.onload = function() {
+      // Check if the "remember_me" cookie exists
+      const rememberMeCookie = document.cookie.split('; ').find(row => row.startsWith('remember_me='));
+
+      if (rememberMeCookie) {
+        // Extract the username from the cookie
+        const username = rememberMeCookie.split('=')[1];
+
+        // Set the value of the username input field
+        document.getElementById('username').value = decodeURIComponent(username);
+        
+        // Automatically check the "Remember Me" checkbox
+        document.getElementById('rememberMe').checked = true;
+      }
+    };
+  </script>
 
   <!-- JavaScript for the Fade, Form Switch, and AJAX -->
   <script src="{{ url_for('static', filename='js/adminLogin.js') }}"></script> <!-- Updated path -->
@@ -120,72 +140,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
     crossorigin="anonymous"></script>
-  
-    <script>
-      window.onload = function() {
-          const loginButton = document.getElementById('loginButton'); // Button for "Admin Login" or "Dashboard"
-          const logoutButton = document.getElementById('logoutButton'); // Button for "Log Out"
-      
-          // Check if the "admin_logged_in" cookie exists
-          const isLoggedIn = document.cookie.split('; ').find(row => row.startsWith('admin_logged_in='));
-      
-          if (isLoggedIn) {
-              loginButton.textContent = 'Dashboard';
-              logoutButton.style.display = 'block'; // Show the logout button when logged in
-              loginButton.addEventListener('click', function() {
-                  window.location.href = '/admin_dashboard';  // Redirect to the dashboard if logged in
-              });
-          } else {
-              loginButton.textContent = 'Admin Login';
-              logoutButton.style.display = 'none'; // Hide the logout button when logged out
-              loginButton.addEventListener('click', function() {
-                  window.location.href = '/login';  // Redirect to the login page if not logged in
-              });
-          }
-      
-          // Add event listener for the log out button
-          logoutButton.addEventListener('click', function() {
-              window.location.href = '/logout';  // Redirect to the logout route to delete cookies
-          });
-      };
-      </script>
-      
-      
-      <script>
-        window.onload = function() {
-          const rememberMeCheckbox = document.getElementById('rememberMe');
-          const usernameField = document.getElementById('username');
-          
-          // Check if the "remember_me" cookie exists
-          const rememberMeCookie = document.cookie.split('; ').find(row => row.startsWith('remember_me='));
-          
-          if (rememberMeCookie) {
-              const username = rememberMeCookie.split('=')[1];
-              usernameField.value = username;  // Pre-fill the username
-              rememberMeCheckbox.checked = true;  // Ensure the checkbox is checked
-          } else {
-              usernameField.value = '';  // No cookie, keep fields blank
-              rememberMeCheckbox.checked = false;
-          }
-      
-      // Add event listener for the "Remember Me" checkbox
-          if (isLoggedIn) {
-              // Auto-fill the username and password fields if the "Remember Me" option was used
-              usernameField.value = 'admin';  // Adjust based on actual implementation
-              passwordField.value = 'admin123'; // Adjust based on actual implementation
-              rememberMeCheckbox.checked = true;
-              window.location.href = '/admin_dashboard';  // Redirect to the dashboard if already logged in
-          }
-        };
-        </script>
-        
-      
-      
-    
-      <!-- Bootstrap Bundle with Popper -->
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-        crossorigin="anonymous"></script>
-    </body>
-    
-    </html>
+</body>
+
+</html>

@@ -22,8 +22,9 @@
 		<div class="logo">HD Requester</div>
 		<div class="adminLogin">
 			<a href="/login">
-				<button class="btnLogin" type="button">Admin Login</button>
+				<button id="loginButton" class="btnLogin" type="button">Admin Login</button>
 			</a>
+			<button id="logoutButton" class="btn btn-danger" style="display:none;">Log Out</button>
 		</div>
 	</nav>
 
@@ -39,7 +40,6 @@
 					<input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off">
 					<label id="btnOut" class="btn btn-secondary" for="btnradio2">OUT</label>
 				</div>
-
 
 				<button type="button" class="btn btn-secondary mt-3" id="toggleNotesBtn">Add Note</button>
 
@@ -127,53 +127,35 @@
 		window.onload = function() {
 			const loginButton = document.getElementById('loginButton'); // Button for "Admin Login" or "Dashboard"
 			const logoutButton = document.getElementById('logoutButton'); // Button for "Log Out"
-		
+			
 			// Check if the "admin_logged_in" cookie exists
 			const isLoggedIn = document.cookie.split('; ').find(row => row.startsWith('admin_logged_in='));
-		
+
 			if (isLoggedIn) {
+				// User is logged in
 				loginButton.textContent = 'Dashboard';
-				logoutButton.style.display = 'block'; // Show the logout button when logged in
+				logoutButton.style.display = 'block';  // Show the logout button
 				loginButton.addEventListener('click', function() {
-					window.location.href = '/admin_dashboard';  // Redirect to the dashboard if logged in
+					window.location.href = '/admin_dashboard';  // Redirect to dashboard if logged in
 				});
 			} else {
+				// User is logged out
 				loginButton.textContent = 'Admin Login';
-				logoutButton.style.display = 'none'; // Hide the logout button when logged out
+				logoutButton.style.display = 'none';  // Hide the logout button
 				loginButton.addEventListener('click', function() {
-					window.location.href = '/login';  // Redirect to the login page if not logged in
+					window.location.href = '/login';  // Redirect to login page if not logged in
 				});
 			}
-		
+
 			// Add event listener for the log out button
 			logoutButton.addEventListener('click', function() {
-				window.location.href = '/logout';  // Redirect to the logout route to delete cookies
+				window.location.href = '/logout';  // Redirect to the logout route
 			});
 		};
-		</script>
-		
-		
-	<script>
-		window.onload = function() {
-			const rememberMeCheckbox = document.getElementById('rememberMe');
-			const usernameField = document.getElementById('username');
-			const passwordField = document.getElementById('password');
-		
-			// Check if the "admin_logged_in" cookie exists
-			const isLoggedIn = document.cookie.split('; ').find(row => row.startsWith('admin_logged_in='));
-		
-			if (isLoggedIn) {
-				// Auto-fill the username and password fields based on the "Remember Me" option
-				usernameField.value = 'admin';  // Use stored username, adjust based on actual implementation
-				passwordField.value = '******'; // Use stored password, adjust based on actual implementation
-				rememberMeCheckbox.checked = true;
-		
-				// Redirect to the dashboard if already logged in
-				window.location.href = '/admin_dashboard';
-			}
-		};
-		</script>
-		
+
+
+	</script>
+
 </body>
 
 </html>

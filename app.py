@@ -88,9 +88,10 @@ def logout():
 # Admin Dashboard route
 @app.route('/admin_dashboard')
 def admin_dashboard():
+    parts = record()
     # Check if the user is logged in by checking the 'admin_logged_in' cookie
     if request.cookies.get('admin_logged_in'):
-        return render_template('dashboard.html')  # Render dashboard page
+        return render_template('dashboard.html',parts=parts)  # Render dashboard page
     else:
         # If not logged in, redirect back to login page
         return redirect(url_for('login'))
@@ -311,6 +312,7 @@ def insert_part(part_data):
 @app.route('/add_part', methods=['POST'])
 def add_part():
     data = request.get_json()
+    print(data)
     result = insert_part(data)
     if result['status'] == 'success':
         return jsonify({'status': 'success', 'message': result['message']})
