@@ -15,7 +15,7 @@ $(document).ready(function () {
             { "data": "Location" },
             { "data": "Part_sn" }  // Serial number column
         ],
-        "order": [[7, "dec"]]  // Sort by the Serial Number (Part_sn) column (index 7) in ascending order, "dec" is another option
+        "order": [[7, "asc"]]  // Sort by the Serial Number (Part_sn) column (index 7) in ascending order, "dec" is another option
     });
 });
 
