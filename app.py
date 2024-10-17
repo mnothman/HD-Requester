@@ -106,8 +106,8 @@ def record():
     query = '''
 SELECT l.Date_time, 
            CASE 
-               WHEN l.Part_status = 'in' THEN 'Check In' 
-               WHEN l.Part_status = 'out' THEN 'Check Out' 
+               WHEN l.Part_status = 'In' THEN 'Check In' 
+               WHEN l.Part_status = 'Out' THEN 'Check Out' 
                ELSE 'Unknown' 
            END AS Action,
            l.TID, 
@@ -189,7 +189,7 @@ def get_parts():
 
 def get_all_parts(search_type=None):
     db = get_db()
-    query = 'SELECT * FROM Part WHERE Status IS "in"'
+    query = 'SELECT * FROM Part WHERE Status IS "In"'
     args = ()
     if search_type:
         query += ' AND Type LIKE ?'
