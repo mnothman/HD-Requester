@@ -47,7 +47,7 @@ def login():
         try: 
             # Assuming hashed_password is defined elsewhere securely
             if username == 'admin' and ph.verify(hashed_password, password):
-                response = make_response(redirect(url_for('admin_dashboard')))
+                response = make_response(redirect(url_for('dashboard')))
                 
                 # Set the session cookie for the admin login state
                 response.set_cookie('admin_logged_in', 'true', max_age=3600)  # Expires in 1 hour
@@ -68,7 +68,7 @@ def login():
             return redirect(url_for('login'))
     # Handle GET request: Check if the admin is already logged in
     if request.cookies.get('admin_logged_in'):
-        return redirect(url_for('admin_dashboard'))  # Redirect if already logged in
+        return redirect(url_for('dashboard'))  # Redirect if already logged in
     
     # If not logged in, check if "remember_me" exists to pre-fill the login form
     remember_me_username = request.cookies.get('remember_me')
@@ -90,8 +90,8 @@ def logout():
 
 
 # Admin Dashboard route
-@app.route('/admin_dashboard')
-def admin_dashboard():
+@app.route('/dashboard')
+def dashboard():
     parts = record()
     # Check if the user is logged in by checking the 'admin_logged_in' cookie
     if request.cookies.get('admin_logged_in'):
