@@ -769,9 +769,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
                                     <div style="margin-top: 10px;">
                                         <button type="button" id="add_btn" class="btn btn-primary mb-2">Add Part</button>	
                                     </div>
-
-                                    
-
                             `;
                             showModal({ title: 'Check-in Error: ' + response.message }, content);
 
@@ -792,8 +789,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
                                     Location: $('#iLocation').val(),
                                     Part_sn: $('#iPart_sn').val()
                                 };
-
-                                //console.log(partData);
                                 submitPart(partData);
                             });
                         }
@@ -921,29 +916,59 @@ function showModal(dataObject, htmlContent, onConfirm) {
                             ` : '';
                             const content = `
                                 <p><strong>That part has never been added to inventory.</strong></p>
-                                <p>Serial number: ${partSn}</p>
-                                <p>Add item to inventory. Fill in the blanks.</p>
-                                <div class="modal-table-wrapper">
-                                    <div class="modal-table-header">
-                                        <div style="flex: 1; padding: 8px;">Type</div>
-                                        <div style="flex: 1; padding: 8px;">Capacity</div>
-                                        <div style="flex: 1; padding: 8px;">Size</div>
-                                            ${speedField}
-                                        <div style="flex: 1; padding: 8px;">Brand</div>
-                                        <div style="flex: 1; padding: 8px;">Model</div>
+                                    <p>Serial number: ${partSn}</p>
+                                    <p>Add item to inventory. Fill in the blanks.</p>
+
+                                    <div class="modal-table-wrapper">
+                                        <div class="modal-table-header">
+                                            <div style="flex: 1; padding: 8px;">Type</div>
+                                            <div style="flex: 1; padding: 8px;">Capacity</div>
+                                            <div style="flex: 1; padding: 8px;">Size</div>
+                                               ${speedField}
+                                            <div style="flex: 1; padding: 8px;">Brand</div>
+                                            <div style="flex: 1; padding: 8px;">Model</div>
+                                            <div style="flex: 1; padding: 8px;">Location</div>
+                                            <div style="flex: 1; padding: 8px;">Part SN</div>
+                                        </div>
+                                        
+                                        <!-- Data Row -->
+                                        <div style="display: flex;">
+                                            <div style="flex: 1; padding: 8px;">
+                                                <input type="text" id="iType" name="Type" style="width: 100%;" value="${partData.Type}"/>
+                                            </div>
+
+                                            <div style="flex: 1; padding: 8px;">
+                                                <input type="text" id="iCapacity" name="Type" style="width: 100%;" value="${partData.Capacity}"/>
+                                            </div>
+
+                                            <div style="flex: 1; padding: 8px;">
+                                                <input type="text" id="ddSize" name="Type" style="width: 100%;" value="${partData.Size}"/>
+                                            </div>
+                                            ${speedInput}
+                                            
+                                            <div style="flex: 1; padding: 8px;">
+                                                <input type="text" id="iBrand" name="Brand" style="width: 100%;" />
+                                            </div>
+                                            <div style="flex: 1; padding: 8px;">
+                                                <input type="text" id="iModel" name="Model" style="width: 100%;" />
+                                            </div>
+                                            <div style="flex: 1; padding: 8px;">
+                                                <input type="text" id="iLocation" name="Location" style="width: 100%;" />
+                                            </div>
+
+                                            <div style="flex: 1; padding: 8px;">
+                                                <input type="text" id="iPart_sn" name="Part SN" style="width: 100%;" value="${partSn}"/>
+                                            </div>
+
+                                            
+                                        </div>
+
+                                        
                                     </div>
-                                    <div style="display: flex;">
-                                        <div style="flex: 1; padding: 8px;">${partData.Type}</div>
-                                        <div style="flex: 1; padding: 8px;">${partData.Capacity}</div>
-                                        <div style="flex: 1; padding: 8px;">${partData.Size}</div>
-                                        ${speedInput}
-                                        <div style="flex: 1; padding: 8px;"><input type="text" id="iBrand" name="Brand" style="width: 100%;"></div>
-                                        <div style="flex: 1; padding: 8px;"><input type="text" id="iModel" name="Model" style="width: 100%;"></div>
-                                        <div style="flex: 1; padding: 8px;"><input type="text" id="iLocation" name="Location" style="width: 100%;"></div>
-                                </div>
-                                <div style="margin-top: 10px;">
-                                    <button type="button" id="add_btn" class="btn btn-primary mb-2">Add Part</button>
-                                </div>
+
+                                    <div style="margin-top: 10px;">
+                                        <button type="button" id="add_btn" class="btn btn-primary mb-2">Add Part</button>	
+                                    </div>
                             `;
 
                             showModal({ title: 'Check-out Error: ' + response.message }, content);
@@ -953,21 +978,21 @@ function showModal(dataObject, htmlContent, onConfirm) {
 
                             // Handle form submission when the user clicks "Add Part"
                             $('#add_btn').click(function () {
-                                const newPartData = {
-                                    Type: originalPartData.Type, // Use the original Type
+                                const partData = {
+                                    TID: '',
+                                    Unit_sn: '',
+                                    Part_status: 'Out',
+                                    Note: 'New part added to inventory',
+                                    Type: $('#iType').val(),
                                     Capacity: $('#iCapacity').val(),
                                     Size: $('#ddSize').val(),
                                     Speed: $('#iSpeed').val(),
                                     Brand: $('#iBrand').val(),
                                     Model: $('#iModel').val(),
                                     Location: $('#iLocation').val(),
-                                    Part_sn: partSn  // Use the original part serial number
+                                    Part_sn: $('#iPart_sn').val()
                                 };
-
-                                console.log('Part data being sent:', newPartData);
-
-                                // Submit the part to the server
-                                submitPart(newPartData);
+                                submitPart(partData);
                             });
                         }
                     }
