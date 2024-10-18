@@ -17,7 +17,11 @@ $(document).ready(function () {
             { "data": "Location" },
             { "data": "Part_sn" }  // Serial number column
         ],
-        "order": [[7, "asc"]]  // Sort by the Serial Number (Part_sn) column (index 7) in ascending order, "dec" is another option
+        "order": [[7, "asc"]],  // Sort by the Serial Number (Part_sn) column (index 7) in ascending order, "dec" is another option
+        "columnDefs": [{
+            "targets": '_all',
+            "defaultContent": "—"
+        }],
     });
 
     // Setup ID to the live search bar
@@ -68,9 +72,6 @@ $(document).ready(function () {
 
     /* ====== EVENT LISTENERS ===== */
 
-
-
-
     /*  deleted Sortable column on 10-17/2024
         because we implemented a new way to sort
         the table columns. RC
@@ -88,10 +89,6 @@ $(document).ready(function () {
             button.classList.add('btn-active');
         });
     }); // end in/out buttons
-
-    $('.adminLogin').click(function () {
-        $('#demo-buttons').toggle(); // This toggles the visibility
-    });
 
     $('#btn-submit-request').click(function () {
         var parsedData = parseTextInput();
@@ -219,9 +216,10 @@ $(document).ready(function () {
 });
 
 /* ====== FUNCTIONS ===== */
-function formatValue(value) {
-    return value !== null && value !== undefined ? value : '-';
-}
+/*  deleted formatValue() on 10-17-2024
+    because we are replacing null values as the
+    table is rendered. RC
+*/
 
 function checkPartStatus(data) {
     fetch('/get_parts', {
@@ -347,46 +345,14 @@ function updateDashboard(data) {
         });
     } // end Modal
 
-    function handleSort(column, sortOrder) {
-        var searchTerm = $('#searchInput').val().toLowerCase(); // Get the current search term to also allow for sorting
-
-        // Make an AJAX request to the server to retrieve sorted data
-        $.ajax({
-            url: '/sort_parts',  // URL for sorting route in app.py
-            method: 'POST',
-            data: {
-                column: column,
-                order: sortOrder,
-                search: searchTerm
-            },
-            success: function (response) {
-                updateTable(response);
-            },
-            error: function (xhr, status, error) {
-                console.error("Error sorting parts: " + error);
-            }
-        }); // end handleSort
-    }
-
-    /*
-    function updateTable(parts) {
-        var tableBody = $('#partsTableBody');
-        tableBody.empty(); // Clear existing rows
-        parts.forEach(function (part, index) {
-            var rowClass = (index % 2 === 0) ? 'odd-row' : 'even-row';
-            tableBody.append('<tr class="' + rowClass + '">' +
-                `<td>${formatValue(part.Type)}</td>` +
-                `<td>${formatValue(part.Capacity)}</td>` +
-                `<td>${formatValue(part.Size)}</td>` +
-                `<td>${formatValue(part.Speed)}</td>` +
-                `<td>${formatValue(part.Brand)}</td>` +
-                `<td>${formatValue(part.Model)}</td>` +
-                `<td>${formatValue(part.Location)}</td>` +
-                `<td>${formatValue(part.Part_sn)}</td>` +
-                '</tr>');
-        });
-    }*/
-
+    /*  deleted handleSort on 10-17-2024
+        because  we implemented sorting differently
+        RC
+    */
+    /*  deleted updateTable(parts) on 10-17-2024
+        because we are displaying the new row as it's
+        created. RC
+    */
 
     function handleAddPart() {
         const content = `
@@ -512,26 +478,17 @@ function updateDashboard(data) {
 
 
     function updateDataTable(){ // https://datatables.net/reference/api/row().data()
-        var table = new DataTable('#partsTable');
- 
-        table.rows().every(function () {
+        partsTable.rows().every(function () {
             var d = this.data();
-        
             d.counter++; // update data source for the row
-        
             this.invalidate(); // invalidate the data DataTables has cached for this row
         });
-        
         // Draw once all updates are done
-        table.draw();
-
-        console.log('test: new table should be drawn')
+        partsTable.draw();
     }
 
     // Function to submit part data to the server used by handleAddPart
     function submitPart(partData) {
-        //console.log(partData);
-
         $.ajax({
             url: '/add_part',
             type: 'POST',
@@ -541,7 +498,6 @@ function updateDashboard(data) {
                 if (response.status === 'success') {
                     alert('Part added successfully!!!!!.');
                     $('#Modal').css('display', 'none'); // Close the modal
-                    //fetchAndDisplayParts();
                     updateDataTable();
                 } else {
                     alert('Failed to add part: ' + response.message);
