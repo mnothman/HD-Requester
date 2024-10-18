@@ -12,8 +12,9 @@ class AdminLoginTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        options = Options()
-        options.add_argument('--log-level=1')
+        print("\n=== Login Tests ===")
+        options = Options()  # supress info message in output
+        options.add_argument('--log-level=1') # supress info message in output
         cls.service = Service(executable_path="chromedriver.exe")
         cls.driver = webdriver.Chrome(service=cls.service, options=options)
         cls.driver.implicitly_wait(10)  # Wait for elements to appear

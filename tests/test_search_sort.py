@@ -7,10 +7,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 
-class SearchSortTests(unittest.TestCase):
+class PartSearchSortTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        print("\n\n=== Part Search/Sort Tests ===")
         options = Options()
         options.add_argument('--log-level=1')
         cls.service = Service(executable_path="chromedriver.exe")

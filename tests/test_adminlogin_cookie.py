@@ -12,10 +12,8 @@ class AdminLoginCookieTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        chrome_options = Options()
-        # Disable headless mode if you want to see the browser interactions.
-        # chrome_options.add_argument("--headless")
-        
+        print("\n\n=== Login Cookie Tests ===")
+        chrome_options = Options()        
         # Use webdriver-manager to install and manage ChromeDriver
         cls.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
         cls.driver.get("http://localhost:5000/login")  # Replace with the actual login page URL

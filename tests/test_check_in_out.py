@@ -13,9 +13,10 @@ from selenium.common.exceptions import TimeoutException
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # Add the root directory to the path
 
 
-class PartAppTest(unittest.TestCase):
+class PartCheckInOutTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        print("\n\n=== Part Check-In/Out Tests ===")
         # Setup Chrome WebDriver
         options = Options()  # supress info message in output
         options.add_argument('--log-level=1') # supress info message in output
