@@ -19,7 +19,6 @@ def drop_and_create_tables():
 	"Date_time"	DATETIME,
 	"Note"	TEXT,
 	FOREIGN KEY("Part_sn") REFERENCES "Part"("Part_sn"),
-	FOREIGN KEY("Part_status") REFERENCES "Part"("Status"),
 	PRIMARY KEY("Date_time","Part_sn")
     );
 
