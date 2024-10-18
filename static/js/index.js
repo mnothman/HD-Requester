@@ -1,30 +1,31 @@
-$(document).ready(function () {
-    var partsTable = $('#partsTable').DataTable({
-        autoFill: true,
-        responsive: true,
-        "ajax": {
-            "url": "/get_parts",
-            "type": "POST",
-            "dataSrc": "data"
-        },
-        "columns": [
-            { "data": "Type" },
-            { "data": "Capacity" },
-            { "data": "Size" },
-            { "data": "Speed" },
-            { "data": "Brand" },
-            { "data": "Model" },
-            { "data": "Location" },
-            { "data": "Part_sn" }  // Serial number column
-        ],
-        "order": [[7, "asc"]],  // Sort by the Serial Number (Part_sn) column (index 7) in ascending order, "dec" is another option
-        "columnDefs": [{
-            "targets": '_all',
-            "defaultContent": "—"
-        }],
-    });
+// Global variable
+var partsTable = $('#partsTable').DataTable({
+    autoFill: true,
+    responsive: true,
+    "ajax": {
+        "url": "/get_parts",
+        "type": "POST",
+        "dataSrc": "data"
+    },
+    "columns": [
+        { "data": "Type" },
+        { "data": "Capacity" },
+        { "data": "Size" },
+        { "data": "Speed" },
+        { "data": "Brand" },
+        { "data": "Model" },
+        { "data": "Location" },
+        { "data": "Part_sn" }  // Serial number column
+    ],
+    "order": [[7, "asc"]],  // Sort by the Serial Number (Part_sn) column (index 7) in ascending order, "dec" is another option
+    "columnDefs": [{
+        "targets": '_all',
+        "defaultContent": "—"
+    }],
+});
 
-    // Setup ID to the live search bar
+$(document).ready(function () {
+    // Setup to add ID for the live search bar
     $('#partsTable_filter input').attr('id', 'searchInput');
     // Setup clear button to search bar
     $('#partsTable_filter').append('<button id="clearButton">&times;</button>');
@@ -49,7 +50,6 @@ $(document).ready(function () {
         partsTable.search('').draw();
         $(this).hide(); // Hide clear button after clearing the input
     });
-
 
     //Code to display a text areas for adding a note to a part
     const toggleNotesBtn = document.getElementById("toggleNotesBtn");
@@ -95,7 +95,6 @@ $(document).ready(function () {
         var activeButton = document.querySelector('.btn-active');
         if (activeButton.innerText == "IN") {
             checkInPart(parsedData);
-            // showLocationModal(parsedData);
         }
         else if (activeButton.innerText == "OUT") {
             checkOutPart(parsedData);
@@ -202,8 +201,8 @@ $(document).ready(function () {
             data: JSON.stringify(updatedPartData),
             contentType: 'application/json',
             success: function (response) {
+                partsTable.ajax.reload(null, false);
                 alert("Part updated successfully.");
-                location.reload();  // Reload the page to reflect the changes
             },
         error: function (xhr, status, error) {
             alert("Error updating part: " + error);
@@ -229,62 +228,29 @@ function checkPartStatus(data) {
             'Content-Type': 'application/json'
         }
     })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                updateDashboard(data.data);
-                console.log(data.data)
-            } else {
-                console.error(data.message);
-            }
-        });
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            updateDashboard(data.data);
+            console.log(data.data)
+        } else {
+            console.error(data.message);
+        }
+    });
 }
 
-function updateDashboard(data) {
-    console.log(data)
-    console.log('teststs')
-
-    const tableBody = document.querySelector('#partsTable tbody');
-    const newRow = document.createElement('tr');
-    newRow.innerHTML = `
-    <td>${data.Type}</td>
-    <td>${data.Capacity}</td>
-    <td>${data.Size}</td>
-    <td>${data.Speed}</td>
-    <td>${data.Brand}</td>
-    <td>${data.Model}</td>
-    <td>${data.Location}</td>
-    <td>${data.Part_sn}</td>
-`;
-    tableBody.appendChild(newRow);
-
-    // Reinitialize DataTables to recognize the new row
-    partsTable.DataTable().row.add($(newRow)).draw();
-}
+/*  deleted updateDashboard(data) on 10-17-2024
+    because it was an exact copy. RC
+*/
 
 /*  deleted fetchAndDisplayParts() on 10/17/2024
     because we're using a new way to get the parts
     and display them. RC
 */
 
-function checkPartStatus(data) {
-    fetch('/get_parts', {
-        method: 'GET',
-        body: JSON.stringify(data),
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                updateDashboard(data.data);
-                console.log(data.data)
-            } else {
-                console.error(data.message);
-            }
-        });
-}
+/*  deleted copy of checkPartStatus(data) on 10-17-2024
+    because it was an exact copy. RC
+*/
 
 function updateDashboard(data) {
     const tableBody = document.querySelector('#partsTable tbody');
@@ -321,7 +287,8 @@ function showModal(dataObject, htmlContent, onConfirm) {
     // Setup close button to hide the modal
     // Handle background clicks to also close the modal
     $('#Modal').css('display', 'block');
-    $(document).on('click', '#closeModalBtn', function () {
+    // close modal
+    $('#closeModalBtn').click(function () {
         $('#Modal').css('display', 'none');
     });
     $(window).click(function (event) {
@@ -416,7 +383,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
 
     //to click on rows to be removed using the remove button from handleRemovePart
     function setupRowClick() {
-        $('#partsTable').on('click', 'tr', function () {
+        $('#partsTable tbody').on('click', 'tr', function () {
             $(this).toggleClass('selected-row');
             if ($(this).hasClass('selected-row')) {
                 $(this).css('outline', '2px solid blue');
@@ -429,8 +396,9 @@ function showModal(dataObject, htmlContent, onConfirm) {
     function removeSelectedParts(selectedRows) {
         var requests = selectedRows.map(function () {
             var partSn = $(this).find('td:last').text(); //part_sn is last in line. could be issue HERE
-            var tid = 'System';
+            var tid = 'System';     // the endpoint update_part_status needs these variables, but removePart doesn't have it
             var unit_sn = 'N/A';
+            var note = "Deleted from homepage";
 
             return $.ajax({
                 url: '/update_part_status',
@@ -440,7 +408,8 @@ function showModal(dataObject, htmlContent, onConfirm) {
                     Part_sn: partSn,
                     TID: tid,
                     Unit_sn: unit_sn,
-                    Part_status: 'deleted'
+                    Part_status: 'Deleted',
+                    Note: note
                 }),
                 success: function (response) {
                     console.log('Success:', response);
@@ -453,22 +422,16 @@ function showModal(dataObject, htmlContent, onConfirm) {
 
         $.when.apply($, requests).then(function () {
             alert('All selected parts have been marked as deleted.');
-            partsTable.draw();
+            partsTable.ajax.reload(null, false);
         }, function () {
             alert('Failed to mark some or all parts as deleted.');
         });
     }
 
 
-    function updateDataTable(){ // https://datatables.net/reference/api/row().data()
-        partsTable.rows().every(function () {
-            var d = this.data();
-            d.counter++; // update data source for the row
-            this.invalidate(); // invalidate the data DataTables has cached for this row
-        });
-        // Draw once all updates are done
-        partsTable.draw();
-    }
+/*  deleted updateDataTable on 10-17-2024
+    because it isn't being used. RC
+*/
 
     // Function to submit part data to the server used by handleAddPart
     function submitPart(partData) {
@@ -479,9 +442,9 @@ function showModal(dataObject, htmlContent, onConfirm) {
             data: JSON.stringify(partData),
             success: function (response) {
                 if (response.status === 'success') {
-                    alert('Part added successfully!!!!!.');
+                    partsTable.ajax.reload(null, false);
+                    alert('Part added successfully.');
                     $('#Modal').css('display', 'none'); // Close the modal
-                    updateDataTable();
                 } else {
                     alert('Failed to add part: ' + response.message);
                 }
@@ -512,7 +475,9 @@ function showModal(dataObject, htmlContent, onConfirm) {
 
         // Parse TID
         dataObject.tid = lines[0].trim();
-        if (!dataObject.tid.startsWith("TI") && !dataObject.tid.startsWith("TZZ")) {
+        if (!dataObject.tid.startsWith("TI") &&
+            !dataObject.tid.startsWith("TT") &&
+            !dataObject.tid.startsWith("TZZ")) {
             console.error("Error: Invalid TID format.");
             return null;
         }
@@ -600,10 +565,9 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 Type: part.type,
                 Capacity: part.capacity,
                 Size: dataObject.size,
-                Part_status: 'in',
+                Part_status: 'In',
                 Note: dataObject.note
             };
-
             $.ajax({
                 url: '/check_part_in_inventory',  // Server-side script to check the inventory
                 type: 'POST',
@@ -656,7 +620,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                                     Part_sn: partSn,
                                     TID: dataObject.tid,
                                     Unit_sn: dataObject.unit_sn,
-                                    Part_status: 'in',
+                                    Part_status: 'In',
                                     Location: location,  // Add location from input
                                     Note: dataObject.note
                                 };
@@ -670,22 +634,10 @@ function showModal(dataObject, htmlContent, onConfirm) {
                                     contentType: 'application/json',
                                     data: JSON.stringify(partUpdateData),
                                     success: function (updateResponse) {
-                                        // fetchAndDisplayParts();
                                         console.log("Part checked in successfully", updateResponse);  // Log the response to ensure success
-
-
                                         if (updateResponse.status === 'success') {
-                                            // Close the modal
-                                            $('#Modal').css('display', 'none');
-
-                                            fetchAndDisplayParts();
-
-
-                                            // Trigger a page reload or fetch updated parts after a small delay
-                                            setTimeout(function () {
-                                                window.location.reload();  // Force page reload
-                                                // location.reload #1
-                                            }, 500);  // Delay to allow the modal to close smoothly
+                                            partsTable.ajax.reload(null, false);
+                                            $('#Modal').css('display', 'none'); // Close modal
                                         } else {
                                             console.error("Failed to check in the part:", updateResponse.message);
                                             alert("Failed to check in the part: " + updateResponse.message);
@@ -695,7 +647,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
                                         console.error("Error updating part status: ", err);
                                         $('#locationSubmitBtn').prop('disabled', false);  // Re-enable button after failure
                                         alert('Failed to update part status: ' + err.responseText); // (Remove later)
-
                                     }
                                 });
                             } else {
@@ -927,7 +878,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 Capacity: part.capacity,
                 Size: dataObject.size,
                 Speed: dataObject.Speed,
-                Part_status: 'out',
+                Part_status: 'Out',
                 Note: dataObject.note
             };
 
@@ -938,7 +889,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 data: JSON.stringify(partData),
                 success: function (response) {
                     if (response.exists) {
-                        // If part exists and matches type and capacity, update its status to 'out'
+                        // If part exists and matches type and capacity, update its status to 'Out'
                         $.ajax({
                             url: '/update_part_status',
                             type: 'POST',
@@ -947,16 +898,12 @@ function showModal(dataObject, htmlContent, onConfirm) {
                                 Part_sn: partSn,
                                 TID: dataObject.tid,
                                 Unit_sn: dataObject.unit_sn,
-                                Part_status: 'out',
+                                Part_status: 'Out',
                                 Note: dataObject.note
                             }),
                             success: function (updateResponse) {
-                                fetchAndDisplayParts();
-
                                 // refreshes page after checking out
-                                location.reload();
-                                print("location reload 2");
-                                // location.reload #2
+                                partsTable.ajax.reload(null, false);
                             },
                             error: function (err) {
                                 console.error("Error updating part status: ", err);
