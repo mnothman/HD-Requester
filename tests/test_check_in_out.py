@@ -14,8 +14,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) 
 
 
 class PartAppTest(unittest.TestCase):
-
-
     @classmethod
     def setUpClass(cls):
         # Setup Chrome WebDriver
@@ -39,6 +37,7 @@ class PartAppTest(unittest.TestCase):
 
     def close_modal(self):
         # Close the modal by clicking the close button
+        time.sleep(1)
         close_button = self.driver.find_element(By.ID, "closeModalBtn")
         close_button.click()
 
@@ -181,7 +180,35 @@ class PartAppTest(unittest.TestCase):
             "Check-in Error: Part not found in inventory.",
             "That part has never been added to inventory.\nSerial number: 00005001\nAdd item to inventory. Fill in the blanks"
         )
-        self.close_modal()
+        self.driver.find_element(By.ID, "iSpeed").send_keys("19200")
+        self.driver.find_element(By.ID, "iBrand").send_keys("Brand-Refresh")
+        self.driver.find_element(By.ID, "iModel").send_keys("Model-Refresh")
+        self.driver.find_element(By.ID, "iLocation").send_keys("Location-Refresh")
+        self.driver.find_element(By.ID, "add_btn").click()
+
+        WebDriverWait(self.driver, 10).until(EC.alert_is_present())
+        alert = self.driver.switch_to.alert
+        alert_text = alert.text
+        self.assertEqual(alert_text, "Part added successfully.")
+        alert.accept()
+
+        time.sleep(2)
+        # Verify the database Part is in the database
+        # Execute the SQL query
+        query = 'SELECT COUNT(*) FROM Part WHERE Part_sn=?'
+        result = self.execute_query(query, ('00005001',))
+
+        # Assert that the count matches 5000
+        self.assertEqual(result, '1')
+        db_path = os.path.join(os.path.dirname(__file__), '..', 'refresh.db')
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.executescript('''
+                           DELETE FROM Log WHERE Part_sn='00005001';
+                           DELETE FROM Log WHERE TID='TI000000-00000001';
+                           DELETE FROM Part WHERE Part_sn='00005001';
+                           ''')
+        conn.commit()
 
     def test08_checkout_missing_type(self):
        # Test case: Check-out Error: Missing Type
@@ -285,7 +312,7 @@ class PartAppTest(unittest.TestCase):
         print("\nTest 12: Missing Part serial number")
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
-        textarea.send_keys("TI000000-00000001\n123456\n256GB HD 3.5\nLaptop")
+        textarea.send_keys("TI000000-00000001\n123456\nPC4 4GB\nLaptop")
         self.driver.find_element(By.ID, "btnOut").click()
         self.driver.find_element(By.ID, "btn-submit-request").click()
 
