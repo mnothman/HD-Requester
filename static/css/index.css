@@ -171,11 +171,11 @@ nav {
 }
 
 /* TABLE */
-#partsTableBody .even-row {
+#partsTable .even{
 	background-color: rgb(255, 255, 255);
 }
 
-#partsTableBody .odd-row {
+#partsTable .odd {
 	background-color: rgba(0, 0, 0, .05);
 }
 

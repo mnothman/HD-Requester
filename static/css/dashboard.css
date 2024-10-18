@@ -55,15 +55,13 @@
       cursor: pointer;
   }
 
-  /* Alternating row colors */
-  tbody tr:nth-child(odd) {
-      background-color: grey;
-      /* Light grey for odd rows */
+  /* Alternating row colors same colors as homepage*/
+  #partsTable .even{
+	background-color: rgb(255, 255, 255);
   }
 
-  tbody tr:nth-child(even) {
-      background-color: white;
-      /* White for even rows */
+  #partsTable .odd {
+	background-color: rgba(0, 0, 0, .05);
   }
 
   tr:hover {

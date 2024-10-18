@@ -287,66 +287,52 @@ function checkPartStatus(data) {
 }
 
 function updateDashboard(data) {
-    console.log(data)
-    console.log('teststs')
-
     const tableBody = document.querySelector('#partsTable tbody');
-    const newRow = document.createElement('tr');
-    newRow.innerHTML = `
-    <td>${data.Type}</td>
-    <td>${data.Capacity}</td>
-    <td>${data.Size}</td>
-    <td>${data.Speed}</td>
-    <td>${data.Brand}</td>
-    <td>${data.Model}</td>
-    <td>${data.Location}</td>
-    <td>${data.Part_sn}</td>
-`;
     tableBody.appendChild(newRow);
 
     // Reinitialize DataTables to recognize the new row
     partsTable.DataTable().row.add($(newRow)).draw();
 }
 
-    // Modal
-    function showModal(dataObject, htmlContent, onConfirm) {
-        // Set the content of the modal
-        // Set the title of the modal if a title is provided in dataObject
-        $('#modalContent').html(htmlContent);
-        if (onConfirm) {
-            $('#modalContent').append('<button id="confirmBtn" class="btn btn-success">Confirm</button>');
-            $('#confirmBtn').click(function () {
-                onConfirm();
-                $('#Modal').css('display', 'none');
-            });
-        }
-
-        if (dataObject && dataObject.title) {
-            $('#modalTitle').text(dataObject.title);
-        } else {
-            // Default title if none provided
-            $('#modalTitle').text('Details');
-        }
-        // Additional data handling could go here
-        if (dataObject) {
-            console.log("Additional data:", dataObject);
-        }
-        // Display the modal
-        // Setup close button to hide the modal
-        // Handle background clicks to also close the modal
-        $('#Modal').css('display', 'block');
-        $('#closeModalBtn').click(function () {
+// Modal
+function showModal(dataObject, htmlContent, onConfirm) {
+    // Set the content of the modal
+    // Set the title of the modal if a title is provided in dataObject
+    $('#modalContent').html(htmlContent);
+    if (onConfirm) {
+        $('#modalContent').append('<button id="confirmBtn" class="btn btn-success">Confirm</button>');
+        $('#confirmBtn').click(function () {
+            onConfirm();
             $('#Modal').css('display', 'none');
         });
-        $(window).click(function (event) {
-            if ($(event.target).is('#Modal')) {
-                $('#Modal').css('display', 'none');
-            }
-        });
-    } // end Modal
+    }
+
+    if (dataObject && dataObject.title) {
+        $('#modalTitle').text(dataObject.title);
+    } else {
+        // Default title if none provided
+        $('#modalTitle').text('Details');
+    }
+    // Additional data handling could go here
+    if (dataObject) {
+        console.log("Additional data:", dataObject);
+    }
+    // Display the modal
+    // Setup close button to hide the modal
+    // Handle background clicks to also close the modal
+    $('#Modal').css('display', 'block');
+    $(document).on('click', '#closeModalBtn', function () {
+        $('#Modal').css('display', 'none');
+    });
+    $(window).click(function (event) {
+        if ($(event.target).is('#Modal')) {
+            $('#Modal').css('display', 'none');
+        }
+    });
+} // end Modal
 
     /*  deleted handleSort on 10-17-2024
-        because  we implemented sorting differently
+        because we implemented sorting differently
         RC
     */
     /*  deleted updateTable(parts) on 10-17-2024
@@ -410,9 +396,6 @@ function updateDashboard(data) {
 
                         <button type="button" id="add_btn" class="btn btn-primary mb-2">OK</button>
                     </form>
-
-
-
         `;
         showModal({ title: 'Add New Part' }, content);
         // Handle form submission
@@ -433,7 +416,7 @@ function updateDashboard(data) {
 
     //to click on rows to be removed using the remove button from handleRemovePart
     function setupRowClick() {
-        $('#partsTableBody').on('click', 'tr', function () {
+        $('#partsTable').on('click', 'tr', function () {
             $(this).toggleClass('selected-row');
             if ($(this).hasClass('selected-row')) {
                 $(this).css('outline', '2px solid blue');
@@ -470,7 +453,7 @@ function updateDashboard(data) {
 
         $.when.apply($, requests).then(function () {
             alert('All selected parts have been marked as deleted.');
-            fetchAndDisplayParts();  // Refresh the parts list
+            partsTable.draw();
         }, function () {
             alert('Failed to mark some or all parts as deleted.');
         });
@@ -715,7 +698,6 @@ function updateDashboard(data) {
 
                                     }
                                 });
-                                // $('#Modal').css('display', 'none'); // Close the modal
                             } else {
                                 alert('Please enter a location');
                             }
