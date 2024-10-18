@@ -289,7 +289,7 @@ def insert_part(part_data):
         conn.execute('BEGIN')
         cursor.execute('''
             INSERT INTO Part (Part_sn, Type, Capacity, Size, Speed, Brand, Model, Location, Status, timedate_updated)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'in', 'null')
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'In', 'null')
         ''', (part_data['Part_sn'], part_data['Type'], part_data['Capacity'], part_data['Size'], part_data['Speed'],
               part_data['Brand'], part_data['Model'], part_data['Location']))
 
@@ -310,7 +310,7 @@ def insert_part(part_data):
     finally:
         conn.close()  # Always close the connection
 
-    return {'status': 'success', 'message': 'Part added successfully and logged as in'}
+    return {'status': 'success', 'message': 'Part added successfully and logged as In'}
 
 
 @app.route('/add_part', methods=['POST'])
@@ -384,9 +384,9 @@ def check_part_in_inventory():
     data = request.get_json()
     part_sn = data['Part_sn']
     size = data['Size']
-    expected_type = data['Type']
-    expected_capacity = data['Capacity']
-    expected_part_status = data['Part_status']
+    textarea_type = data['Type']
+    textarea_capacity = data['Capacity']
+    textarea_part_status = data['Part_status']
 
     conn = get_db()
     try:
@@ -399,20 +399,20 @@ def check_part_in_inventory():
 							'message': 'Part not found in inventory.',
 						   })
 
-        # Check if the existing part matches the expected type and capacity
-        elif part['Type'] != expected_type or part['Capacity'] != expected_capacity:
+        # Check if the existing part matches the textarea's type and capacity
+        elif part['Type'] != textarea_type or part['Capacity'] != textarea_capacity:
             return jsonify({
                 'exists': False,
                 'error': 'mismatch',
                 'message': 'Mismatch in type or capacity.',
-                'expected': {'Type': expected_type, 'Capacity': expected_capacity},
+                'expected': {'Type': textarea_type, 'Capacity': textarea_capacity},
                 'actual': {'Type': part['Type'], 'Capacity': part['Capacity']}
             })
 		# Check if the existing part is already checked in
-        elif part['Status'] == 'in':
-            if expected_part_status == 'in':
+        elif textarea_part_status == 'In':
+            if part['Status'] == 'In':
                 return jsonify({
-                    'exists': False,
+                    'exists': False,    # make index.js around line 724 show the modal with this data 
                     'error': 'checked-in',
                     'message': 'Already checked-in.',
                     'part': {'Part_sn': part_sn,
@@ -427,8 +427,8 @@ def check_part_in_inventory():
             else:
                 return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
         # Check if the existing part is already checked out
-        elif part['Status'] == 'out':
-            if expected_part_status == 'out':
+        elif textarea_part_status == 'Out':
+            if part['Status'] == 'Out':
                 return jsonify({
                     'exists': False,
                     'error': 'checked-out',
@@ -468,18 +468,15 @@ def update_part_status():
     conn = get_db()
     try:
         conn.execute('BEGIN')
-        # Update Part to set Status to 'in'
+        # Update Part to set Status
         conn.execute('UPDATE Part SET Status = ? WHERE Part_sn = ?', (part_status, part_sn))
         # Insert a new log entry with the current timestamp
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', 
                      (tid, unit_sn, part_sn, part_status, timestamp, note))
-#        conn.commit()
- #       return jsonify({'status': 'success', 'message': 'Part status updated and logged successfully.'})
-
-           # Fetch the part details
+        
+        # Fetch the part details
         part = conn.execute('SELECT * FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         conn.commit()
         return jsonify({
@@ -536,7 +533,7 @@ def simulate_text_area_input(user_input):
         # Simulated insertion into Log table with all necessary fields
         cursor.execute(
             "INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status) VALUES (?, ?, ?, ?)",
-            (user_input, 'Unit123', 'Part123', 'in')  # Dummy values for Unit_sn, Part_sn, and Part_status
+            (user_input, 'Unit123', 'Part123', 'In')  # Dummy values for Unit_sn, Part_sn, and Part_status
         )
         conn.commit()
         return "Simulated input was processed safely."
