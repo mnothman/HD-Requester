@@ -280,18 +280,28 @@ def inventory():
 
 # Database function to insert a part
 def insert_part(part_data):
-    # Connection to your SQLite database
+    # Connection to SQLite database
     conn = get_db()
     cursor = conn.cursor()
 
     try:
+        part_sn = part_data['Part_sn']
+        tid = part_data['TID']
+        unit_sn = part_data['Unit_sn']
+        part_status = part_data['Part_status']  # update the part status given
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        note = part_data['Note']
         # SQL query to insert a new part into the Part table
         conn.execute('BEGIN')
         cursor.execute('''
             INSERT INTO Part (Part_sn, Type, Capacity, Size, Speed, Brand, Model, Location, Status, timedate_updated)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'In', 'null')
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (part_data['Part_sn'], part_data['Type'], part_data['Capacity'], part_data['Size'], part_data['Speed'],
-              part_data['Brand'], part_data['Model'], part_data['Location']))
+              part_data['Brand'], part_data['Model'], part_data['Location'], 'In', timestamp))
+        
+        # Insert a new log entry with the current timestamp
+        cursor.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', 
+                     (tid, unit_sn, part_sn, part_status, timestamp, note))
 
         # Commit the changes
         conn.commit()

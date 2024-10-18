@@ -839,9 +839,14 @@ function showModal(dataObject, htmlContent, onConfirm) {
                             `;
                             showModal({ title: 'Check-in Error: ' + response.message }, content);
 
-                            // Handle form submission - Add The Part
+                            // Handle form submission
+                            // Add The Part with blank TID, blank Unit_sn, and Status Out, bc it needs to go In
                             $('#add_btn').click(function () {
                                 const partData = {
+                                    TID: '',
+                                    Unit_sn: '',
+                                    Part_status: 'Out',
+                                    Note: 'New part added to inventory',
                                     Type: $('#iType').val(),
                                     Capacity: $('#iCapacity').val(),
                                     Size: $('#ddSize').val(),
