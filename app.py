@@ -72,7 +72,7 @@ def login():
     
     # If not logged in, check if "remember_me" exists to pre-fill the login form
     remember_me_username = request.cookies.get('remember_me')
-    return render_template('adminLogin.html', remember_me=remember_me_username)
+    return render_template('login.html', remember_me=remember_me_username)
 
 
 @app.route('/logout')
