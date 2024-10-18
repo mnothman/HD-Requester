@@ -279,12 +279,24 @@ body.hide-menu .context-menu {
 	justify-content: flex-start;
 }
 
-.modal-content {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: center;
-	margin-bottom: 20px;
+#modalContent table {
+	width: 100%; border-collapse: collapse; border: 1px solid #000;
+}
+
+.modal-table-wrapper{
+	display: flex; flex-direction: column; width: 100%; border: 1px solid #000;
+}
+
+.modal-table-header{
+	display: flex; font-weight: bold; border-bottom: 1px solid #000; background-color: #f0f0f0;
+}
+
+#modalContent thead tr:first td{
+	width: 10%;
+}
+
+#modalContent td {
+	padding: 8px;
 }
 
 .form-control {

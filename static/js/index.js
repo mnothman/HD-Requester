@@ -581,33 +581,31 @@ function showModal(dataObject, htmlContent, onConfirm) {
                         const partModel = response.part?.Model || 'N/A';
 
                         const partDetails = `
-                        <tr>
-                            <td>${partData.Type}</td>
-                            <td>${partData.Capacity}</td>
-                            <td>${partData.Size}</td>
-                            <td>${partBrand}</td>
-                            <td>${partModel}</td>
-                            <td><input type="text" id="locationInput" name="location" style="width: 100%;" placeholder="Enter location"></td>
-                            <td>${partSn}</td>
-                        </tr>
+                        <div style="display: flex;">
+                            <div style="flex: 1; padding: 8px;">${partData.Type}</div>
+                            <div style="flex: 1; padding: 8px;">${partData.Capacity}</div>
+                            <div style="flex: 1; padding: 8px;">${partData.Size}</div>
+                            <div style="flex: 1; padding: 8px;">${partBrand}</div>
+                            <div style="flex: 1; padding: 8px;">${partModel}</div>
+                            <div style="flex: 1; padding: 8px;"><input type="text" id="locationInput" name="location" style="width: 100%;" placeholder="Enter location"></div>
+                            <div style="flex: 1; padding: 8px;">${partSn}</div>
+                        </div>
                     `;
                         const modalContent = `
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Type</th>
-                                    <th>Capacity</th>
-                                    <th>Size</th>
-                                    <th>Brand</th>
-                                    <th>Model</th>
-                                    <th>Location</th>
-                                    <th>Part SN</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                        <div class="modal-table-wrapper">
+                            <div class="modal-table-header">
+                                <div style="flex: 1; padding: 8px;">Type</div>
+                                <div style="flex: 1; padding: 8px;">Capacity</div>
+                                <div style="flex: 1; padding: 8px;">Size</div>
+                                <div style="flex: 1; padding: 8px;">Brand</div>
+                                <div style="flex: 1; padding: 8px;">Model</div>
+                                <div style="flex: 1; padding: 8px;">Location</div>
+                                <div style="flex: 1; padding: 8px;">Part SN</div>
+                            </div>
+                            
+                            <!-- Data Row -->
                                 ${partDetails}
-                            </tbody>
-                        </table>
+                        </div>
                         <button type="button" id="locationSubmitBtn" class="btn btn-primary mb-2">OK</button>
                     `;
                         showModal({ title: 'Enter Location for Check-in' }, modalContent);
@@ -671,38 +669,11 @@ function showModal(dataObject, htmlContent, onConfirm) {
                         else if (response.error == 'checked-in') {
                             console.log("Error: " + response.message); // Handle other errors
                             const content = `
-                            <!--
-                                <p><strong>That part is already checked-in.<strong></p>
-                                <p>Serial number: ${partSn}</p>
-                                <table width="100%" border="1">
-                                <tbody>
-                                <tr>
-                                  <th scope="col">&nbsp;Type</th>
-                                  <th scope="col">Capacity&nbsp;</th>
-                                  <th scope="col">Size&nbsp;</th>
-                                  <th scope="col">Speed&nbsp;</th>
-                                  <th scope="col">Brand&nbsp;</th>
-                                  <th scope="col">Model&nbsp;</th>
-                                  <th scope="col">Location&nbsp;</th>
-                                </tr>
-                                <tr>
-                                    <td>${response.part['Type']}</td>
-                                    <td>${response.part['Capacity']}</td>
-                                    <td>${response.part['Size']}</td>
-                                    <td>${response.part['Speed']}</td>
-                                    <td>${response.part['Brand']}</td>
-                                    <td>${response.part['Model']}</td>
-                                    <td>${response.part['Location']}</td>
-                                </tr>
-                                </tbody>
-                                </table>
-                        -->
-                                
                                     <p><strong>That part is already checked-in.</strong></p>
                                     <p>Serial number: ${partSn}</p>
 
-                                    <div style="display: flex; flex-direction: column; width: 100%; border: 1px solid #000;">
-                                        <div style="display: flex; font-weight: bold; border-bottom: 1px solid #000; background-color: #f0f0f0;">
+                                    <div class="modal-table-wrapper">
+                                        <div class="modal-table-header">
                                             <div style="flex: 1; padding: 8px;">Type</div>
                                             <div style="flex: 1; padding: 8px;">Capacity</div>
                                             <div style="flex: 1; padding: 8px;">Size</div>
@@ -744,40 +715,12 @@ function showModal(dataObject, htmlContent, onConfirm) {
 
                             // This below is for check in error when part is not in inventory
                             const content = `
-                            <!--
-                                <p><strong>That part has never been added to inventory.<strong></p>
-                                <p>Serial number: ${partSn}</p>
-                                <p>Add item to inventory. Fill in the blanks.</p>
-                                <table width="100%" border="1">
-                                <tbody>
-                                <tr>
-                                  <th scope="col">&nbsp;Type</th>
-                                  <th scope="col">Capacity&nbsp;</th>
-                                  <th scope="col">Size&nbsp;</th>
-                                   ${speedField}
-                                   <th scope="col">Brand&nbsp;</th>
-                                  <th scope="col">Model&nbsp;</th>
-                                  <th scope="col">Location&nbsp;</th>
-                                </tr>
-                                <tr>
-                                    <td>${partData.Type}</td>
-                                    <td>${partData.Capacity}</td>
-                                    <td>${partData.Size}</td>
-                                    <td><input type="text" id="iSpeed" name="Speed"></input></td>
-                                    <td><input type="text" id="iBrand" name="Brand"></input></td>
-                                    <td><input type="text" id="iModel" name="Model"></input></td>
-                                    <td><input type="text" id="iLocation" name="Location"></input></td>
-                                </tr>
-                                </tbody>
-                                </table>-->
-
                                 <p><strong>That part has never been added to inventory.</strong></p>
                                     <p>Serial number: ${partSn}</p>
                                     <p>Add item to inventory. Fill in the blanks.</p>
 
-                                    <div style="display: flex; flex-direction: column; width: 100%; border: 1px solid #000;">
-                                        <!-- Header Row -->
-                                        <div style="display: flex; font-weight: bold; border-bottom: 1px solid #000; background-color: #f0f0f0;">
+                                    <div class="modal-table-wrapper">
+                                        <div class="modal-table-header">
                                             <div style="flex: 1; padding: 8px;">Type</div>
                                             <div style="flex: 1; padding: 8px;">Capacity</div>
                                             <div style="flex: 1; padding: 8px;">Size</div>
@@ -790,13 +733,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
                                         
                                         <!-- Data Row -->
                                         <div style="display: flex;">
-
-                                            <!--
-                                                <div style="flex: 1; padding: 8px;" id="iType">${partData.Type}</div>
-                                                <div style="flex: 1; padding: 8px;">${partData.Capacity}</div>
-                                                <div style="flex: 1; padding: 8px;">${partData.Size}</div>
-                                            -->
-
                                             <div style="flex: 1; padding: 8px;">
                                                 <input type="text" id="iType" name="Type" style="width: 100%;" value="${partData.Type}"/>
                                             </div>
@@ -929,67 +865,82 @@ function showModal(dataObject, htmlContent, onConfirm) {
                             showModal({ title: 'Check-out Error: ' + response.message }, content);
                         }
                         else if (response.error == 'checked-out') {
+                            let speedField = ''; // Speed field isn't needed for HD or SSD
+
+                            if (!["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type)) {  // Speed field isn't needed for HD or SSD
+                                speedField = `
+                                    <div style="flex: 1; padding: 8px;">Speed</div>
+                                `;
+                            }
+
+                            const speedValue = !["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type) ? `
+                                <div style="flex: 1; padding: 8px;">${response.part['Speed']}</div>
+                            ` : '';
                             console.log("Error: " + response.message); // Handle other errors
                             const content = `
-                                <p><strong>That part is already checked-out.<strong></p>
-                                <p>Serial number: ${partSn}</p>
-                                <table width="100%" border="1">
-                                <tbody>
-                                <tr>
-                                  <th scope="col">&nbsp;Type</th>
-                                  <th scope="col">Capacity&nbsp;</th>
-                                  <th scope="col">Size&nbsp;</th>
-                                  <th scope="col">Speed&nbsp;</th>
-                                  <th scope="col">Brand&nbsp;</th>
-                                  <th scope="col">Model&nbsp;</th>
-                                  <th scope="col">Location&nbsp;</th>
-                                </tr>
-                                <tr>
-                                    <td>${response.part['Type']}</td>
-                                    <td>${response.part['Capacity']}</td>
-                                    <td>${response.part['Size']}</td>
-                                    <td>${response.part['Speed']}</td>
-                                    <td>${response.part['Brand']}</td>
-                                    <td>${response.part['Model']}</td>
-                                    <td>${response.part['Location']}</td>
-                                </tr>
-                                </tbody>
-                                </table>
+                                    <p><strong>That part is already checked-out.<strong></p>
+                                    <p>Serial number: ${partSn}</p>
+                                    <div class="modal-table-wrapper">
+                                        <div class="modal-table-header">
+                                            <div style="flex: 1; padding: 8px;">Type</div>
+                                            <div style="flex: 1; padding: 8px;">Capacity</div>
+                                            <div style="flex: 1; padding: 8px;">Size</div>
+                                            ${speedField}
+                                            <div style="flex: 1; padding: 8px;">Brand</div>
+                                            <div style="flex: 1; padding: 8px;">Model</div>
+                                            <div style="flex: 1; padding: 8px;">Location</div>
+                                        </div>
+                                        <div style="display: flex;">
+                                            <div style="flex: 1; padding: 8px;">${response.part['Type']}</div>
+                                            <div style="flex: 1; padding: 8px;">${response.part['Capacity']}</div>
+                                            <div style="flex: 1; padding: 8px;">${response.part['Size']}</div>
+                                            ${speedValue}
+                                            <div style="flex: 1; padding: 8px;">${response.part['Brand']}</div>
+                                            <div style="flex: 1; padding: 8px;">${response.part['Model']}</div>
+                                            <div style="flex: 1; padding: 8px;">${response.part['Location']}</div>
+                                        </div>
+                                    </div>
                             `;
                             showModal({ title: 'Check-out Error: ' + response.message }, content);
                         }
                         // This is if the part does not exist in database and needs to be added manually
                         else if (response.error == 'not_in_inventory') {
                             console.log("Error: " + response.message); // Handle other errors
+                            let speedField = ''; // Speed field isn't needed for HD or SSD
 
+                            if (!["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type)) {  // Speed field isn't needed for HD or SSD
+                                speedField = `
+                                    <div style="flex: 1; padding: 8px;">Speed</div>
+                                `;
+                            }
+
+                            const speedInput = !["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type) ? `
+                                <div style="flex: 1; padding: 8px;">
+                                    <input type="text" id="iSpeed" name="Speed" style="width: 100%;" />
+                                </div>
+                            ` : '';
                             const content = `
                                 <p><strong>That part has never been added to inventory.</strong></p>
                                 <p>Serial number: ${partSn}</p>
                                 <p>Add item to inventory. Fill in the blanks.</p>
-                                    <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;">
-                                <thead>
-                                    <tr style="background-color: #f0f0f0; text-align: left; font-weight: bold;">
-                                        <th style="padding: 8px; width: 10%;">Type</th>
-                                        <th style="padding: 8px; width: 10%;">Capacity</th>
-                                        <th style="padding: 8px; width: 10%;">Size</th>
-                                        <th style="padding: 8px; width: 10%;">Speed</th>
-                                        <th style="padding: 8px; width: 10%;">Brand</th>
-                                        <th style="padding: 8px; width: 10%;">Model</th>
-                                        <th style="padding: 8px; width: 15%;">Location</th>
-                                    </tr>
-                                <tr>
-                                    <td style="padding: 8px;">${partData.Type}</td>
-                                    <td style="padding: 8px;">${partData.Capacity}</td>
-                                    <td style="padding: 8px;">${partData.Size}</td>
-                                    <td style="padding: 8px;"><input type="text" id="iSpeed" name="Speed" style="width: 100%;"></td>
-                                    <td style="padding: 8px;"><input type="text" id="iBrand" name="Brand" style="width: 100%;"></td>
-                                    <td style="padding: 8px;"><input type="text" id="iModel" name="Model" style="width: 100%;"></td>
-                                    <td style="padding: 8px;"><input type="text" id="iLocation" name="Location" style="width: 100%;">
-                                </td>
-                                </tr>
-                                </tbody>
-                                </table>
-
+                                <div class="modal-table-wrapper">
+                                    <div class="modal-table-header">
+                                        <div style="flex: 1; padding: 8px;">Type</div>
+                                        <div style="flex: 1; padding: 8px;">Capacity</div>
+                                        <div style="flex: 1; padding: 8px;">Size</div>
+                                            ${speedField}
+                                        <div style="flex: 1; padding: 8px;">Brand</div>
+                                        <div style="flex: 1; padding: 8px;">Model</div>
+                                    </div>
+                                    <div style="display: flex;">
+                                        <div style="flex: 1; padding: 8px;">${partData.Type}</div>
+                                        <div style="flex: 1; padding: 8px;">${partData.Capacity}</div>
+                                        <div style="flex: 1; padding: 8px;">${partData.Size}</div>
+                                        ${speedInput}
+                                        <div style="flex: 1; padding: 8px;"><input type="text" id="iBrand" name="Brand" style="width: 100%;"></div>
+                                        <div style="flex: 1; padding: 8px;"><input type="text" id="iModel" name="Model" style="width: 100%;"></div>
+                                        <div style="flex: 1; padding: 8px;"><input type="text" id="iLocation" name="Location" style="width: 100%;"></div>
+                                </div>
                                 <div style="margin-top: 10px;">
                                     <button type="button" id="add_btn" class="btn btn-primary mb-2">Add Part</button>
                                 </div>

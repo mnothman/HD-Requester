@@ -453,7 +453,16 @@ def check_part_in_inventory():
                              'Location': part['Location']}
                 })
             else:
-                return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
+                return jsonify({'exists': True,
+                                'part': {'Part_sn': part_sn,
+                                'Type': part['Type'],
+                                'Capacity': part['Capacity'],
+                                'Size': part['Size'],
+                                'Speed': part['Speed'],
+                                'Brand': part['Brand'],
+                                'Model': part['Model'],
+                                'Location': part['Location']},
+                                'message': 'Part exists with matching type and capacity.'})
         else:
             return jsonify({
                 'exists': False,
