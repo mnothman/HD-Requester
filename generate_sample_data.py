@@ -6,6 +6,69 @@ from datetime import datetime, timedelta
 conn = sqlite3.connect('refresh.db')
 cursor = conn.cursor()
 
+def drop_and_create_tables():
+    query = '''
+    drop table Log;
+    drop table Part;
+
+    CREATE TABLE "Log" (
+	"TID"	TEXT NOT NULL,
+	"Unit_sn"	TEXT NOT NULL,
+	"Part_sn"	TEXT NOT NULL,
+	"Part_status"	TEXT NOT NULL,
+	"Date_time"	DATETIME,
+	"Note"	TEXT,
+	FOREIGN KEY("Part_sn") REFERENCES "Part"("Part_sn"),
+	FOREIGN KEY("Part_status") REFERENCES "Part"("Status"),
+	PRIMARY KEY("Date_time","Part_sn")
+    );
+
+    CREATE TABLE "Part" (
+	"Part_sn"	TEXT,
+	"Type"	TEXT NOT NULL,
+	"Capacity"	TEXT NOT NULL,
+	"Size"	TEXT,
+	"Speed"	NUMERIC,
+	"Brand"	TEXT NOT NULL,
+	"Model"	TEXT NOT NULL,
+	"Location"	TEXT,
+	"Status"	TEXT NOT NULL CHECK("Status" IN ('In', 'Out', 'Deleted')),
+	"Timedate_updated"	DATETIME,
+	PRIMARY KEY("Part_sn")
+    );
+
+    UPDATE Part
+    SET
+        Type = 'PC4',
+        Capacity = '4GB',
+        Size = 'Laptop',
+        Speed = '2400T',
+        Brand = 'SK Hynix'
+    WHERE
+        Part_sn = '00000001';
+
+    '''
+    cursor.executescript(query)
+    conn.commit()
+
+
+# Update the Part with Serial number=00000001 for our Tests to work
+def update_first_part_record():
+    query = '''
+    UPDATE Part
+    SET
+        Type = 'PC4',
+        Capacity = '4GB',
+        Size = 'Laptop',
+        Speed = '2400T',
+        Brand = 'SK Hynix'
+    WHERE
+        Part_sn = '00000001';
+    '''
+    cursor.execute(query)
+    conn.commit()
+
+
 # Function to generate random part data
 def generate_part_data(part_sn):
     types = ['PC3', 'PC3L', 'PC4', 'HD', 'SSD', 'm.2', 'NVMe', 'mSATA', 'Apple']
@@ -65,6 +128,9 @@ def generate_part_data(part_sn):
 
     return (part_sn, part_type, capacity, size, speed, brand, model, location, status, random_date)
 
+
+drop_and_create_tables()
+
 # Insert sample parts
 for i in range(1, 5001):
     part_sn = f'{i:08d}'  # Sequential serial number
@@ -87,6 +153,8 @@ for i in range(1, 5001):
     part_sn = f'{i:08d}'
     log_entry = generate_log_entry(part_sn)
     cursor.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', log_entry)
+
+update_first_part_record()
 
 # Commit and close
 conn.commit()
