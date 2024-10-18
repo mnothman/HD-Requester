@@ -28,10 +28,11 @@ class PartAppTest(unittest.TestCase):
 
 
     def add_part(self):
-        ###
+        pass
     
+
     def remove_part(self):
-        ###
+        pass
 
 
     
