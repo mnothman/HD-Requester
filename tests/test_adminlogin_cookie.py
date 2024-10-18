@@ -49,7 +49,7 @@ class AdminLoginCookieTests(unittest.TestCase):
         login_button.click()
 
         # Step 6: Wait for the redirect to complete and page to fully load
-        WebDriverWait(driver, 10).until(EC.url_contains("/admin_dashboard"))
+        WebDriverWait(driver, 10).until(EC.url_contains("/dashboard"))
 
         # Step 7: Verify the "remember_me" cookie is set
         cookies = driver.get_cookies()
@@ -84,7 +84,7 @@ class AdminLoginCookieTests(unittest.TestCase):
         login_button.click()
 
         # Step 6: Wait for the redirect to complete and page to fully load
-        WebDriverWait(driver, 10).until(EC.url_contains("/admin_dashboard"))
+        WebDriverWait(driver, 10).until(EC.url_contains("/dashboard"))
 
         # Step 7: Check that the "remember_me" cookie is NOT set
         cookies = driver.get_cookies()
@@ -152,7 +152,7 @@ class AdminLoginCookieTests(unittest.TestCase):
             remember_me_checkbox.click()
 
         login_button.click()
-        WebDriverWait(driver, 10).until(EC.url_contains("/admin_dashboard"))
+        WebDriverWait(driver, 10).until(EC.url_contains("/dashboard"))
 
         # Save the cookies before quitting the browser
         cookies = driver.get_cookies()
@@ -193,7 +193,7 @@ class AdminLoginCookieTests(unittest.TestCase):
             remember_me_checkbox.click()
 
         login_button.click()
-        WebDriverWait(driver, 10).until(EC.url_contains("/admin_dashboard"))
+        WebDriverWait(driver, 10).until(EC.url_contains("/dashboard"))
 
         # Log out and check auto-fill behavior
         driver.get("http://localhost:5000/logout")
@@ -248,7 +248,7 @@ class AdminLoginCookieTests(unittest.TestCase):
             remember_me_checkbox.click()
 
         login_button.click()
-        WebDriverWait(driver, 10).until(EC.url_contains("/admin_dashboard"))
+        WebDriverWait(driver, 10).until(EC.url_contains("/dashboard"))
 
         # Manually set cookie expiry to a past time
         driver.delete_cookie("remember_me")
