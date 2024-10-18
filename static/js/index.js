@@ -1,5 +1,7 @@
 $(document).ready(function () {
-    $('#partsTable').DataTable({
+    var partsTable = $('#partsTable').DataTable({
+        autoFill: true,
+        responsive: true,
         "ajax": {
             "url": "/get_parts",
             "type": "POST",
@@ -17,66 +19,14 @@ $(document).ready(function () {
         ],
         "order": [[7, "asc"]]  // Sort by the Serial Number (Part_sn) column (index 7) in ascending order, "dec" is another option
     });
-});
 
-
-// Function to update the dashboard table with new records
-// I think this is the old funcitonality that no longer works, unable to log anything as DataTables renders data
-function updateDashboard(data) {
-    console.log(data)
-    console.log('teststs')
-
-
-    const tableBody = document.querySelector('#partsTable tbody');
-    const newRow = document.createElement('tr');
-    newRow.innerHTML = `
-    <td>${data.Type}</td>
-    <td>${data.Capacity}</td>
-    <td>${data.Size}</td>
-    <td>${data.Speed}</td>
-    <td>${data.Brand}</td>
-    <td>${data.Model}</td>
-    <td>${data.Location}</td>
-    <td>${data.Part_sn}</td>
-`;
-    tableBody.appendChild(newRow);
-
-    
-
-    // Reinitialize DataTables to recognize the new row
-    $('#partsTable').DataTable().row.add($(newRow)).draw();
-}
-
-
-function checkPartStatus(data) {
-    fetch('/get_parts', {
-        method: 'GET',
-        body: JSON.stringify(data),
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                updateDashboard(data.data);
-                console.log(data.data)
-            } else {
-                console.error(data.message);
-            }
-        });
-}
-
-// split here
-
-$(document).ready(function () {
-    //fetchAndDisplayParts();
-    setupRowClick();
-
-    /* ====== EVENT LISTENERS ===== */
+    // Setup ID to the live search bar
+    $('#partsTable_filter input').attr('id', 'searchInput');
+    // Setup clear button to search bar
+    $('#partsTable_filter').append('<button id="clearButton">&times;</button>');
 
     // Show/hide clear button functionality
-    /*$('#searchInput').on('input', function () {
+    $('#searchInput').on('input', function () {
         var searchTerm = $(this).val().toLowerCase();
 
         // Show clear button if more than one character is entered
@@ -87,61 +37,44 @@ $(document).ready(function () {
             $('#clearButton').hide();
             $('#searchInput').removeClass('inputFilled');
         }
-
-
-        // Need this to display all parts when search is deleted
-        if (searchTerm === '') {
-            fetchAndDisplayParts();  // Fetch and reset to show all parts
-            return;
-        }
-
-        // Filter table rows based on the search term
-        $('#partsTableBody tr').filter(function () {
-            $(this).toggle($(this).text().toLowerCase().indexOf(searchTerm) > -1);
-        });
-
-        // Reapply classes to visible rows for alternating colors
-        $('#partsTableBody tr').filter(":visible").each(function (index) {
-            $(this).removeClass('odd-row even-row');  // Clear previous classes
-            if (index % 2 === 0) {  // Even index, odd row (0-based index)
-                $(this).addClass('odd-row');
-            } else {  // Odd index, even row
-                $(this).addClass('even-row');
-            }
-        });
     });
 
-    // Clear input when clear button is clicked
+    // Clear search bar when clear icon is clicked
     $('#clearButton').on('click', function () {
         $('#searchInput').val('');
+        partsTable.search('').draw();
         $(this).hide(); // Hide clear button after clearing the input
-
-        // Show all rows after clearing the input
-        $('#partsTableBody tr').show();
-
-        // Reapply classes to visible rows for alternating colors
-        $('#partsTableBody tr').each(function (index) {
-            $(this).removeClass('odd-row even-row');
-            if (index % 2 === 0) {
-                $(this).addClass('odd-row');
-            } else {
-                $(this).addClass('even-row');
-            }
-        });
-    });*/
+    });
 
 
-    // Sort column
-    /*
-    $('.sortable-column').click(function () {
-        var column = $(this).text().trim();  // Get the column name
-        var sortOrder = $(this).attr('data-sort-order') || 'asc'; //get current sort order, default to ascending
-        var searchTerm = $('#searchInput').val().toLowerCase();
-        handleSort(column, sortOrder, searchTerm);
+    //Code to display a text areas for adding a note to a part
+    const toggleNotesBtn = document.getElementById("toggleNotesBtn");
+    const notesContainer = document.getElementById("notesContainer");
+    const textarea = document.getElementById("textarea-notes"); // Get the textarea
 
-        sortOrder = (sortOrder === 'asc' ? 'desc' : 'asc');
-        $(this).attr('data-sort-order', sortOrder);
-    });*/ // end Sort column
+    // Ensure notes container is hidden initially
+    notesContainer.style.display = "none";
+
+    toggleNotesBtn.onclick = function () {
+        if (notesContainer.style.display === "none") {
+            notesContainer.style.display = "block";
+        } else {
+            notesContainer.style.display = "none";
+            textarea.value = ""; // Clear the textarea when hiding
+        }
+    };
+
+    setupRowClick();
+
+    /* ====== EVENT LISTENERS ===== */
+
+
+
+
+    /*  deleted Sortable column on 10-17/2024
+        because we implemented a new way to sort
+        the table columns. RC
+    */
 
     // IN/OUT Buttons
     document.querySelectorAll('.btn-group .btn').forEach(function (button) {
@@ -201,60 +134,6 @@ $(document).ready(function () {
     // $('#rmvPartBtn').click(function () {
     // 	handleRemovePart();
     // });
-
-    $('#btnDemoCheckin').click(function () {
-        var demoPart = {
-            "tid": "TI000000-00000001",
-            "unit_sn": "123456",
-            "parts": [{ "capacity": "1TB", "type": "SSD" }],
-            "size": "Laptop",
-            "serial_numbers": ["00000022"]
-        }
-        checkInPart(demoPart);
-    });
-    $('#btnDemoCheckinNotSeenBefore').click(function () {
-        var demoPart = {
-            "tid": "TI000000-00000001",
-            "unit_sn": "123456",
-            "parts": [{ "capacity": "99TB", "type": "SSD" }],
-            "size": "Laptop",
-            "serial_numbers": ["0000011"]
-        }
-        checkInPart(demoPart);
-    });
-    $('#btnDemoCheckinMismatch').click(function () {
-        var demoPart = {
-            "tid": "TI000000-00000001",
-            "unit_sn": "123456",
-            "parts": [{ "capacity": "8GB", "type": "PC4" }],
-            "size": "Laptop",
-            "serial_numbers": ["00000010"]
-        }
-        checkInPart(demoPart);
-    });
-    $('#btnDemoCheckout').click(function () {
-        var demoPart = {
-            "tid": "TI000000-00000001",
-            "unit_sn": "123456",
-            "parts": [{ "capacity": "2TB", "type": "HD" }],
-            "size": "3.5",
-            "serial_numbers": ["00000001"]
-        }
-        checkOutPart(demoPart);
-    });
-    $('#btnDemoCheckoutMismatch').click(function () {
-        var demoPart = {
-            "tid": "TI000000-00000001",
-            "unit_sn": "123456",
-            "parts": [{ "capacity": "1TB", "type": "HD" }],
-            "size": "3.5",
-            "serial_numbers": ["00000001"]
-        }
-        checkOutPart(demoPart);
-    });
-    $('#btnResetLogTables').click(function () {
-        resetLogTables();
-    });
 
     // Handle right-click on table row
     $('#partsTable tbody').on('contextmenu', 'tr', function (e) {
@@ -337,43 +216,99 @@ $(document).ready(function () {
         // Close the modal after submission
         $('#editPartModal').hide();
     });
+});
 
+/* ====== FUNCTIONS ===== */
+function formatValue(value) {
+    return value !== null && value !== undefined ? value : '-';
+}
 
-
-
-    /* ====== FUNCTIONS ===== */
-    function formatValue(value) {
-        return value !== null && value !== undefined ? value : '-';
-    }
-
-    /*
-    function fetchAndDisplayParts() {
-        $.ajax({
-            url: '/get_parts',
-            type: 'POST',
-            dataType: 'json',
-            success: function (data) {
-                var tableBody = $('#partsTableBody');
-                tableBody.empty(); // Clear existing rows
-                $.each(data, function (index, part) {
-                    var rowClass = (index % 2 === 0) ? 'odd-row' : 'even-row';
-                    tableBody.append('<tr class="' + rowClass + '">' +
-                        '<td>' + formatValue(part.Type) + '</td>' +
-                        '<td>' + formatValue(part.Capacity) + '</td>' +
-                        '<td>' + formatValue(part.Size) + '</td>' +
-                        '<td>' + formatValue(part.Speed) + '</td>' +
-                        '<td>' + formatValue(part.Brand) + '</td>' +
-                        '<td>' + formatValue(part.Model) + '</td>' +
-                        '<td>' + formatValue(part.Location) + '</td>' +
-                        '<td>' + formatValue(part.Part_sn) + '</td>' +
-                        '</tr>');
-                });
-            },
-            error: function (xhr, status, error) {
-                console.error("Error fetching parts data: " + error);
+function checkPartStatus(data) {
+    fetch('/get_parts', {
+        method: 'GET',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                updateDashboard(data.data);
+                console.log(data.data)
+            } else {
+                console.error(data.message);
             }
         });
-    }*/ // end fetchAndDisplayParts
+}
+
+function updateDashboard(data) {
+    console.log(data)
+    console.log('teststs')
+
+    const tableBody = document.querySelector('#partsTable tbody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+    <td>${data.Type}</td>
+    <td>${data.Capacity}</td>
+    <td>${data.Size}</td>
+    <td>${data.Speed}</td>
+    <td>${data.Brand}</td>
+    <td>${data.Model}</td>
+    <td>${data.Location}</td>
+    <td>${data.Part_sn}</td>
+`;
+    tableBody.appendChild(newRow);
+
+    // Reinitialize DataTables to recognize the new row
+    partsTable.DataTable().row.add($(newRow)).draw();
+}
+
+/*  deleted fetchAndDisplayParts() on 10/17/2024
+    because we're using a new way to get the parts
+    and display them. RC
+*/
+
+function checkPartStatus(data) {
+    fetch('/get_parts', {
+        method: 'GET',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                updateDashboard(data.data);
+                console.log(data.data)
+            } else {
+                console.error(data.message);
+            }
+        });
+}
+
+function updateDashboard(data) {
+    console.log(data)
+    console.log('teststs')
+
+    const tableBody = document.querySelector('#partsTable tbody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+    <td>${data.Type}</td>
+    <td>${data.Capacity}</td>
+    <td>${data.Size}</td>
+    <td>${data.Speed}</td>
+    <td>${data.Brand}</td>
+    <td>${data.Model}</td>
+    <td>${data.Location}</td>
+    <td>${data.Part_sn}</td>
+`;
+    tableBody.appendChild(newRow);
+
+    // Reinitialize DataTables to recognize the new row
+    partsTable.DataTable().row.add($(newRow)).draw();
+}
 
     // Modal
     function showModal(dataObject, htmlContent, onConfirm) {
@@ -1203,43 +1138,3 @@ $(document).ready(function () {
             });
         });
     } // end checkoutPart
-
-    function resetLogTables() {
-        $.ajax({
-            url: '/reset_log_tables',  // URL of the Flask endpoint
-            type: 'POST',  // Method type, as defined in your Flask route
-            contentType: 'application/json',  // Data type expected to send (if you are sending data to the server)
-            success: function (response) {
-                // This function is called if the request succeeds.
-                console.log('Response:', response);
-                alert('Database has been reset successfully.');
-                fetchAndDisplayParts();
-            },
-            error: function (xhr, status, error) {
-                // This function is called if the request fails.
-                console.error('Error resetting database:', error);
-                alert('Failed to reset database: ' + error);
-            }
-        });
-    } // end resetLogTables
-
-});
-
-//Code to display a text areas for adding a note to a part
-document.addEventListener("DOMContentLoaded", function () {
-    const toggleNotesBtn = document.getElementById("toggleNotesBtn");
-    const notesContainer = document.getElementById("notesContainer");
-    const textarea = document.getElementById("textarea-notes"); // Get the textarea
-
-    // Ensure notes container is hidden initially
-    notesContainer.style.display = "none";
-
-    toggleNotesBtn.onclick = function () {
-        if (notesContainer.style.display === "none") {
-            notesContainer.style.display = "block";
-        } else {
-            notesContainer.style.display = "none";
-            textarea.value = ""; // Clear the textarea when hiding
-        }
-    };
-});

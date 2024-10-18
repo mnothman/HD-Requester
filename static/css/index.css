@@ -18,38 +18,26 @@ nav {
 	top: 0;
 }
 
-.search form {
+
+/* Search */
+#partsTable_filter {
+	position: relative;
+	top: -5px; /* fix alignment with other items in row */
+}
+
+#partsTable_filter input {
 	background-color: white;
-	/* set background color for the search bar */
-	padding: 2px;
-	border: 1px solid black;
-	border-radius: 30px;
-	/* adjust border-radius to make the search bar more elongated */
-	margin-bottom: 20px;
-	margin-top: 20px;
-	margin-left: auto;
 	width: 300px;
-	/* set width for demonstration */
-	display: flex;
-	/* align input and button horizontally */
-	align-items: center;
-	/* center items vertically */
-}
-
-.search input {
-	flex: 1;
-	/* take up remaining space */
-	padding: 3px 8px;
-	outline: none;
-	font-size: 14px;
+	padding-left: 10px;
+	font-size: 16px;
 	border-radius: 30px;
 }
 
-.search input:hover {
+#partsTable_filter input:hover {
 	border: 1px solid #7babe2;
 }
 
-.search button {
+#partsTable_filter button {
 	background-color: #FFF;
 	color: black;
 	outline: none;
@@ -57,6 +45,31 @@ nav {
 	border-radius: 20px;
 	border: solid 0px #FFF;
 	cursor: pointer;
+}
+
+#partsTable_filter::after {
+	content: '\f002';
+	/* FontAwesome search icon unicode */
+	font-family: 'Font Awesome 5 Pro';
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	pointer-events: none;
+	/* Makes the icon non-interactive */
+	color: #ccc;
+	/* Icon color, can be changed as needed */
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	display: inline-block;
+	font-style: normal;
+	font-variant: normal;
+	text-rendering: auto;
+	line-height: 1;
+}
+
+#partsTable_filter label {
+	margin-bottom: 0px; /* override for search icon alignment */
 }
 
 #clearButton {
@@ -68,6 +81,9 @@ nav {
 	z-index: 1000;
 	font-size: 1.3em;
 }
+
+
+/* end Search */
 
 .adminLogin button {
 	color: black;
@@ -131,17 +147,6 @@ nav {
 	background-color: rgb(214, 214, 214);
 	color: black;
 	border: 1px solid black;
-}
-
-#demo-buttons {
-	height: 100%;
-	margin: 0px;
-}
-
-#demo-buttons .btn {
-	color: black;
-	border: 1px solid black;
-	background: #FFFFFF;
 }
 
 /* TOPBAR AND LOGO */
@@ -299,35 +304,4 @@ body.hide-menu .context-menu {
 
 .btn-success {
 	margin-top: 20px;
-}
-
-.input-wrapper {
-	position: relative;
-	margin: 20px 0px;
-}
-
-.input-wrapper::after {
-	content: '\f002';
-	/* FontAwesome search icon unicode */
-	font-family: 'Font Awesome 5 Pro';
-	position: absolute;
-	right: 10px;
-	top: 50%;
-	transform: translateY(-50%);
-	pointer-events: none;
-	/* Makes the icon non-interactive */
-	color: #ccc;
-	/* Icon color, can be changed as needed */
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-font-smoothing: antialiased;
-	display: inline-block;
-	font-style: normal;
-	font-variant: normal;
-	text-rendering: auto;
-	line-height: 1;
-}
-
-.input-wrapper .form-control {
-	padding-right: 30px;
-	/* Add padding to ensure text does not overlap the icon */
 }
