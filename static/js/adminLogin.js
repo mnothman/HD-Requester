@@ -126,6 +126,8 @@ function RecoveryFormCancel() {
             loginForm.style.transform = 'translateY(0)';
         }, 100);
     }, 500);  // Wait for the fade-out transition to complete
+    messageQuestionsBox.textContent = '';  // Clear the message box
+    document.getElementById('form-recover-password').reset();
 }
 
 //Switch to Login page after CANCELLING New Password set
