@@ -39,14 +39,13 @@ class PartAppTest(unittest.TestCase):
 
     def close_modal(self):
         # Close the modal by clicking the close button
-        time.sleep(1)
         close_button = self.driver.find_element(By.ID, "closeModalBtn")
         close_button.click()
 
     def checkin_part(self):
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
-        textarea.send_keys("TI000000-00000001\n123456\n256GB HD 3.5\nLaptop\n00000001")
+        textarea.send_keys("TI000000-00000001\n123456\nPC4 4GB\nLaptop\n00000001")
         self.driver.find_element(By.ID, "btnIn").click()
         self.driver.find_element(By.ID, "btn-submit-request").click()
         time.sleep(1)
@@ -56,15 +55,12 @@ class PartAppTest(unittest.TestCase):
         locationInput = self.driver.find_element(By.ID, "locationInput")
         locationInput.send_keys("Box 7 C5")
         self.driver.find_element(By.ID, "locationSubmitBtn").click()
-        #######################
-        # The Modal should close by now, but Mo is still working on this part.
-        # Delete the line below once Mo has the Mo working.
-        self.driver.find_element(By.ID, "closeModalBtn").click()
+        time.sleep(1)
 
     def checkout_part(self):
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
-        textarea.send_keys("TI000000-00000001\n123456\n256GB HD 3.5\nLaptop\n00000001")
+        textarea.send_keys("TI000000-00000001\n123456\nPC4 4GB\nLaptop\n00000001")
         self.driver.find_element(By.ID, "btnOut").click()
         self.driver.find_element(By.ID, "btn-submit-request").click()
         time.sleep(1)
@@ -97,10 +93,10 @@ class PartAppTest(unittest.TestCase):
         print("Test 1: Check-out")
         self.checkout_part()
 
-        # Verify the database Part now has 4999 parts with Status='in'
+        # Verify the database Part now has 4999 parts with Status='In'
         # Execute the SQL query
         query = 'SELECT COUNT(*) FROM Part WHERE Status = ?'
-        result = self.execute_query(query, ('in',))
+        result = self.execute_query(query, ('In',))
 
         # Assert that the count matches 4999
         self.assertEqual(result, '4999')
@@ -111,10 +107,10 @@ class PartAppTest(unittest.TestCase):
         self.checkin_part()
         self.checkin_part_add_location()
 
-        # Verify the database Part now has 5000 parts with Status='in'
+        # Verify the database Part now has 5000 parts with Status='In'
         # Execute the SQL query
         query = 'SELECT COUNT(*) FROM Part WHERE Status = ?'
-        result = self.execute_query(query, ('in',))
+        result = self.execute_query(query, ('In',))
 
         # Assert that the count matches 5000
         self.assertEqual(result, '5000')
@@ -145,13 +141,13 @@ class PartAppTest(unittest.TestCase):
         print("\nTest 5: Serial number mismatch with Type or Capacity")
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
-        textarea.send_keys("TI000000-00000001\n123456\n256GB HD 3.5\nLaptop\n00000002")
+        textarea.send_keys("TI000000-00000001\n123456\nPC3 4GB\nLaptop\n00000001")
         self.driver.find_element(By.ID, "btnOut").click()
         self.driver.find_element(By.ID, "btn-submit-request").click()
 
         self.check_modal(
             "Check-out Error: Mismatch in type or capacity.",
-            "Expected: 256GB HD 3.5\nFound: 512GB PC4"
+            "Expected: 4GB PC3\nFound: 4GB PC4"
         )
         self.close_modal()
 
@@ -161,7 +157,7 @@ class PartAppTest(unittest.TestCase):
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
         # Using Serial number 5001
-        textarea.send_keys("TI000000-00000001\n123456\n256GB HD 3.5\nLaptop\n00005001")
+        textarea.send_keys("TI000000-00000001\n123456\nPC4 4GB\nLaptop\n00005001")
         self.driver.find_element(By.ID, "btnOut").click()
         self.driver.find_element(By.ID, "btn-submit-request").click()
 
@@ -172,12 +168,12 @@ class PartAppTest(unittest.TestCase):
         self.close_modal()
 
     def test07_checkin_part_not_in_inventory(self):
-        # Test case: Check-out Error: Mismatch in type or capacity
+        # Test case: Check-in Error: Part not seen b4
         print("\nTest 7: Check-in Error: Part not seen in inventory before")
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
         # Using Serial number 5001
-        textarea.send_keys("TI000000-00000001\n123456\n256GB HD 3.5\nLaptop\n00005001")
+        textarea.send_keys("TI000000-00000001\n123456\nPC4 4GB\nLaptop\n00005001")
         self.driver.find_element(By.ID, "btnIn").click()
         self.driver.find_element(By.ID, "btn-submit-request").click()
 
