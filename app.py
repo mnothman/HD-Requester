@@ -279,6 +279,48 @@ def insert_part(part_data):
 
     return {'status': 'success', 'message': 'Part added successfully and logged as in'}
 
+# Function for getting data to display trends
+@app.route('/get_trends', methods=['GET'])
+def get_trends():
+    month = request.args.get('month', type=int)
+    year = request.args.get('year', type=int)
+
+    # Check for complete parameters
+    if not month or not year:
+        return jsonify({'status': 'error', 'message': 'Month and year are required.'}), 400
+
+    # For query range, first_day included and last_day excluded 
+    first_day = datetime(year, month, 1)    # Sets first day of specified month 
+    last_day = datetime(year + (1 if month == 12 else 0), (month % 12) + 1, 1)  # Calculates the first day of the next month and wraps if needed 
+
+    db = get_db()
+    query = '''
+    SELECT 
+        DATE(Date_time) AS date, 
+        COUNT(CASE WHEN Part_status = 'in' THEN 1 END) AS check_ins,
+        COUNT(CASE WHEN Part_status = 'out' THEN 1 END) AS check_outs,
+        COUNT(CASE WHEN Type = 'Laptop' THEN 1 END) AS laptop_transactions,
+        COUNT(CASE WHEN Type = 'Desktop' THEN 1 END) AS desktop_transactions
+        FROM Log l
+        JOIN Part p ON l.Part_sn = p.Part_sn
+        WHERE Date_time >= ? AND Date_time < ?
+        GROUP BY DATE(Date_time)
+        ORDER BY DATE(Date_time)
+    '''
+
+    try:
+        results = db.execute(query, (first_day, last_day)).fetchall()
+        trends = {row['date']: {
+            'check_ins': row['check_ins'],
+            'check_outs': row['check_outs'],
+            'laptop_transactions': row['laptop_transactions'],
+            'desktop_transactions': row['desktop_transactions']
+        } for row in results}
+
+        return jsonify({'status': 'success', 'data': trends})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 @app.route('/add_part', methods=['POST'])
 def add_part():
