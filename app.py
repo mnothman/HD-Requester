@@ -340,10 +340,10 @@ def get_trends():
     query = '''
     SELECT 
         DATE(Date_time) AS date, 
-        COUNT(CASE WHEN Part_status = 'in' THEN 1 END) AS check_ins,
-        COUNT(CASE WHEN Part_status = 'out' THEN 1 END) AS check_outs,
-        COUNT(CASE WHEN Type = 'Laptop' THEN 1 END) AS laptop_transactions,
-        COUNT(CASE WHEN Type = 'Desktop' THEN 1 END) AS desktop_transactions
+        COUNT(CASE WHEN Part_status = 'In' THEN 1 END) AS check_ins,
+        COUNT(CASE WHEN Part_status = 'Out' THEN 1 END) AS check_outs,
+        COUNT(CASE WHEN Size = 'Laptop' THEN 1 END) AS laptop_transactions,
+        COUNT(CASE WHEN Size = 'Desktop' THEN 1 END) AS desktop_transactions
         FROM Log l
         JOIN Part p ON l.Part_sn = p.Part_sn
         WHERE Date_time >= ? AND Date_time < ?
