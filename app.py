@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, Flask, g, jsonify, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, current_app, Flask, g, jsonify, render_template, request, redirect, url_for, session, flash, make_response
 from datetime import datetime
 from argon2 import PasswordHasher
 import re, sqlite3
@@ -6,8 +6,8 @@ import re, sqlite3
 app = Flask(__name__)
 
 app.secret_key = 'key'
- 
-#Test Login
+
+# Test Login
 ph = PasswordHasher()
 hashed_password = ph.hash('admin123')
 
@@ -15,66 +15,99 @@ db_blueprint = Blueprint('db', __name__)
 DATABASE = 'refresh.db'
 
 def get_db():
-    
     if 'db' not in g:
         g.db = sqlite3.connect(DATABASE)
         g.db.row_factory = sqlite3.Row
     return g.db
-
 
 @db_blueprint.teardown_app_request
 def close_db(error):
     db = g.pop('db', None)
     if db is not None:
         db.close()
-
     current_app.logger.info("Database is connected")
-
 
 @app.route('/')
 def index():
-    return render_template('index.html')
-
+    admin_cookie = request.cookies.get('admin')
+    if admin_cookie == 'true':
+        return render_template('index.html', logged_in=True)
+    else:
+        return render_template('index.html', logged_in=False)
 
 # Login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+        username = request.form['username']
+        password = request.form['password']
+        remember = 'remember' in request.form  # Check if "Remember Me" is selected
 
         # Validate login credentials
         try: 
             # Assuming hashed_password is defined elsewhere securely
             if username == 'admin' and ph.verify(hashed_password, password):
-                # If login is successful, redirect to the admin dashboard
-                return redirect(url_for('admin_dashboard'))
+                response = make_response(redirect(url_for('dashboard')))
+                
+                # Set the session cookie for the admin login state
+                response.set_cookie('admin_logged_in', 'true', max_age=3600)  # Expires in 1 hour
+                
+                if remember:
+                    # Set the "Remember Me" cookie for 30 days
+                    response.set_cookie('remember_me', username, max_age=30*24*60*60)  # 30 days for the remember me feature
+                else:
+                    # If "Remember Me" is unchecked, delete the remember_me cookie if it exists
+                    response.set_cookie('remember_me', '', expires=0)
+
+                return response
             else:
-                # If login fails, flash a message and render login again
-                flash('Invalid credentials, please try again.')
-                return redirect(url_for('login'))  # Redirect back to the login page
+                flash('Invalid username or password')
+                return redirect(url_for('login'))
         except Exception as e:
-            # This captures any exception, which could include verification failure or other issues
-            flash('Invalid credentials, please try again')
-            return redirect(url_for('login')) #redirect to login page once more
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+    # Handle GET request: Check if the admin is already logged in
+    if request.cookies.get('admin_logged_in'):
+        return redirect(url_for('dashboard'))  # Redirect if already logged in
+    
+    # If not logged in, check if "remember_me" exists to pre-fill the login form
+    remember_me_username = request.cookies.get('remember_me')
+    return render_template('login.html', remember_me=remember_me_username)
 
-    # If GET request, render the login page
-    return render_template('adminLogin.html')
+
+@app.route('/logout')
+def logout():
+    response = make_response(redirect(url_for('index')))  # Redirect to the homepage
+    
+    # Remove the session cookie that tracks login state
+    response.set_cookie('admin_logged_in', '', expires=0)
+
+    # Do not delete the remember_me cookie, so it remains for future login pre-filling
+
+    return response
 
 
-# Dashboard route
+
+
+# Admin Dashboard route
 @app.route('/dashboard')
-def admin_dashboard():
+def dashboard():
     parts = record()
-    return render_template('dashboard.html', parts=parts)
+    # Check if the user is logged in by checking the 'admin_logged_in' cookie
+    if request.cookies.get('admin_logged_in'):
+        return render_template('dashboard.html',parts=parts)  # Render dashboard page
+    else:
+        # If not logged in, redirect back to login page
+        return redirect(url_for('login'))
+
 
 def record():
     db = get_db()
     query = '''
 SELECT l.Date_time, 
            CASE 
-               WHEN l.Part_status = 'in' THEN 'Check In' 
-               WHEN l.Part_status = 'out' THEN 'Check Out' 
+               WHEN l.Part_status = 'In' THEN 'Check In' 
+               WHEN l.Part_status = 'Out' THEN 'Check Out' 
                ELSE 'Unknown' 
            END AS Action,
            l.TID, 
@@ -156,7 +189,7 @@ def get_parts():
 
 def get_all_parts(search_type=None):
     db = get_db()
-    query = 'SELECT * FROM Part WHERE Status IS "in"'
+    query = 'SELECT * FROM Part WHERE Status IS "In"'
     args = ()
     if search_type:
         query += ' AND Type LIKE ?'
@@ -247,18 +280,28 @@ def inventory():
 
 # Database function to insert a part
 def insert_part(part_data):
-    # Connection to your SQLite database
+    # Connection to SQLite database
     conn = get_db()
     cursor = conn.cursor()
 
     try:
+        part_sn = part_data['Part_sn']
+        tid = part_data['TID']
+        unit_sn = part_data['Unit_sn']
+        part_status = part_data['Part_status']  # update the part status given
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        note = part_data['Note']
         # SQL query to insert a new part into the Part table
         conn.execute('BEGIN')
         cursor.execute('''
-            INSERT INTO Part (Type, Capacity, Size, Speed, Brand, Model, Location, Part_sn)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'in')
-        ''', (part_data['Type'], part_data['Capacity'], part_data['Size'], part_data['Speed'],
-              part_data['Brand'], part_data['Model'], part_data['Location'], part_data['Part_sn']))
+            INSERT INTO Part (Part_sn, Type, Capacity, Size, Speed, Brand, Model, Location, Status, timedate_updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (part_data['Part_sn'], part_data['Type'], part_data['Capacity'], part_data['Size'], part_data['Speed'],
+              part_data['Brand'], part_data['Model'], part_data['Location'], 'In', timestamp))
+        
+        # Insert a new log entry with the current timestamp
+        cursor.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', 
+                     (tid, unit_sn, part_sn, part_status, timestamp, note))
 
         # Commit the changes
         conn.commit()
@@ -277,7 +320,7 @@ def insert_part(part_data):
     finally:
         conn.close()  # Always close the connection
 
-    return {'status': 'success', 'message': 'Part added successfully and logged as in'}
+    return {'status': 'success', 'message': 'Part added successfully and logged as In'}
 
 # Function for getting data to display trends
 @app.route('/get_trends', methods=['GET'])
@@ -325,6 +368,7 @@ def get_trends():
 @app.route('/add_part', methods=['POST'])
 def add_part():
     data = request.get_json()
+    print(data)
     result = insert_part(data)
     if result['status'] == 'success':
         return jsonify({'status': 'success', 'message': result['message']})
@@ -392,9 +436,9 @@ def check_part_in_inventory():
     data = request.get_json()
     part_sn = data['Part_sn']
     size = data['Size']
-    expected_type = data['Type']
-    expected_capacity = data['Capacity']
-    expected_part_status = data['Part_status']
+    textarea_type = data['Type']
+    textarea_capacity = data['Capacity']
+    textarea_part_status = data['Part_status']
 
     conn = get_db()
     try:
@@ -407,20 +451,20 @@ def check_part_in_inventory():
 							'message': 'Part not found in inventory.',
 						   })
 
-        # Check if the existing part matches the expected type and capacity
-        elif part['Type'] != expected_type or part['Capacity'] != expected_capacity:
+        # Check if the existing part matches the textarea's type and capacity
+        elif part['Type'] != textarea_type or part['Capacity'] != textarea_capacity:
             return jsonify({
                 'exists': False,
                 'error': 'mismatch',
                 'message': 'Mismatch in type or capacity.',
-                'expected': {'Type': expected_type, 'Capacity': expected_capacity},
+                'expected': {'Type': textarea_type, 'Capacity': textarea_capacity},
                 'actual': {'Type': part['Type'], 'Capacity': part['Capacity']}
             })
 		# Check if the existing part is already checked in
-        elif part['Status'] == 'in':
-            if expected_part_status == 'in':
+        elif textarea_part_status == 'In':
+            if part['Status'] == 'In':
                 return jsonify({
-                    'exists': False,
+                    'exists': False,    # make index.js around line 724 show the modal with this data 
                     'error': 'checked-in',
                     'message': 'Already checked-in.',
                     'part': {'Part_sn': part_sn,
@@ -435,8 +479,8 @@ def check_part_in_inventory():
             else:
                 return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
         # Check if the existing part is already checked out
-        elif part['Status'] == 'out':
-            if expected_part_status == 'out':
+        elif textarea_part_status == 'Out':
+            if part['Status'] == 'Out':
                 return jsonify({
                     'exists': False,
                     'error': 'checked-out',
@@ -451,7 +495,16 @@ def check_part_in_inventory():
                              'Location': part['Location']}
                 })
             else:
-                return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
+                return jsonify({'exists': True,
+                                'part': {'Part_sn': part_sn,
+                                'Type': part['Type'],
+                                'Capacity': part['Capacity'],
+                                'Size': part['Size'],
+                                'Speed': part['Speed'],
+                                'Brand': part['Brand'],
+                                'Model': part['Model'],
+                                'Location': part['Location']},
+                                'message': 'Part exists with matching type and capacity.'})
         else:
             return jsonify({
                 'exists': False,
@@ -476,18 +529,15 @@ def update_part_status():
     conn = get_db()
     try:
         conn.execute('BEGIN')
-        # Update Part to set Status to 'in'
+        # Update Part to set Status
         conn.execute('UPDATE Part SET Status = ? WHERE Part_sn = ?', (part_status, part_sn))
         # Insert a new log entry with the current timestamp
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', 
                      (tid, unit_sn, part_sn, part_status, timestamp, note))
-#        conn.commit()
- #       return jsonify({'status': 'success', 'message': 'Part status updated and logged successfully.'})
-
-           # Fetch the part details
+        
+        # Fetch the part details
         part = conn.execute('SELECT * FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         conn.commit()
         return jsonify({
@@ -544,7 +594,7 @@ def simulate_text_area_input(user_input):
         # Simulated insertion into Log table with all necessary fields
         cursor.execute(
             "INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status) VALUES (?, ?, ?, ?)",
-            (user_input, 'Unit123', 'Part123', 'in')  # Dummy values for Unit_sn, Part_sn, and Part_status
+            (user_input, 'Unit123', 'Part123', 'In')  # Dummy values for Unit_sn, Part_sn, and Part_status
         )
         conn.commit()
         return "Simulated input was processed safely."

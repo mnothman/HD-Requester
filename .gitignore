@@ -3,3 +3,4 @@
 .vscode/
 tests/__pycache__/
 refresh.db
+*.db
