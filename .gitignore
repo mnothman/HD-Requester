@@ -2,3 +2,5 @@
 .metadata/
 .vscode/
 tests/__pycache__/
+tests/.pytest
+*.db
