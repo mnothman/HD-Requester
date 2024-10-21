@@ -50,28 +50,49 @@ class PartSearchSortTests(unittest.TestCase):
         print("Search for 'NonExistentPart' returned no results as expected.")
 
     # Commenting out the sorting functionality as requested
-    # def test_sorting_functionality(self):
-    #     print("Testing sorting functionality.")
-    #     driver = self.driver
+    def test_sorting_functionality(self):
+        print("Testing sorting functionality.")
+        driver = self.driver
 
-    #     # Sort by the serial number column
-    #     serial_column_header = driver.find_element(By.XPATH, "//th[contains(text(), 'Serial Number')]")
-    #     serial_column_header.click()
+        # Wait for the page to fully load
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "partsTable"))
+        )
 
-    #     # Wait for sorting to finish (we assume that the first result changes or sorting arrow is updated)
-    #     WebDriverWait(driver, 10).until(
-    #         EC.presence_of_element_located((By.XPATH, "//span[contains(@class, 'sorting_asc')]"))
-    #     )
+        # Use JavaScript to trigger DataTables sorting on the 'Serial Number' column (7th column index for Serial Number)
+        driver.execute_script("$('#partsTable').DataTable().order([7, 'asc']).draw();")
 
-    #     # Fetch the first and last part_sn values after sorting
-    #     part_sn_elements = driver.find_elements(By.XPATH, "//table[@id='partsTable']//tbody//tr/td[1]")
+        # Wait for the sorting to complete by checking the updated sorting class
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//th[contains(@class, 'sorting_asc')]"))
+        )
 
-    #     first_value = part_sn_elements[0].text
-    #     last_value = part_sn_elements[-1].text
+        # Fetch all rows from the Serial Number column after sorting
+        part_sn_elements = driver.find_elements(By.XPATH, "//table[@id='partsTable']//tbody//tr/td[8]")
 
-    #     # Assuming part_sn should be sorted alphabetically or numerically
-    #     self.assertLessEqual(first_value, last_value, "The serial numbers should be sorted in ascending order.")
-    #     print("Sorting by 'Serial Number' column works as expected.")
+        # Collect the serial numbers from the column and verify sorting
+        serial_numbers = [element.text for element in part_sn_elements]
+
+        # Verify if the serial numbers are sorted in ascending order
+        self.assertEqual(serial_numbers, sorted(serial_numbers), "Serial numbers should be sorted in ascending order.")
+        print("Sorting by 'Serial Number' column works as expected.")
+
+        # Similarly, for the 'Type' column (0th index for Type column)
+        driver.execute_script("$('#partsTable').DataTable().order([0, 'asc']).draw();")
+
+        # Wait for the sorting to complete
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//th[contains(@class, 'sorting_asc')]"))
+        )
+
+        # Fetch all rows from the 'Type' column and verify sorting
+        type_elements = driver.find_elements(By.XPATH, "//table[@id='partsTable']//tbody//tr/td[1]")
+        type_values = [element.text for element in type_elements]
+    
+        self.assertEqual(type_values, sorted(type_values), "'Type' column should be sorted in ascending order.")
+        print("Sorting by 'Type' column works as expected.")
+
+
 
     @classmethod
     def tearDownClass(cls):
