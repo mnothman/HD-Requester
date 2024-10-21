@@ -1,15 +1,15 @@
 from flask import Blueprint, current_app, Flask, g, jsonify, render_template, request, redirect, url_for, session, flash, make_response
 from datetime import datetime
-from argon2 import PasswordHasher
+from argon2 import PasswordHasher, Type
 import re, sqlite3
 
 app = Flask(__name__)
 
 app.secret_key = 'key'
 
-# Test Login
-ph = PasswordHasher()
-hashed_password = ph.hash('admin123')
+# Use argon2id for better security
+ph = PasswordHasher(type=Type.ID)
+
 
 db_blueprint = Blueprint('db', __name__)
 DATABASE = 'refresh.db'
@@ -41,38 +41,43 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        remember = 'remember' in request.form  # Check if "Remember Me" is selected
 
-        # Validate login credentials
-        try: 
-            # Assuming hashed_password is defined elsewhere securely
-            if username == 'admin' and ph.verify(hashed_password, password):
-                response = make_response(redirect(url_for('dashboard')))
-                
-                # Set the session cookie for the admin login state
-                response.set_cookie('admin_logged_in', 'true', max_age=3600)  # Expires in 1 hour
-                
-                if remember:
-                    # Set the "Remember Me" cookie for 30 days
-                    response.set_cookie('remember_me', username, max_age=30*24*60*60)  # 30 days for the remember me feature
+        conn = get_db()
+        cursor = conn.cursor()
+
+        # Fetch the hashed password from the database
+        cursor.execute("SELECT password FROM Admin WHERE username = ?", (username,))
+        user = cursor.fetchone()
+
+        if user:
+            try:
+                # Verify the password using Argon2id
+                if ph.verify(user['password'], password):
+                    print("Password verified successfully!")
+                    response = make_response(redirect(url_for('dashboard')))
+                    response.set_cookie('admin_logged_in', 'true', max_age=3600)  # Expires in 1 hour
+                    return response
                 else:
-                    # If "Remember Me" is unchecked, delete the remember_me cookie if it exists
-                    response.set_cookie('remember_me', '', expires=0)
-
-                return response
-            else:
+                    print("Password verification failed.")
+                    flash('Invalid username or password')
+                    return redirect(url_for('login'))
+            except Exception as e:
+                print(f"Verification error: {e}")
                 flash('Invalid username or password')
                 return redirect(url_for('login'))
-        except Exception as e:
-            flash('Invalid username or password')
+        else:
+            print("User not found.")
+            flash('User not found')
             return redirect(url_for('login'))
+
     # Handle GET request: Check if the admin is already logged in
     if request.cookies.get('admin_logged_in'):
         return redirect(url_for('dashboard'))  # Redirect if already logged in
-    
+
     # If not logged in, check if "remember_me" exists to pre-fill the login form
     remember_me_username = request.cookies.get('remember_me')
     return render_template('login.html', remember_me=remember_me_username)
+
 
 
 @app.route('/logout')
@@ -85,7 +90,6 @@ def logout():
     # Do not delete the remember_me cookie, so it remains for future login pre-filling
 
     return response
-
 
 
 
@@ -161,12 +165,15 @@ def check_answers():
 def reset_password():
     new_password = request.form['new_password']
 
-    # Update the Admin table with the new password in plain text
+    # Hash the new password with Argon2
+    hashed_password = ph.hash(new_password)
+
+    # Update the Admin table with the hashed password
     conn = get_db()
     cursor = conn.cursor()
     try:
         # Update the password in the Admin table (assuming only one admin user)
-        cursor.execute("UPDATE Admin SET password = ? WHERE username = ?", (new_password, 'admin'))  # Replace 0 with actual Admin ID if necessary
+        cursor.execute("UPDATE Admin SET password = ? WHERE username = ?", (hashed_password, 'admin'))  # Update 'admin'
         conn.commit()
 
         return jsonify({'success': True, 'message': 'Password has been updated successfully.'})
@@ -176,6 +183,7 @@ def reset_password():
         return jsonify({'success': False, 'message': 'An error occurred while updating the password: ' + str(e)})
     finally:
         conn.close()
+
 
 
 @app.route('/get_parts', methods=['POST'])
@@ -565,6 +573,8 @@ def update_part_status():
         conn.close()
 
 
+
+
 @app.route('/automated_test')
 def automated_test():
     """
@@ -603,6 +613,7 @@ def simulate_text_area_input(user_input):
         return f"Failed to process simulated input: {str(e)}"
     finally:
         conn.close()
+
 
 
 
