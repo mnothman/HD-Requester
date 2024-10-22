@@ -442,87 +442,69 @@ def sort_parts():
 @app.route('/check_part_in_inventory', methods=['POST'])
 def check_part_in_inventory():
     data = request.get_json()
-    part_sn = data['Part_sn']
-    size = data['Size']
-    textarea_type = data['Type']
-    textarea_capacity = data['Capacity']
-    textarea_part_status = data['Part_status']
+    part_sn = data.get('Part_sn')
+    size = data.get('Size')
+    textarea_type = data.get('Type')
+    textarea_capacity = data.get('Capacity')
+    textarea_part_status = data.get('Part_status')
+    unit_sn = data.get('Unit_sn')
 
     conn = get_db()
     try:
-        # Query to check if Part_sn exists in the Part table and is currently checked out
         part = conn.execute('SELECT * FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
 
         if part is None:
-            return jsonify({'exists': False,
-							'error': 'not_in_inventory',
-							'message': 'Part not found in inventory.',
-						   })
+            return jsonify({
+                'exists': False,
+                'error': 'not_in_inventory',
+                'message': 'Part not found in inventory.'
+            })
 
-        # Check if the existing part matches the textarea's type and capacity
-        elif part['Type'] != textarea_type or part['Capacity'] != textarea_capacity:
+        # Convert sqlite3.Row to dictionary
+        part = dict(part)
+
+        # Handle the Size mismatch logic
+        if part['Type'] in ['PC3', 'PC3L', 'PC4', 'HD']:  # Only relevant types
+            if part['Size'] != size:
+                return jsonify({
+                    'exists': False,
+                    'error': 'size_mismatch',
+                    'message': f'Size mismatch for Part_sn: {part_sn}. Expected {part["Size"]}, got {size}.',
+                    'expected': {'Size': part['Size']},
+                    'actual': {'Size': size}
+                })
+
+        # Mismatch check for Type and Capacity
+        if part['Type'] != textarea_type or part['Capacity'] != textarea_capacity:
             return jsonify({
                 'exists': False,
                 'error': 'mismatch',
-                'message': 'Mismatch in type or capacity.',
-                'expected': {'Type': textarea_type, 'Capacity': textarea_capacity},
-                'actual': {'Type': part['Type'], 'Capacity': part['Capacity']}
+                'message': 'Mismatch in Type or Capacity.',
+                'expected': {'Type': part['Type'], 'Capacity': part['Capacity']},
+                'actual': {'Type': textarea_type, 'Capacity': textarea_capacity}
             })
-		# Check if the existing part is already checked in
-        elif textarea_part_status == 'In':
-            if part['Status'] == 'In':
-                return jsonify({
-                    'exists': False,    # make index.js around line 724 show the modal with this data 
-                    'error': 'checked-in',
-                    'message': 'Already checked-in.',
-                    'part': {'Part_sn': part_sn,
-                             'Type': part['Type'],
-                             'Capacity': part['Capacity'],
-                             'Size': part['Size'],
-                             'Speed': part['Speed'],
-                             'Brand': part['Brand'],
-                             'Model': part['Model'],
-                             'Location': part['Location']}
-                })
-            else:
-                return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
-        # Check if the existing part is already checked out
-        elif textarea_part_status == 'Out':
-            if part['Status'] == 'Out':
-                return jsonify({
-                    'exists': False,
-                    'error': 'checked-out',
-                    'message': 'Already checked-out.',
-                    'part': {'Part_sn': part_sn,
-                             'Type': part['Type'],
-                             'Capacity': part['Capacity'],
-                             'Size': part['Size'],
-                             'Speed': part['Speed'],
-                             'Brand': part['Brand'],
-                             'Model': part['Model'],
-                             'Location': part['Location']}
-                })
-            else:
-                return jsonify({'exists': True,
-                                'part': {'Part_sn': part_sn,
-                                'Type': part['Type'],
-                                'Capacity': part['Capacity'],
-                                'Size': part['Size'],
-                                'Speed': part['Speed'],
-                                'Brand': part['Brand'],
-                                'Model': part['Model'],
-                                'Location': part['Location']},
-                                'message': 'Part exists with matching type and capacity.'})
-        else:
+
+        # Check if already checked-in or checked-out
+        if textarea_part_status == 'In' and part['Status'] == 'In':
             return jsonify({
                 'exists': False,
-                'error': 'uncaught',
-                'message': 'Uncaught error.',
-                'part': {'Part_sn': part_sn, 'Type': part['Type'], 'Capacity': part['Capacity'], 'Size': part['Size']}
+                'error': 'checked-in',
+                'message': 'Part already checked-in.',
+                'part': part
             })
+        elif textarea_part_status == 'Out' and part['Status'] == 'Out':
+            return jsonify({
+                'exists': False,
+                'error': 'checked-out',
+                'message': 'Part already checked-out.',
+                'part': part
+            })
+
+        return jsonify({'exists': True, 'message': 'Part exists with matching Type, Capacity, and Size.'})
 
     finally:
         conn.close()
+
 
 
 @app.route('/update_part_status', methods=['POST'])
