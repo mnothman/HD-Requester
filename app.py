@@ -493,8 +493,8 @@ def check_part_in_inventory():
                 'exists': False,
                 'error': 'mismatch',
                 'message': 'Mismatch in Type or Capacity.',
-                'expected': {'Type': part['Type'], 'Capacity': part['Capacity']},
-                'actual': {'Type': textarea_type, 'Capacity': textarea_capacity}
+                'expected': {'Type': textarea_type, 'Capacity': textarea_capacity},
+                'actual': {'Type': part['Type'], 'Capacity': part['Capacity']}
             })
 
         # Check if already checked-in or checked-out
@@ -502,14 +502,14 @@ def check_part_in_inventory():
             return jsonify({
                 'exists': False,
                 'error': 'checked-in',
-                'message': 'Part already checked-in.',
+                'message': 'Already checked-in.',
                 'part': part
             })
         elif textarea_part_status == 'Out' and part['Status'] == 'Out':
             return jsonify({
                 'exists': False,
                 'error': 'checked-out',
-                'message': 'Part already checked-out.',
+                'message': 'Already checked-out.',
                 'part': part
             })
 

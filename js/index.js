@@ -696,14 +696,14 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 <p><strong>That part is already checked-in:</strong></p>
                 <p>Serial number: ${partSn}</p>
             `;
-            showModal({ title: 'Check-in Error: Already Checked In' }, content);
+            showModal({ title: 'Check-in Error: Already checked-in.' }, content);
         } else if (response.error === 'not_in_inventory') {
             const content = `
-                <p><strong>Part not found in inventory:</strong></p>
+                <p><strong>That part has never been added to inventory.</strong></p>
                 <p>Serial number: ${partSn}</p>
-                <p>Please add the part to inventory.</p>
+                <p>Add item to inventory. Fill in the blanks</p>
             `;
-            showModal({ title: 'Check-in Error: Part Not Found' }, content);
+            showModal({ title: 'Check-in Error: Part not found in inventory.' }, content);
         } else if (response.error === 'missing_serial_number') {
             // New case for missing serial number
             const content = `
@@ -798,7 +798,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 <p>Expected: ${response.expected.Capacity} ${response.expected.Type}</p>
                 <p>Found: ${response.actual.Capacity} ${response.actual.Type}</p>
             `;
-            showModal({ title: 'Check-out Error: Mismatch' }, content);
+            showModal({ title: 'Check-out Error: Mismatch in type or capacity.' }, content);
         } else if (response.error === 'checked-out') {
             let speedField = '';  // Speed field isn't needed for HD or SSD
     
@@ -835,7 +835,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                     </div>
                 </div>
             `;
-            showModal({ title: 'Check-out Error: Already Checked Out' }, content);
+            showModal({ title: 'Check-out Error: Already checked-out.' }, content);
         } else if (response.error === 'not_in_inventory') {
             let speedField = '';  // Speed field isn't needed for HD or SSD
     
@@ -894,7 +894,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                     <button type="button" id="add_btn" class="btn btn-primary mb-2">Add Part</button>    
                 </div>
             `;
-            showModal({ title: 'Check-out Error: Part Not Found' }, content);
+            showModal({ title: 'Check-out Error: Part not found in inventory.' }, content);
     
             // Handle form submission when the user clicks "Add Part"
             $('#add_btn').click(function () {
