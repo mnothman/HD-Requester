@@ -146,7 +146,7 @@ class PartCheckInOutTest(unittest.TestCase):
         self.driver.find_element(By.ID, "btn-submit-request").click()
 
         self.check_modal(
-            "Check-out Error: Mismatch in type or capacity.",
+            "Check-out Error: Mismatch in Type or Capacity.",
             "Expected: 4GB PC3\nFound: 4GB PC4"
         )
         self.close_modal()
