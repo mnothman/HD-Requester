@@ -146,7 +146,7 @@ class PartCheckInOutTest(unittest.TestCase):
         self.driver.find_element(By.ID, "btn-submit-request").click()
 
         self.check_modal(
-            "Check-out Error: Mismatch in type or capacity.",
+            "Check-out Error: Mismatch in Type or Capacity.",
             "Expected: 4GB PC3\nFound: 4GB PC4"
         )
         self.close_modal()
@@ -213,28 +213,22 @@ class PartCheckInOutTest(unittest.TestCase):
 
     def test08_checkout_missing_type(self):
        # Test case: Check-out Error: Missing Type
-        print("\nTest 8: Check-out Error: Missing Type - Skip")
-
-        ### Need to fix our app and then remove this pass
-        ##  and the ''' '''
-        #
-        pass
-        r'''
+        print("\nTest 8: Check-out Error: Missing Type")
+ 
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
-        # Using Serial number 5001
-        textarea.send_keys("TI000000-00000001\n123456\n256GB\nLaptop\n00005001")
+        # Using Serial number 0001
+        textarea.send_keys("TI000000-00000001\n123456\n4GB\nLaptop\n00000001")
         self.driver.find_element(By.ID, "btnIn").click()
         self.driver.find_element(By.ID, "btn-submit-request").click()
 
         # Expecting modal to show mismatch error
         
-                        self.check_modal(
+        self.check_modal(
             "Check-out Error: Missing Part Capacity.",
-            "Expected: 256GB HD 3.5\nFound: HD 3.5"
+            "Expected: 4GB PC4\nFound: 4GB"
         )
         self.close_modal()
-        '''
 
     def test09_checkout_missing_capacity(self):
        # Test case: Check-out Error: Missing capacity - Skip
