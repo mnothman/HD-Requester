@@ -575,6 +575,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 data: JSON.stringify(partData),
                 success: function (response) {
                     if (response.exists) {
+                        
                         // If part exists and matches type and capacity, update its status to 'in'
                         const partSpeed = response.part?.Speed || 'N/A';  // Fallback to 'N/A' if undefined
                         const partBrand = response.part?.Brand || 'N/A';
@@ -883,7 +884,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
                                             ${speedField}
                                             <div style="flex: 1; padding: 8px;">Brand</div>
                                             <div style="flex: 1; padding: 8px;">Model</div>
-                                            <div style="flex: 1; padding: 8px;">Location</div>
                                         </div>
                                         <div style="display: flex;">
                                             <div style="flex: 1; padding: 8px;">${response.part['Type']}</div>
@@ -892,7 +892,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
                                             ${speedValue}
                                             <div style="flex: 1; padding: 8px;">${response.part['Brand']}</div>
                                             <div style="flex: 1; padding: 8px;">${response.part['Model']}</div>
-                                            <div style="flex: 1; padding: 8px;">${response.part['Location']}</div>
                                         </div>
                                     </div>
                             `;

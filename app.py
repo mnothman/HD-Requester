@@ -532,14 +532,15 @@ def update_part_status():
     tid = data['TID']
     unit_sn = data['Unit_sn']
     part_status = data['Part_status']  # update the part status given
+    location = data.get('Location')
     note = data['Note']
 
     conn = get_db()
     try:
         conn.execute('BEGIN')
         # Update Part to set Status
-        conn.execute('UPDATE Part SET Status = ? WHERE Part_sn = ?', (part_status, part_sn))
-        # Insert a new log entry with the current timestamp
+        conn.execute('UPDATE Part SET Status = ?, Location = ? WHERE Part_sn = ?', (part_status, location, part_sn))
+        # Insert a new log entry with the current timestamp, don't need location here (potentially)
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', 
                      (tid, unit_sn, part_sn, part_status, timestamp, note))
@@ -561,6 +562,7 @@ def update_part_status():
                 'Speed': part['Speed'],
                 'Brand': part['Brand'],
                 'Model': part['Model'],
+                'Location': part['Location'],
                 'Part_sn': part_sn
             }
         })
