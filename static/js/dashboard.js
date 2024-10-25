@@ -22,8 +22,9 @@ const colors = [
 
 $(document).ready(function () {
     loadInventory();
-    $('#partsTable').DataTable();  // Initialize DataTables on the table
-     
+    new DataTable('#partsTable', {
+        order: [0, 'dec']
+    });
 });
 
 /// Function to sanitize IDs for CSS selectors
