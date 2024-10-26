@@ -138,7 +138,7 @@ class PartCheckInOutTest(unittest.TestCase):
 
     def test05_checkout_mismatch_type_capacity(self):
         # Test case: Check-out Error: Mismatch in type or capacity
-        print("\nTest 5: Serial number mismatch with Type or Capacity")
+        print("\nTest 5: Serial number mismatch with type or capacity")
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
         textarea.send_keys("TI000000-00000001\n123456\nPC3 4GB\nLaptop\n00000001")
@@ -146,7 +146,7 @@ class PartCheckInOutTest(unittest.TestCase):
         self.driver.find_element(By.ID, "btn-submit-request").click()
 
         self.check_modal(
-            "Check-out Error: Mismatch in Type or Capacity.",
+            "Check-out Error: Mismatch in type or capacity.",
             "Expected: 4GB PC3\nFound: 4GB PC4"
         )
         self.close_modal()
