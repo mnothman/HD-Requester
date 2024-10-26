@@ -132,20 +132,21 @@ $(document).ready(function () {
     // });
 
     // Handle right-click on table row
+    // Prevent the default right-click context menu
     $('#partsTable tbody').on('contextmenu', 'tr', function (e) {
-        e.preventDefault();  // Prevent the default right-click context menu
-
+        e.preventDefault();  
         // Get the part data from the row
         const partData = $(this).children("td").map(function () {
-        return $(this).text();
+            return $(this).text();
         }).get();
 
         // Show context menu at mouse position
         $(".context-menu").css({
-        display: "block",
-        left: e.pageX + "px",
-        top: e.pageY + "px"
-        }).data('partData', partData); // Attach part data to the context menu
+            display: "block",
+            left: e.pageX + "px",
+            top: e.pageY + "px"
+        // Attach part data to the context menu    
+        }).data('partData', partData); 
     });
 
     // Hide context menu when clicking elsewhere
@@ -184,14 +185,14 @@ $(document).ready(function () {
         e.preventDefault();
 
         const updatedPartData = {
-        type: $('#editType').val(),
-        capacity: $('#editCapacity').val(),
-        size: $('#editSize').val(),
-        speed: $('#editSpeed').val(),
-        brand: $('#editBrand').val(),
-        model: $('#editModel').val(),
-        location: $('#editLocation').val(),
-        part_sn: $('#editPart_sn').val()
+            type: $('#editType').val(),
+            capacity: $('#editCapacity').val(),
+            size: $('#editSize').val(),
+            speed: $('#editSpeed').val(),
+            brand: $('#editBrand').val(),
+            model: $('#editModel').val(),
+            location: $('#editLocation').val(),
+            part_sn: $('#editPart_sn').val()
         };
 
         // AJAX call to update the part in the database
@@ -201,12 +202,16 @@ $(document).ready(function () {
             data: JSON.stringify(updatedPartData),
             contentType: 'application/json',
             success: function (response) {
-                partsTable.ajax.reload(null, false);
-                alert("Part updated successfully.");
+                alert(response.message);
+               partsTable.ajax.reload(null, false);
             },
-        error: function (xhr, status, error) {
-            alert("Error updating part: " + error);
-        }
+            //error: function (xhr, status, error) {
+            //    alert("Error updating part: " + error);
+            //    location.reload();
+            //},
+            error: function (xhr, status, error){
+                alert("Error Updating Part: " + error);
+            }
         });
 
         // Close the modal after submission
