@@ -195,6 +195,48 @@ def get_parts():
     })
 
 
+@app.route('/update_part', methods=['POST'])
+def update_part():
+    data = request.get_json()
+    print("Received data for update:", data)  # Debug print to verify received data
+
+    part_sn = data.get('part_sn')
+    if not part_sn:
+        return jsonify({'status': 'error', 'message': 'No part serial number provided'}), 400
+
+    # Proceed to check the part in the database and update it if found
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        part = cursor.execute("SELECT * FROM Part WHERE Part_sn = ?", (part_sn,)).fetchone()
+        if not part:
+            return jsonify({'status': 'error', 'message': 'Part NOT FOUND'}), 404
+
+        cursor.execute('''
+            UPDATE Part SET Type = ?, Capacity = ?, Size = ?, Speed = ?, Brand = ?, Model = ?, Location = ?
+            WHERE Part_sn = ?
+        ''', (
+            data['type'],   # Match with the keys used in `index.js`
+            data['capacity'],
+            data['size'],
+            data['speed'],
+            data['brand'],
+            data['model'],
+            data['location'],
+            part_sn
+        ))
+        conn.commit()
+        print("Part updated successfully")  # Debug confirmation
+        return jsonify({'status': 'success', 'message': 'Part updated successfully'})
+    except sqlite3.Error as e:
+        conn.rollback()
+        print("Error during update:", str(e))  # Log any errors
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+
 def get_all_parts(search_type=None):
     db = get_db()
     query = 'SELECT * FROM Part WHERE Status IS "In"'
