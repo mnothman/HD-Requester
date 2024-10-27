@@ -132,37 +132,21 @@ $(document).ready(function () {
     // });
 
     // Handle right-click on table row
-<<<<<<< HEAD
-    $('#partsTable tbody').on('contextmenu', 'tr', function (e) {
-        e.preventDefault();  // Prevent the default right-click context menu
-
-        // Get the part data from the row
-        const partData = $(this).children("td").map(function () {
-        return $(this).text();
-=======
     // Prevent the default right-click context menu
     $('#partsTable tbody').on('contextmenu', 'tr', function (e) {
         e.preventDefault();  
         // Get the part data from the row
         const partData = $(this).children("td").map(function () {
             return $(this).text();
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
         }).get();
 
         // Show context menu at mouse position
         $(".context-menu").css({
-<<<<<<< HEAD
-        display: "block",
-        left: e.pageX + "px",
-        top: e.pageY + "px"
-        }).data('partData', partData); // Attach part data to the context menu
-=======
             display: "block",
             left: e.pageX + "px",
             top: e.pageY + "px"
         // Attach part data to the context menu    
         }).data('partData', partData); 
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
     });
 
     // Hide context menu when clicking elsewhere
@@ -201,16 +185,6 @@ $(document).ready(function () {
         e.preventDefault();
 
         const updatedPartData = {
-<<<<<<< HEAD
-        type: $('#editType').val(),
-        capacity: $('#editCapacity').val(),
-        size: $('#editSize').val(),
-        speed: $('#editSpeed').val(),
-        brand: $('#editBrand').val(),
-        model: $('#editModel').val(),
-        location: $('#editLocation').val(),
-        part_sn: $('#editPart_sn').val()
-=======
             type: $('#editType').val(),
             capacity: $('#editCapacity').val(),
             size: $('#editSize').val(),
@@ -219,7 +193,6 @@ $(document).ready(function () {
             model: $('#editModel').val(),
             location: $('#editLocation').val(),
             part_sn: $('#editPart_sn').val()
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
         };
 
         // AJAX call to update the part in the database
@@ -229,14 +202,6 @@ $(document).ready(function () {
             data: JSON.stringify(updatedPartData),
             contentType: 'application/json',
             success: function (response) {
-<<<<<<< HEAD
-                partsTable.ajax.reload(null, false);
-                alert("Part updated successfully.");
-            },
-        error: function (xhr, status, error) {
-            alert("Error updating part: " + error);
-        }
-=======
                 alert(response.message);
                partsTable.ajax.reload(null, false);
             },
@@ -247,7 +212,6 @@ $(document).ready(function () {
             error: function (xhr, status, error){
                 alert("Error Updating Part: " + error);
             }
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
         });
 
         // Close the modal after submission
@@ -508,14 +472,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
             serial_numbers: [],
             note: noteContent
         };
-<<<<<<< HEAD
-    
-        if (lines.length < 4) { 
-            console.error("Error: Insufficient input data.");
-            return null;
-        }
-    
-=======
 
         if (lines.length < 4) { // Minimum number of lines for valid input
             console.error("Error: Insufficient input data.");
@@ -523,7 +479,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
         }
 
         // Parse TID
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
         dataObject.tid = lines[0].trim();
         if (!dataObject.tid.startsWith("TI") &&
             !dataObject.tid.startsWith("TT") &&
@@ -531,7 +486,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
             console.error("Error: Invalid TID format.");
             return null;
         }
-<<<<<<< HEAD
     
         // Parse Unit_sn
         dataObject.unit_sn = lines[1].trim();
@@ -545,37 +499,17 @@ function showModal(dataObject, htmlContent, onConfirm) {
             return null; // Stop further processing
         }
         // Proceed with parsing parts, size, and serial numbers as usual
-=======
-
-        // Parse Unit_sn
-        dataObject.unit_sn = lines[1].trim();
-        if (!dataObject.unit_sn) {
-            console.error("Error: Missing unit_sn.");
-            return null;
-        }
-
-        // Parse parts and serial numbers
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
         var i = 2;
         while (lines[i] && !["Laptop", "Desktop", "Server"].includes(lines[i].trim())) {
             var details = lines[i].trim().split(' ');
             var part = {};
-<<<<<<< HEAD
     
             if (details[0].match(/\d+(GB|TB)$/)) {
-=======
-
-            if (details[0].match(/\d+(GB|TB)$/)) { // Drive
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
                 part = {
                     capacity: details[0],
                     type: details.slice(1).join(' ')
                 };
-<<<<<<< HEAD
             } else {
-=======
-            } else { // RAM
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
                 var capacityIndex = details.findIndex(detail => detail.match(/\d+(GB|MB)$/));
                 part = {
                     type: details.slice(0, capacityIndex).join(' '),
@@ -585,43 +519,25 @@ function showModal(dataObject, htmlContent, onConfirm) {
             dataObject.parts.push(part);
             i++;
         }
-<<<<<<< HEAD
-    
-        dataObject.size = lines[i].trim();
-        i++;
-    
-=======
 
         // Parse Size
         dataObject.size = lines[i].trim();
         i++;
 
         // Parse Serial Numbers
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
         while (i < lines.length) {
             dataObject.serial_numbers.push(lines[i].trim());
             i++;
         }
-<<<<<<< HEAD
-    
-=======
-
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
         if (dataObject.parts.length !== dataObject.serial_numbers.length) {
             console.error("Error: The number of parts does not match the number of serial numbers.");
             alert('Error: The number of parts does not match the number of serial numbers.');
             return null;
         }
-<<<<<<< HEAD
     
         return dataObject;
     }
     // end parseTextInput
-=======
-
-        return dataObject;
-    } // end parseTextInput
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
 
     function showLocationModal(partData) {
         const content = `
@@ -648,7 +564,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
     }
 
     function checkInPart(dataObject) {
-<<<<<<< HEAD
         console.log("Data object received:", dataObject);
     
         // Check if Unit Serial Number (Unit_sn) is provided
@@ -689,38 +604,23 @@ function showModal(dataObject, htmlContent, onConfirm) {
             }
     
             // Prepare data to send to the server
-=======
-        // Assume dataObject has already been parsed and structured
-        dataObject.parts.forEach((part, index) => {
-            const partSn = dataObject.serial_numbers[index];  // Get the serial number for the current part
-
-            // Prepare the data to be sent to the server including Type and Capacity
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
             const partData = {
                 Part_sn: partSn,
                 Type: part.type,
                 Capacity: part.capacity,
                 Size: dataObject.size,
                 Part_status: 'In',
-<<<<<<< HEAD
                 Unit_sn: unitSn,
                 Note: dataObject.note
             };
     
             $.ajax({
                 url: '/check_part_in_inventory',
-=======
-                Note: dataObject.note
-            };
-            $.ajax({
-                url: '/check_part_in_inventory',  // Server-side script to check the inventory
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(partData),
                 success: function (response) {
                     if (response.exists) {
-<<<<<<< HEAD
                         // Process success response
                         const partDetails = `
                             <div style="display: flex;">
@@ -750,52 +650,12 @@ function showModal(dataObject, htmlContent, onConfirm) {
                         `;
                         showModal({ title: 'Enter Location for Check-in' }, modalContent);
     
-=======
-                        
-                        // If part exists and matches type and capacity, update its status to 'in'
-                        const partSpeed = response.part?.Speed || 'N/A';  // Fallback to 'N/A' if undefined
-                        const partBrand = response.part?.Brand || 'N/A';
-                        const partModel = response.part?.Model || 'N/A';
-
-                        const partDetails = `
-                        <div style="display: flex;">
-                            <div style="flex: 1; padding: 8px;">${partData.Type}</div>
-                            <div style="flex: 1; padding: 8px;">${partData.Capacity}</div>
-                            <div style="flex: 1; padding: 8px;">${partData.Size}</div>
-                            <div style="flex: 1; padding: 8px;">${partBrand}</div>
-                            <div style="flex: 1; padding: 8px;">${partModel}</div>
-                            <div style="flex: 1; padding: 8px;"><input type="text" id="locationInput" name="location" style="width: 100%;" placeholder="Enter location"></div>
-                            <div style="flex: 1; padding: 8px;">${partSn}</div>
-                        </div>
-                    `;
-                        const modalContent = `
-                        <div class="modal-table-wrapper">
-                            <div class="modal-table-header">
-                                <div style="flex: 1; padding: 8px;">Type</div>
-                                <div style="flex: 1; padding: 8px;">Capacity</div>
-                                <div style="flex: 1; padding: 8px;">Size</div>
-                                <div style="flex: 1; padding: 8px;">Brand</div>
-                                <div style="flex: 1; padding: 8px;">Model</div>
-                                <div style="flex: 1; padding: 8px;">Location</div>
-                                <div style="flex: 1; padding: 8px;">Part SN</div>
-                            </div>
-                            
-                            <!-- Data Row -->
-                                ${partDetails}
-                        </div>
-                        <button type="button" id="locationSubmitBtn" class="btn btn-primary mb-2">OK</button>
-                    `;
-                        showModal({ title: 'Enter Location for Check-in' }, modalContent);
-
-                        // Handle form submission
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
                         $('#locationSubmitBtn').click(function () {
                             const location = $('#locationInput').val();
                             if (location) {
                                 const partUpdateData = {
                                     Part_sn: partSn,
                                     TID: dataObject.tid,
-<<<<<<< HEAD
                                     Unit_sn: unitSn,
                                     Part_status: 'In',
                                     Location: location,
@@ -804,54 +664,27 @@ function showModal(dataObject, htmlContent, onConfirm) {
     
                                 $('#locationSubmitBtn').prop('disabled', true);
     
-=======
-                                    Unit_sn: dataObject.unit_sn,
-                                    Part_status: 'In',
-                                    Location: location,  // Add location from input
-                                    Note: dataObject.note
-                                };
-
-                                console.log("Data being sent to /update_part_status: ", partUpdateData);
-                                $('#locationSubmitBtn').prop('disabled', true);
-
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
                                 $.ajax({
                                     url: '/update_part_status',
                                     type: 'POST',
                                     contentType: 'application/json',
                                     data: JSON.stringify(partUpdateData),
                                     success: function (updateResponse) {
-<<<<<<< HEAD
                                         if (updateResponse.status === 'success') {
                                             partsTable.ajax.reload(null, false);
                                             $('#Modal').css('display', 'none');
                                         } else {
-=======
-                                        console.log("Part checked in successfully", updateResponse);  // Log the response to ensure success
-                                        if (updateResponse.status === 'success') {
-                                            partsTable.ajax.reload(null, false);
-                                            $('#Modal').css('display', 'none'); // Close modal
-                                        } else {
-                                            console.error("Failed to check in the part:", updateResponse.message);
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
                                             alert("Failed to check in the part: " + updateResponse.message);
                                         }
                                     },
                                     error: function (err) {
-<<<<<<< HEAD
                                         alert('Failed to update part status: ' + err.responseText);
-=======
-                                        console.error("Error updating part status: ", err);
-                                        $('#locationSubmitBtn').prop('disabled', false);  // Re-enable button after failure
-                                        alert('Failed to update part status: ' + err.responseText); // (Remove later)
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
                                     }
                                 });
                             } else {
                                 alert('Please enter a location');
                             }
                         });
-<<<<<<< HEAD
     
                     } else {
                         handleCheckInErrors(response, partSn);
@@ -1139,356 +972,3 @@ function checkOutPart(dataObject) {
         }
     }
     
-=======
-
-                    } else {
-                        // If part does not exist or does not match, show modal to add part
-                        console.log(response.message); // Log the message from the server
-                        // Check for specific mismatch error
-                        if (response.error == 'mismatch') {
-                            const expectedDetails = response.expected;
-                            const actualDetails = response.actual;
-                            const content = `
-                                <p><strong>Expected: </strong>${expectedDetails.Capacity} ${expectedDetails.Type}</p>
-                                <p><strong>Found: </strong>${actualDetails.Capacity} ${actualDetails.Type}</p>
-                                
-                            `;
-                            showModal({ title: 'Check-in Error: ' + response.message }, content);
-                        }
-                        else if (response.error == 'checked-in') {
-                            console.log("Error: " + response.message); // Handle other errors
-                            const content = `
-                                    <p><strong>That part is already checked-in.</strong></p>
-                                    <p>Serial number: ${partSn}</p>
-
-                                    <div class="modal-table-wrapper">
-                                        <div class="modal-table-header">
-                                            <div style="flex: 1; padding: 8px;">Type</div>
-                                            <div style="flex: 1; padding: 8px;">Capacity</div>
-                                            <div style="flex: 1; padding: 8px;">Size</div>
-                                            <div style="flex: 1; padding: 8px;">Speed</div>
-                                            <div style="flex: 1; padding: 8px;">Brand</div>
-                                            <div style="flex: 1; padding: 8px;">Model</div>
-                                            <div style="flex: 1; padding: 8px;">Location</div>
-                                        </div>
-                                        <div style="display: flex;">
-                                            <div style="flex: 1; padding: 8px;">${response.part['Type']}</div>
-                                            <div style="flex: 1; padding: 8px;">${response.part['Capacity']}</div>
-                                            <div style="flex: 1; padding: 8px;">${response.part['Size']}</div>
-                                            <div style="flex: 1; padding: 8px;">${response.part['Speed']}</div>
-                                            <div style="flex: 1; padding: 8px;">${response.part['Brand']}</div>
-                                            <div style="flex: 1; padding: 8px;">${response.part['Model']}</div>
-                                            <div style="flex: 1; padding: 8px;">${response.part['Location']}</div>
-                                        </div>
-                                    </div>`
-                                ;
-                            showModal({ title: 'Check-in Error: ' + response.message }, content);
-
-                        }
-                        else if (response.error == 'not_in_inventory') {
-                            console.log("Error: " + response.message); // Handle other errors
-
-                            let speedField = ''; // Speed field isn't needed for HD or SSD
-
-                            if (!["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type)) {  // Speed field isn't needed for HD or SSD
-                                speedField = `
-                                    <div style="flex: 1; padding: 8px;">Speed</div>
-                                `;
-                            }
-
-                            const speedInput = !["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type) ? `
-                                <div style="flex: 1; padding: 8px;">
-                                    <input type="text" id="iSpeed" name="Speed" style="width: 100%;" />
-                                </div>
-                            ` : '';
-
-                            // This below is for check in error when part is not in inventory
-                            const content = `
-                                <p><strong>That part has never been added to inventory.</strong></p>
-                                    <p>Serial number: ${partSn}</p>
-                                    <p>Add item to inventory. Fill in the blanks.</p>
-
-                                    <div class="modal-table-wrapper">
-                                        <div class="modal-table-header">
-                                            <div style="flex: 1; padding: 8px;">Type</div>
-                                            <div style="flex: 1; padding: 8px;">Capacity</div>
-                                            <div style="flex: 1; padding: 8px;">Size</div>
-                                               ${speedField}
-                                            <div style="flex: 1; padding: 8px;">Brand</div>
-                                            <div style="flex: 1; padding: 8px;">Model</div>
-                                            <div style="flex: 1; padding: 8px;">Location</div>
-                                            <div style="flex: 1; padding: 8px;">Part SN</div>
-                                        </div>
-                                        
-                                        <!-- Data Row -->
-                                        <div style="display: flex;">
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="iType" name="Type" style="width: 100%;" value="${partData.Type}"/>
-                                            </div>
-
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="iCapacity" name="Type" style="width: 100%;" value="${partData.Capacity}"/>
-                                            </div>
-
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="ddSize" name="Type" style="width: 100%;" value="${partData.Size}"/>
-                                            </div>
-                                            ${speedInput}
-                                            
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="iBrand" name="Brand" style="width: 100%;" />
-                                            </div>
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="iModel" name="Model" style="width: 100%;" />
-                                            </div>
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="iLocation" name="Location" style="width: 100%;" />
-                                            </div>
-
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="iPart_sn" name="Part SN" style="width: 100%;" value="${partSn}"/>
-                                            </div>
-
-                                            
-                                        </div>
-
-                                        
-                                    </div>
-
-                                    <div style="margin-top: 10px;">
-                                        <button type="button" id="add_btn" class="btn btn-primary mb-2">Add Part</button>	
-                                    </div>
-                            `;
-                            showModal({ title: 'Check-in Error: ' + response.message }, content);
-
-                            // Handle form submission
-                            // Add The Part with blank TID, blank Unit_sn, and Status Out, bc it needs to go In
-                            $('#add_btn').click(function () {
-                                const partData = {
-                                    TID: '',
-                                    Unit_sn: '',
-                                    Part_status: 'Out',
-                                    Note: 'New part added to inventory',
-                                    Type: $('#iType').val(),
-                                    Capacity: $('#iCapacity').val(),
-                                    Size: $('#ddSize').val(),
-                                    Speed: $('#iSpeed').val(),
-                                    Brand: $('#iBrand').val(),
-                                    Model: $('#iModel').val(),
-                                    Location: $('#iLocation').val(),
-                                    Part_sn: $('#iPart_sn').val()
-                                };
-                                submitPart(partData);
-                            });
-                        }
-                    }
-                },
-                error: function (err) {
-                    console.error("Error checking part in inventory: ", err);
-                    alert('Error checking part in inventory: ' + error);
-                }
-            });
-        });
-    } // end checkinPart
-
-    function checkOutPart(dataObject) {
-        // Assume dataObject has already been parsed and structured
-        dataObject.parts.forEach((part, index) => {
-            const partSn = dataObject.serial_numbers[index];  // Get the serial number for the current part
-
-            // Prepare the data to be sent to the server including Type and Capacity
-            const partData = {
-                Part_sn: partSn,
-                Type: part.type,
-                Capacity: part.capacity,
-                Size: dataObject.size,
-                Speed: dataObject.Speed,
-                Part_status: 'Out',
-                Note: dataObject.note
-            };
-
-            $.ajax({
-                url: '/check_part_in_inventory',  // Server-side script to check the inventory
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(partData),
-                success: function (response) {
-                    if (response.exists) {
-                        // If part exists and matches type and capacity, update its status to 'Out'
-                        $.ajax({
-                            url: '/update_part_status',
-                            type: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify({
-                                Part_sn: partSn,
-                                TID: dataObject.tid,
-                                Unit_sn: dataObject.unit_sn,
-                                Part_status: 'Out',
-                                Note: dataObject.note
-                            }),
-                            success: function (updateResponse) {
-                                // refreshes page after checking out
-                                partsTable.ajax.reload(null, false);
-                            },
-                            error: function (err) {
-                                console.error("Error updating part status: ", err);
-                            }
-                        });
-                    } else {
-                        // If part does not exist or does not match, show modal to add part
-                        console.log(response.message); // Log the message from the server
-                        // Check for specific mismatch error
-                        if (response.error == 'mismatch') {
-                            const expectedDetails = response.expected;
-                            const actualDetails = response.actual;
-                            const content = `
-                                <p><strong>Expected: </strong>${expectedDetails.Capacity} ${expectedDetails.Type}</p>
-                                <p><strong>Found: </strong>${actualDetails.Capacity} ${actualDetails.Type}</p>
-                                
-                            `;
-                            showModal({ title: 'Check-out Error: ' + response.message }, content);
-                        }
-                        else if (response.error == 'checked-out') {
-                            let speedField = ''; // Speed field isn't needed for HD or SSD
-
-                            if (!["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type)) {  // Speed field isn't needed for HD or SSD
-                                speedField = `
-                                    <div style="flex: 1; padding: 8px;">Speed</div>
-                                `;
-                            }
-
-                            const speedValue = !["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type) ? `
-                                <div style="flex: 1; padding: 8px;">${response.part['Speed']}</div>
-                            ` : '';
-                            console.log("Error: " + response.message); // Handle other errors
-                            const content = `
-                                    <p><strong>That part is already checked-out.<strong></p>
-                                    <p>Serial number: ${partSn}</p>
-                                    <div class="modal-table-wrapper">
-                                        <div class="modal-table-header">
-                                            <div style="flex: 1; padding: 8px;">Type</div>
-                                            <div style="flex: 1; padding: 8px;">Capacity</div>
-                                            <div style="flex: 1; padding: 8px;">Size</div>
-                                            ${speedField}
-                                            <div style="flex: 1; padding: 8px;">Brand</div>
-                                            <div style="flex: 1; padding: 8px;">Model</div>
-                                        </div>
-                                        <div style="display: flex;">
-                                            <div style="flex: 1; padding: 8px;">${response.part['Type']}</div>
-                                            <div style="flex: 1; padding: 8px;">${response.part['Capacity']}</div>
-                                            <div style="flex: 1; padding: 8px;">${response.part['Size']}</div>
-                                            ${speedValue}
-                                            <div style="flex: 1; padding: 8px;">${response.part['Brand']}</div>
-                                            <div style="flex: 1; padding: 8px;">${response.part['Model']}</div>
-                                        </div>
-                                    </div>
-                            `;
-                            showModal({ title: 'Check-out Error: ' + response.message }, content);
-                        }
-                        // This is if the part does not exist in database and needs to be added manually
-                        else if (response.error == 'not_in_inventory') {
-                            console.log("Error: " + response.message); // Handle other errors
-                            let speedField = ''; // Speed field isn't needed for HD or SSD
-
-                            if (!["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type)) {  // Speed field isn't needed for HD or SSD
-                                speedField = `
-                                    <div style="flex: 1; padding: 8px;">Speed</div>
-                                `;
-                            }
-
-                            const speedInput = !["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type) ? `
-                                <div style="flex: 1; padding: 8px;">
-                                    <input type="text" id="iSpeed" name="Speed" style="width: 100%;" />
-                                </div>
-                            ` : '';
-                            const content = `
-                                <p><strong>That part has never been added to inventory.</strong></p>
-                                    <p>Serial number: ${partSn}</p>
-                                    <p>Add item to inventory. Fill in the blanks.</p>
-
-                                    <div class="modal-table-wrapper">
-                                        <div class="modal-table-header">
-                                            <div style="flex: 1; padding: 8px;">Type</div>
-                                            <div style="flex: 1; padding: 8px;">Capacity</div>
-                                            <div style="flex: 1; padding: 8px;">Size</div>
-                                               ${speedField}
-                                            <div style="flex: 1; padding: 8px;">Brand</div>
-                                            <div style="flex: 1; padding: 8px;">Model</div>
-                                            <div style="flex: 1; padding: 8px;">Location</div>
-                                            <div style="flex: 1; padding: 8px;">Part SN</div>
-                                        </div>
-                                        
-                                        <!-- Data Row -->
-                                        <div style="display: flex;">
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="iType" name="Type" style="width: 100%;" value="${partData.Type}"/>
-                                            </div>
-
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="iCapacity" name="Type" style="width: 100%;" value="${partData.Capacity}"/>
-                                            </div>
-
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="ddSize" name="Type" style="width: 100%;" value="${partData.Size}"/>
-                                            </div>
-                                            ${speedInput}
-                                            
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="iBrand" name="Brand" style="width: 100%;" />
-                                            </div>
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="iModel" name="Model" style="width: 100%;" />
-                                            </div>
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="iLocation" name="Location" style="width: 100%;" />
-                                            </div>
-
-                                            <div style="flex: 1; padding: 8px;">
-                                                <input type="text" id="iPart_sn" name="Part SN" style="width: 100%;" value="${partSn}"/>
-                                            </div>
-
-                                            
-                                        </div>
-
-                                        
-                                    </div>
-
-                                    <div style="margin-top: 10px;">
-                                        <button type="button" id="add_btn" class="btn btn-primary mb-2">Add Part</button>	
-                                    </div>
-                            `;
-
-                            showModal({ title: 'Check-out Error: ' + response.message }, content);
-
-                            const originalPartData = partData;  // Store the original partData outside the click handler
-
-
-                            // Handle form submission when the user clicks "Add Part"
-                            $('#add_btn').click(function () {
-                                const partData = {
-                                    TID: '',
-                                    Unit_sn: '',
-                                    Part_status: 'Out',
-                                    Note: 'New part added to inventory',
-                                    Type: $('#iType').val(),
-                                    Capacity: $('#iCapacity').val(),
-                                    Size: $('#ddSize').val(),
-                                    Speed: $('#iSpeed').val(),
-                                    Brand: $('#iBrand').val(),
-                                    Model: $('#iModel').val(),
-                                    Location: $('#iLocation').val(),
-                                    Part_sn: $('#iPart_sn').val()
-                                };
-                                submitPart(partData);
-                            });
-                        }
-                    }
-                },
-                error: function (err) {
-                    console.error("Error checking part out inventory: ", err);
-                    alert('Error checking part out inventory: ' + err);
-                }
-            });
-        });
-    } // end checkoutPart
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539

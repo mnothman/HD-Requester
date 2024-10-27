@@ -41,10 +41,7 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-<<<<<<< HEAD
         remember_me = request.form.get('remember_me')  # Get the remember_me checkbox value
-=======
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
 
         conn = get_db()
         cursor = conn.cursor()
@@ -60,7 +57,6 @@ def login():
                     print("Password verified successfully!")
                     response = make_response(redirect(url_for('dashboard')))
                     response.set_cookie('admin_logged_in', 'true', max_age=3600)  # Expires in 1 hour
-<<<<<<< HEAD
 
                     # Set the remember_me cookie if the checkbox is checked
                     if remember_me:
@@ -71,8 +67,6 @@ def login():
                         print("Clearing remember_me cookie")
                         response.set_cookie('remember_me', '', expires=0)
 
-=======
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
                     return response
                 else:
                     print("Password verification failed.")
@@ -93,18 +87,10 @@ def login():
 
     # If not logged in, check if "remember_me" exists to pre-fill the login form
     remember_me_username = request.cookies.get('remember_me')
-<<<<<<< HEAD
-    print(f"Remember Me cookie value: {remember_me_username}")
-=======
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
     return render_template('login.html', remember_me=remember_me_username)
 
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
 @app.route('/logout')
 def logout():
     response = make_response(redirect(url_for('index')))  # Redirect to the homepage
@@ -220,8 +206,6 @@ def get_parts():
     })
 
 
-<<<<<<< HEAD
-=======
 @app.route('/update_part', methods=['POST'])
 def update_part():
     data = request.get_json()
@@ -264,7 +248,6 @@ def update_part():
         conn.close()
 
 
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
 def get_all_parts(search_type=None):
     db = get_db()
     query = 'SELECT * FROM Part WHERE Status IS "In"'
@@ -509,7 +492,6 @@ def sort_parts():
     return jsonify([dict(part) for part in sorted_parts])
 
 
-<<<<<<< HEAD
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -596,101 +578,15 @@ def check_part_in_inventory():
             })
 
         return jsonify({'exists': True, 'message': 'Part exists with matching Type, Capacity, and Size.'})
-=======
-@app.route('/check_part_in_inventory', methods=['POST'])
-def check_part_in_inventory():
-    data = request.get_json()
-    part_sn = data['Part_sn']
-    size = data['Size']
-    textarea_type = data['Type']
-    textarea_capacity = data['Capacity']
-    textarea_part_status = data['Part_status']
-
-    conn = get_db()
-    try:
-        # Query to check if Part_sn exists in the Part table and is currently checked out
-        part = conn.execute('SELECT * FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
-
-        if part is None:
-            return jsonify({'exists': False,
-							'error': 'not_in_inventory',
-							'message': 'Part not found in inventory.',
-						   })
-
-        # Check if the existing part matches the textarea's type and capacity
-        elif part['Type'] != textarea_type or part['Capacity'] != textarea_capacity:
-            return jsonify({
-                'exists': False,
-                'error': 'mismatch',
-                'message': 'Mismatch in type or capacity.',
-                'expected': {'Type': textarea_type, 'Capacity': textarea_capacity},
-                'actual': {'Type': part['Type'], 'Capacity': part['Capacity']}
-            })
-		# Check if the existing part is already checked in
-        elif textarea_part_status == 'In':
-            if part['Status'] == 'In':
-                return jsonify({
-                    'exists': False,    # make index.js around line 724 show the modal with this data 
-                    'error': 'checked-in',
-                    'message': 'Already checked-in.',
-                    'part': {'Part_sn': part_sn,
-                             'Type': part['Type'],
-                             'Capacity': part['Capacity'],
-                             'Size': part['Size'],
-                             'Speed': part['Speed'],
-                             'Brand': part['Brand'],
-                             'Model': part['Model'],
-                             'Location': part['Location']}
-                })
-            else:
-                return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
-        # Check if the existing part is already checked out
-        elif textarea_part_status == 'Out':
-            if part['Status'] == 'Out':
-                return jsonify({
-                    'exists': False,
-                    'error': 'checked-out',
-                    'message': 'Already checked-out.',
-                    'part': {'Part_sn': part_sn,
-                             'Type': part['Type'],
-                             'Capacity': part['Capacity'],
-                             'Size': part['Size'],
-                             'Speed': part['Speed'],
-                             'Brand': part['Brand'],
-                             'Model': part['Model'],
-                             'Location': part['Location']}
-                })
-            else:
-                return jsonify({'exists': True,
-                                'part': {'Part_sn': part_sn,
-                                'Type': part['Type'],
-                                'Capacity': part['Capacity'],
-                                'Size': part['Size'],
-                                'Speed': part['Speed'],
-                                'Brand': part['Brand'],
-                                'Model': part['Model'],
-                                'Location': part['Location']},
-                                'message': 'Part exists with matching type and capacity.'})
-        else:
-            return jsonify({
-                'exists': False,
-                'error': 'uncaught',
-                'message': 'Uncaught error.',
-                'part': {'Part_sn': part_sn, 'Type': part['Type'], 'Capacity': part['Capacity'], 'Size': part['Size']}
-            })
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
 
     finally:
         conn.close()
 
 
-<<<<<<< HEAD
 
 
 
 
-=======
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
 @app.route('/update_part_status', methods=['POST'])
 def update_part_status():
     data = request.get_json()
@@ -698,23 +594,15 @@ def update_part_status():
     tid = data['TID']
     unit_sn = data['Unit_sn']
     part_status = data['Part_status']  # update the part status given
-<<<<<<< HEAD
-=======
     location = data.get('Location')
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
     note = data['Note']
 
     conn = get_db()
     try:
         conn.execute('BEGIN')
         # Update Part to set Status
-<<<<<<< HEAD
-        conn.execute('UPDATE Part SET Status = ? WHERE Part_sn = ?', (part_status, part_sn))
-        # Insert a new log entry with the current timestamp
-=======
         conn.execute('UPDATE Part SET Status = ?, Location = ? WHERE Part_sn = ?', (part_status, location, part_sn))
         # Insert a new log entry with the current timestamp, don't need location here (potentially)
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', 
                      (tid, unit_sn, part_sn, part_status, timestamp, note))
@@ -736,10 +624,7 @@ def update_part_status():
                 'Speed': part['Speed'],
                 'Brand': part['Brand'],
                 'Model': part['Model'],
-<<<<<<< HEAD
-=======
                 'Location': part['Location'],
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
                 'Part_sn': part_sn
             }
         })
@@ -794,11 +679,8 @@ def simulate_text_area_input(user_input):
         conn.close()
 
 
-<<<<<<< HEAD
-=======
 
 
->>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
 if __name__ == '__main__':
     # app.run(port=8000)
     app.run(debug=True)
