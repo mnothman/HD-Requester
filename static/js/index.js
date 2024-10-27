@@ -744,8 +744,6 @@ function handleCheckInErrors(response, partSn) {
     }
 }
 
-    
-    
 function checkOutPart(dataObject) {
     dataObject.parts.forEach((part, index) => {
         const partSn = dataObject.serial_numbers[index];
