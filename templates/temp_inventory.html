@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory</title>
+    <style>
+        table {
+            width: 45%;
+            border-collapse: collapse;
+            margin: 20px;
+            float: left;
+            cursor: pointer; /* Pointer cursor for clickable tables */
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center; /* Center align text in the table */
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .capacities {
+            display: none; /* Hide capacities section initially */
+            margin-top: 10px;
+        }
+        .capacities ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .capacities ul li {
+            padding: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Inventory</h1>
+    <div class="container" id="tablesContainer">
+        <!-- Tables will be inserted here -->
+    </div>
+    <script>
+        // Function to sanitize IDs for CSS selectors
+        function sanitizeId(id) {
+            return id.replace(/[^a-zA-Z0-9-_]/g, '_'); // Replace invalid characters with underscores
+        }
+        // Function to fetch inventory data and populate tables
+        function loadInventory() {
+            fetch('/get_inventory')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.querySelector('#tablesContainer');
+
+                    // Create a map to aggregate quantities by combined Type and Size
+                    const combinedMap = new Map();
+
+                    data.forEach(item => {
+                        // Combine Type and Size into a single key
+                        const key = `${item.Type} ${item.Size}`;
+
+                        if (!combinedMap.has(key)) {
+                            combinedMap.set(key, { quantity: item.quantity, capacities: [] });
+                        } else {
+                            combinedMap.get(key).quantity += item.quantity;
+                        }
+                    });
+
+                    // Function to fetch capacities for a given Type and Size
+                    function fetchCapacities(type, size) {
+                        return fetch(`/get_part_capacities?type=${type}&size=${size}`)
+                            .then(response => response.json())
+                            .then(capacities => {
+                                combinedMap.get(`${type} ${size}`).capacities = capacities;
+                            });
+                    }
+
+                    // Function to create a table for given title and data
+                    function createTable(type, size, quantity) {
+                        const table = document.createElement('table');
+                        const thead = document.createElement('thead');
+                        const tbody = document.createElement('tbody');
+                        const titleRow = document.createElement('tr');
+                        const titleCell = document.createElement('th');
+
+                        titleCell.colSpan = 2;
+                        // To remove null from apperaring on table name
+                        if (size === "null") {
+                            titleCell.textContent = `${type}`;
+                        } else {
+                            titleCell.textContent = `${type} ${size}`;
+                        }
+                        titleRow.appendChild(titleCell);
+                        thead.appendChild(titleRow);
+
+                        // Add data row
+                        const dataRow = document.createElement('tr');
+                        dataRow.innerHTML = `
+                            <td colspan="2">${quantity}</td>
+                        `;
+                        tbody.appendChild(dataRow);
+
+                        table.appendChild(thead);
+                        table.appendChild(tbody);
+
+                        // Cleans the type/size so they don't creater errors due to certain special characters
+                        const sanitizedType = sanitizeId(type);
+                        const sanitizedSize = sanitizeId(size);
+
+                        table.addEventListener('click', () => {
+                            const capacitiesDiv = document.querySelector(`#capacities-${sanitizedType}-${sanitizedSize}`);
+                            if (capacitiesDiv.style.display === 'none') {
+                                capacitiesDiv.style.display = 'block';
+                            } else {
+                                capacitiesDiv.style.display = 'none';
+                            }
+                        });
+
+                        return table;
+                    }
+
+                    // Create and insert a separate table for each combined Type and Size
+                    container.innerHTML = ''; // Clear existing content
+
+                    Promise.all(
+                        Array.from(combinedMap.keys()).map(key => {
+                            const [type, size] = key.split(' ');
+                            return fetchCapacities(type, size).then(() => {
+                                const { quantity, capacities } = combinedMap.get(key);
+                                const table = createTable(type, size, quantity);
+                                
+                                // Create and add capacities section
+                                const capacitiesDiv = document.createElement('div');
+                                capacitiesDiv.id = `capacities-${sanitizeId(type)}-${sanitizeId(size)}`;
+                                capacitiesDiv.className = 'capacities';
+                                const ul = document.createElement('ul');
+                                capacities.forEach(capacity => {
+                                    const li = document.createElement('li');
+                                    li.textContent = capacity;
+                                    ul.appendChild(li);
+                                });
+                                capacitiesDiv.appendChild(ul);
+                                container.appendChild(table);
+                                container.appendChild(capacitiesDiv);
+                            });
+                        })
+                    ).catch(error => console.error('Error fetching capacities:', error));
+                })
+                .catch(error => console.error('Error fetching inventory data:', error));
+        }
+
+        // Load inventory data when the page is loaded
+        window.onload = loadInventory;
+    </script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+  body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+  }
+
+  .header {
+      background-color: rgb(26, 107, 30);
+      color: white;
+      padding: 15px;
+      text-align: center;
+  }
+
+  /* Sidebar styling */
+  .sidebar {
+
+      padding: 10px;
+      background-color: rgba(244, 244, 244, 0.9);
+      border: 1px solid #ddd;
+      border-radius: 5px;
+  }
+
+  .content {
+      padding: 0px;
+  }
+
+  .table-container {
+      margin-top: 20px;
+      padding: 0 20px 20px;
+  }
+
+  table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      margin-bottom: 20px;
+  }
+
+  table,
+  th,
+  td {
+      border: 1px solid #ddd;
+  }
+
+  th,
+  td {
+      padding: 12px;
+      text-align: left;
+  }
+
+  th {
+      background-color: rgb(26, 107, 30);
+      color: white;
+      cursor: pointer;
+  }
+
+  /* Alternating row colors same colors as homepage*/
+  #partsTable .even{
+	background-color: rgb(255, 255, 255);
+  }
+
+  #partsTable .odd {
+	background-color: rgba(0, 0, 0, .05);
+  }
+
+  tr:hover {
+      background-color: #f2f2f2;
+  }
+
+  /* Inventory Levels */
+  #inventory-levels, #monthly-trends{
+    background-color: #333333;
+    margin-top: 0px; /** override .table-container for these section**/
+  }
+
+  #inventory-levels H2, #monthly-trends H2 {
+    color: #ffffff;
+  }
+
+  .inventory-levels-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* Max 6 items per row */
+    gap: 20px; /* Space between boxes */
+    justify-content: center; /* Center the grid on the page */
+    margin-right: 40px;
+    margin-left: 40px;
+    padding: 25px;
+  }
+
+  #inventory-levels .box {
+    position: relative;
+    margin-bottom: 20px;
+    padding: 0;
+    text-align: center;
+    background-color: #f0f0f0;
+    border-radius: 12px;
+    box-sizing: content-box;
+  }
+
+  #inventory-levels .box h3 {
+    margin: 0;
+    font-size: 1em;
+    padding: 3px 0px 0px;
+  }
+
+  #inventory-levels .box-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 24px; /* needs to match height in admin.js */
+    border-radius: 10px;
+    background-color: aqua;
+    transition: height 0.3s ease;
+    cursor: pointer;
+    overflow: visible;
+    z-index: 1;
+  }
+
+  #inventory-levels .box-data {
+    position: relative;
+    top: 20px;
+    height: 36px; /* Space for content */
+    border-radius: 0px 0px 10px 10px;
+    background-color: #e0e0e0;
+    padding: 8px;
+    z-index: 0;
+}
+
+#inventory-levels .box-header ul.capacities {
+    list-style: none;
+    padding-bottom: 3px;
+    padding-left: 0px;
+    opacity: 0;
+}
+
+#inventory-levels .box-header ul.capacities.show {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+  /* Trends */
+  .monthly-trends-container {
+    display: grid;
+    grid-template-columns: 1fr 5fr; /* 1/6 width for the first column, 5/6 for the second */
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .monthly-trends-date-column {
+    background-color: #f0f0f0;
+    border: 2px solid #333;
+    padding: 3px;
+  }
+
+  .monthly-trends-graph-column {
+    background-color: #666666;
+    border: 2px solid #333;
+    padding: 2px;
+  }
+
+  /* Breakpoints */
+@media (max-width: 1200px) {
+    .inventory-levels-container {
+        grid-template-columns: repeat(4, 1fr); /* Adjust to 4 items per row on medium screens */
+    }
+}
+
+@media (max-width: 800px) {
+    .inventory-levels-container  {
+        grid-template-columns: repeat(2, 1fr); /* Adjust to 2 items per row on small screens */
+    }
+    .monthly-trends-container {
+        grid-template-columns: 1fr; /* Stack columns on top of each other */
+    }
+
+    .monthly-trends-date-column, .monthly-trends-graph-column {
+        width: 100%; /* Ensure both columns take full width */
+    }
+}
+
+@media (max-width: 500px) {
+    .inventory-levels-container  {
+        grid-template-columns: 1fr; /* Stack the boxes in one column on very small screens */
+    }
+}
