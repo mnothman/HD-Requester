@@ -138,7 +138,11 @@ class PartCheckInOutTest(unittest.TestCase):
 
     def test05_checkout_mismatch_type_capacity(self):
         # Test case: Check-out Error: Mismatch in type or capacity
+<<<<<<< HEAD
         print("\nTest 5: Serial number mismatch with Type or Capacity")
+=======
+        print("\nTest 5: Serial number mismatch with type or capacity")
+>>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
         textarea.send_keys("TI000000-00000001\n123456\nPC3 4GB\nLaptop\n00000001")
@@ -213,6 +217,7 @@ class PartCheckInOutTest(unittest.TestCase):
 
     def test08_checkout_missing_type(self):
        # Test case: Check-out Error: Missing Type
+<<<<<<< HEAD
         print("\nTest 8: Check-out Error: Missing Type - Skip")
 
         ### Need to fix our app and then remove this pass
@@ -224,17 +229,33 @@ class PartCheckInOutTest(unittest.TestCase):
         textarea.clear()
         # Using Serial number 5001
         textarea.send_keys("TI000000-00000001\n123456\n256GB\nLaptop\n00005001")
+=======
+        print("\nTest 8: Check-out Error: Missing Type")
+ 
+        textarea = self.driver.find_element(By.ID, "textarea-request")
+        textarea.clear()
+        # Using Serial number 0001
+        textarea.send_keys("TI000000-00000001\n123456\n4GB\nLaptop\n00000001")
+>>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
         self.driver.find_element(By.ID, "btnIn").click()
         self.driver.find_element(By.ID, "btn-submit-request").click()
 
         # Expecting modal to show mismatch error
         
+<<<<<<< HEAD
                         self.check_modal(
             "Check-out Error: Missing Part Capacity.",
             "Expected: 256GB HD 3.5\nFound: HD 3.5"
         )
         self.close_modal()
         '''
+=======
+        self.check_modal(
+            "Check-out Error: Missing Part Capacity.",
+            "Expected: 4GB PC4\nFound: 4GB"
+        )
+        self.close_modal()
+>>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
 
     def test09_checkout_missing_capacity(self):
        # Test case: Check-out Error: Missing capacity - Skip
@@ -336,4 +357,8 @@ class PartCheckInOutTest(unittest.TestCase):
         cls.driver.quit()
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     unittest.main()
+=======
+    unittest.main()
+>>>>>>> ecdf7b17a29d555c8e15f3032be865fb2dc50539
