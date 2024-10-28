@@ -91,29 +91,27 @@ class PartCheckInOutTest(unittest.TestCase):
     def test01_checkout_part(self):
         # Test case: Check Out Part
         print("Test 1: Check-out")
-        self.checkout_part()
 
-        # Verify the database Part now has 4999 parts with Status='In'
-        # Execute the SQL query
         query = 'SELECT COUNT(*) FROM Part WHERE Status = ?'
-        result = self.execute_query(query, ('In',))
+        partsCountBefore = self.execute_query(query, ('In',))
+        self.checkout_part()
+        query = 'SELECT COUNT(*) FROM Part WHERE Status = ?'
+        partsCountAfter = self.execute_query(query, ('In',))
 
-        # Assert that the count matches 4999
-        self.assertEqual(result, '4999')
+        self.assertEqual(int(partsCountAfter), int(partsCountBefore)-1)
 
     def test02_checkin_part(self):
         # Test case: Check In Part
         print("\nTest 2: Check-in")
+
+        query = 'SELECT COUNT(*) FROM Part WHERE Status = ?'
+        partsCountBefore = self.execute_query(query, ('In',))
         self.checkin_part()
         self.checkin_part_add_location()
-
-        # Verify the database Part now has 5000 parts with Status='In'
-        # Execute the SQL query
         query = 'SELECT COUNT(*) FROM Part WHERE Status = ?'
-        result = self.execute_query(query, ('In',))
+        partsCountAfter = self.execute_query(query, ('In',))
 
-        # Assert that the count matches 5000
-        self.assertEqual(result, '5000')
+        self.assertEqual(int(partsCountAfter), int(partsCountBefore)+1)
 
     def test03_checkin_already_checkedin_part(self):
         # Test case: Check In a Part that's Already Checked In
@@ -147,7 +145,7 @@ class PartCheckInOutTest(unittest.TestCase):
 
         self.check_modal(
             "Check-out Error: Mismatch in type or capacity.",
-            "Expected: 4GB PC3\nFound: 4GB PC4"
+            "Expected: 4GB PC4\nFound: 4GB PC3"
         )
         self.close_modal()
 
@@ -185,6 +183,7 @@ class PartCheckInOutTest(unittest.TestCase):
         self.driver.find_element(By.ID, "iBrand").send_keys("Brand-Refresh")
         self.driver.find_element(By.ID, "iModel").send_keys("Model-Refresh")
         self.driver.find_element(By.ID, "iLocation").send_keys("Location-Refresh")
+        time.sleep(1)
         self.driver.find_element(By.ID, "add_btn").click()
 
         WebDriverWait(self.driver, 10).until(EC.alert_is_present())

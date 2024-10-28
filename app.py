@@ -49,7 +49,6 @@ def login():
         # Fetch the hashed password from the database
         cursor.execute("SELECT password FROM Admin WHERE username = ?", (username,))
         user = cursor.fetchone()
-
         if user:
             try:
                 # Verify the password using Argon2id
@@ -71,6 +70,7 @@ def login():
                 else:
                     print("Password verification failed.")
                     flash('Invalid username or password')
+                    
                     return redirect(url_for('login'))
             except Exception as e:
                 print(f"Verification error: {e}")
@@ -206,6 +206,10 @@ def get_parts():
     })
 
 
+from datetime import datetime
+from flask import jsonify, request
+import sqlite3
+
 @app.route('/update_part', methods=['POST'])
 def update_part():
     data = request.get_json()
@@ -220,10 +224,30 @@ def update_part():
     cursor = conn.cursor()
 
     try:
+        # Fetch the existing part details
         part = cursor.execute("SELECT * FROM Part WHERE Part_sn = ?", (part_sn,)).fetchone()
         if not part:
             return jsonify({'status': 'error', 'message': 'Part NOT FOUND'}), 404
 
+        # Mapping the fetched part to its attributes for comparison
+        old_data = {
+            'type': part['Type'],
+            'capacity': part['Capacity'],
+            'size': part['Size'],
+            'speed': part['Speed'],
+            'brand': part['Brand'],
+            'model': part['Model'],
+            'location': part['Location']
+        }
+
+        # Constructing the note for changes
+        changes = []
+        for key in old_data:
+            if old_data[key] != data[key]:
+                changes.append(f"{key.capitalize()} changed from '{old_data[key.capitalize()]}' to '{data[key]}'")
+        note = "; ".join(changes) if changes else ""
+
+        # Update the part in the Part table
         cursor.execute('''
             UPDATE Part SET Type = ?, Capacity = ?, Size = ?, Speed = ?, Brand = ?, Model = ?, Location = ?
             WHERE Part_sn = ?
@@ -237,6 +261,21 @@ def update_part():
             data['location'],
             part_sn
         ))
+
+        # Log the update in the Log table
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        cursor.execute('''
+            INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (
+            None,           # Assuming TID can be NULL as requested
+            None,           # Assuming Unit_sn is optional here
+            part_sn,
+            data.get('Part_status', 'in'),  # Default to 'in' if Part_status is not provided
+            timestamp,
+            note
+        ))
+
         conn.commit()
         print("Part updated successfully")  # Debug confirmation
         return jsonify({'status': 'success', 'message': 'Part updated successfully'})
@@ -246,6 +285,7 @@ def update_part():
         return jsonify({'status': 'error', 'message': str(e)}), 500
     finally:
         conn.close()
+
 
 
 def get_all_parts(search_type=None):
@@ -491,7 +531,6 @@ def sort_parts():
 
     return jsonify([dict(part) for part in sorted_parts])
 
-
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -582,11 +621,6 @@ def check_part_in_inventory():
     finally:
         conn.close()
 
-
-
-
-
-
 @app.route('/update_part_status', methods=['POST'])
 def update_part_status():
     data = request.get_json()
@@ -635,8 +669,6 @@ def update_part_status():
 
     finally:
         conn.close()
-
-
 
 
 @app.route('/automated_test')

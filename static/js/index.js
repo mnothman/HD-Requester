@@ -469,6 +469,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
             unit_sn: null,
             parts: [],
             size: null,
+            speed: null,
             serial_numbers: [],
             note: noteContent
         };
@@ -687,7 +688,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                         });
     
                     } else {
-                        handleCheckInErrors(response, partSn);
+                        handleCheckInErrors(response, partData);
                     }
                 },
                 error: function (err) {
@@ -697,11 +698,8 @@ function showModal(dataObject, htmlContent, onConfirm) {
         });
     }
     
-    
-    
-    
     // Function to handle edge case errors during check-in
-function handleCheckInErrors(response, partSn) {
+function handleCheckInErrors(response, partData) {
     if (response.error === 'size_mismatch') {
         const content = `
             <p><strong>Size mismatch detected:</strong></p>
@@ -730,18 +728,116 @@ function handleCheckInErrors(response, partSn) {
         `;
         showModal({ title: title }, content);
     } else if (response.error === 'checked-in') {
-        const content = `
-            <p><strong>That part is already checked-in:</strong></p>
-            <p>Serial number: ${partSn}</p>
-        `;
+        const content = `<p><strong>That part is already checked-in.</strong></p>
+                        <p>Serial number: ${response.part['Part_sn']}</p>
+
+                        <div class="modal-table-wrapper">
+                            <div class="modal-table-header">
+                                <div style="flex: 1; padding: 8px;">Type</div>
+                                <div style="flex: 1; padding: 8px;">Capacity</div>
+                                <div style="flex: 1; padding: 8px;">Size</div>
+                                <div style="flex: 1; padding: 8px;">Speed</div>
+                                <div style="flex: 1; padding: 8px;">Brand</div>
+                                <div style="flex: 1; padding: 8px;">Model</div>
+                                <div style="flex: 1; padding: 8px;">Location</div>
+                            </div>
+                            <div style="display: flex;">
+                                <div style="flex: 1; padding: 8px;">${response.part['Type']}</div>
+                                <div style="flex: 1; padding: 8px;">${response.part['Capacity']}</div>
+                                <div style="flex: 1; padding: 8px;">${response.part['Size']}</div>
+                                <div style="flex: 1; padding: 8px;">${response.part['Speed']}</div>
+                                <div style="flex: 1; padding: 8px;">${response.part['Brand']}</div>
+                                <div style="flex: 1; padding: 8px;">${response.part['Model']}</div>
+                                <div style="flex: 1; padding: 8px;">${response.part['Location']}</div>
+                            </div>
+                        </div>`;
         showModal({ title: 'Check-in Error: Already checked-in.' }, content);
     } else if (response.error === 'not_in_inventory') {
-        const content = `
-            <p><strong>That part has never been added to inventory.</strong></p>
-            <p>Serial number: ${partSn}</p>
-            <p>Add item to inventory. Fill in the blanks</p>
-        `;
+        let speedField = '';  // Speed field isn't needed for HD or SSD
+    
+        if (!["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type)) {
+            speedField = `
+                <div style="flex: 1; padding: 8px;">Speed</div>
+            `;
+        }
+        const speedInput = !["HD", "SSD", "3.5\" HD", "2.5\" HD"].includes(partData.Type) ? `
+                <div style="flex: 1; padding: 8px;">
+                    <input type="text" id="iSpeed" name="Speed" style="width: 100%;" />
+                </div>
+            ` : '';
+        const content = `<p><strong>That part has never been added to inventory.</strong></p>
+                        <p>Serial number: ${partData.Part_sn}</p>
+                        <p>Add item to inventory. Fill in the blanks.</p>
+                        <div class="modal-table-wrapper">
+                            <div class="modal-table-header">
+                                <div style="flex: 1; padding: 8px;">Type</div>
+                                <div style="flex: 1; padding: 8px;">Capacity</div>
+                                <div style="flex: 1; padding: 8px;">Size</div>
+                                    ${speedField}
+                                <div style="flex: 1; padding: 8px;">Brand</div>
+                                <div style="flex: 1; padding: 8px;">Model</div>
+                                <div style="flex: 1; padding: 8px;">Location</div>
+                                <div style="flex: 1; padding: 8px;">Part SN</div>
+                            </div>
+                            
+                            <!-- Data Row -->
+                            <div style="display: flex;">
+                                <div style="flex: 1; padding: 8px;">
+                                    <input type="text" id="iType" name="Type" style="width: 100%;" value="${partData.Type}"/>
+                                </div>
+
+                                <div style="flex: 1; padding: 8px;">
+                                    <input type="text" id="iCapacity" name="Type" style="width: 100%;" value="${partData.Capacity}"/>
+                                </div>
+
+                                <div style="flex: 1; padding: 8px;">
+                                    <input type="text" id="ddSize" name="Type" style="width: 100%;" value="${partData.Size}"/>
+                                </div>
+                                ${speedInput}
+                                
+                                <div style="flex: 1; padding: 8px;">
+                                    <input type="text" id="iBrand" name="Brand" style="width: 100%;" />
+                                </div>
+                                <div style="flex: 1; padding: 8px;">
+                                    <input type="text" id="iModel" name="Model" style="width: 100%;" />
+                                </div>
+                                <div style="flex: 1; padding: 8px;">
+                                    <input type="text" id="iLocation" name="Location" style="width: 100%;" />
+                                </div>
+
+                                <div style="flex: 1; padding: 8px;">
+                                    <input type="text" id="iPart_sn" name="Part SN" style="width: 100%;" value="${partData.Part_sn}"/>
+                                </div>
+
+                                
+                            </div>
+
+                            
+                        </div>
+
+                        <div style="margin-top: 10px;">
+                            <button type="button" id="add_btn" class="btn btn-primary mb-2">Add Part</button>	
+                        </div>
+                    `;
         showModal({ title: 'Check-in Error: Part not found in inventory.' }, content);
+        // Handle form submission when the user clicks "Add Part"
+        $('#add_btn').click(function () {
+            const newPartData = {
+                TID: '',
+                Unit_sn: '',
+                Part_status: 'Out',
+                Note: 'New part added to inventory',
+                Type: $('#iType').val(),
+                Capacity: $('#iCapacity').val(),
+                Size: $('#ddSize').val(),
+                Speed: $('#iSpeed').val() ? $('#iSpeed').val() : null, // sometimes modal doesn't have speed box
+                Brand: $('#iBrand').val(),
+                Model: $('#iModel').val(),
+                Location: $('#iLocation').val(),
+                Part_sn: $('#iPart_sn').val()
+            };
+            submitPart(newPartData);
+        });
     } else if (response.error === 'missing_serial_number') {
         const content = `
             <p><strong>Unit Serial Number is missing:</strong></p>
@@ -805,7 +901,7 @@ function checkOutPart(dataObject) {
             data: JSON.stringify(partData),
             success: function (response) {
                 if (response.exists) {
-                    // Update status to 'Out'
+                    // If part exists and matches type and capacity, update its status to 'Out'
                     $.ajax({
                         url: '/update_part_status',
                         type: 'POST',
@@ -961,7 +1057,7 @@ function checkOutPart(dataObject) {
                     Type: $('#iType').val(),
                     Capacity: $('#iCapacity').val(),
                     Size: $('#ddSize').val(),
-                    Speed: $('#iSpeed').val(),
+                    Speed: $('#iSpeed').val() ? $('#iSpeed').val() : null, // sometimes modal doesn't have speed box
                     Brand: $('#iBrand').val(),
                     Model: $('#iModel').val(),
                     Location: $('#iLocation').val(),
