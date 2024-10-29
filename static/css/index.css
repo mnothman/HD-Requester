@@ -85,6 +85,50 @@ nav {
 
 /* end Search */
 
+/* Side Bar */
+#hamburgerBtn {
+    position: absolute;
+    top: 15px;
+    right: 10px;
+	z-index: 1001;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px; 
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: -250px;
+    width: 250px;
+    height: 100%;
+    background-color: #343a40;
+    color: white;
+    transition: right 0.3s ease; 
+    z-index: 1000;
+}
+
+.sidebar.active {
+    right: 0; 
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 20px 10px;
+}
+
+.sidebar ul li {
+    margin: 15px 0;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+}
+
+/* End of SideBar */
+
 .adminLogin button {
 	color: black;
 	font-size: 14px;
@@ -136,6 +180,11 @@ nav {
 	color: black;
 	border: 1px solid black;
 	width: 100%;
+}
+
+.notes-active {
+    background-color: rgb(26, 107, 30); /* green */
+    color: white; /* white text */
 }
 
 #parts-buttons {
