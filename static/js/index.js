@@ -92,6 +92,10 @@ $(document).ready(function () {
 
     $('#btn-submit-request').click(function () {
         var parsedData = parseTextInput();
+        if (parsedData == null) {
+            console.log("Error unable to proceed with request")
+            return;
+        }
         var activeButton = document.querySelector('.btn-active');
         if (activeButton.innerText == "IN") {
             checkInPart(parsedData);
@@ -476,7 +480,13 @@ function showModal(dataObject, htmlContent, onConfirm) {
 
         if (lines.length < 4) { // Minimum number of lines for valid input
             console.error("Error: Insufficient input data.");
-            return null;
+            // Show modal for missing or invalid Unit Serial Number
+            const content = `
+                <p><strong>Missing Information For Request</strong></p>
+                <p>Please provide a valid request to proceed.</p>
+            `;
+            showModal({ title: 'Error: Insufficient input data.' }, content);
+            return null; // Stop further processing
         }
 
         // Parse TID
@@ -496,7 +506,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 <p><strong>Unit Serial Number is missing or invalid.</strong></p>
                 <p>Please provide a valid Unit Serial Number to proceed.</p>
             `;
-            showModal({ title: 'Error: Missing Unit Serial Number' }, content);
+            showModal({ title: 'Error: Missing Unit serial number' }, content);
             return null; // Stop further processing
         }
         // Proceed with parsing parts, size, and serial numbers as usual
@@ -520,8 +530,18 @@ function showModal(dataObject, htmlContent, onConfirm) {
             dataObject.parts.push(part);
             i++;
         }
-
+        
         // Parse Size
+        if (lines.length == i) {
+            // Show modal for missing or invalid Unit Serial Number
+            const content = `
+                <p><strong>Missing or invalid Unit size.</strong></p>
+                <p>Please provide a valid Unit Size to proceed.</p>
+            `;
+            showModal({ title: 'Error: Missing Unit Size' }, content);
+            return null; // Stop further processing
+        }
+        
         dataObject.size = lines[i].trim();
         i++;
 
@@ -574,9 +594,9 @@ function showModal(dataObject, htmlContent, onConfirm) {
         if (!unitSn || unitSn.trim() === '') {
             const content = `
                 <p><strong>Unit Serial Number is missing for the Parts Request.</strong></p>
-                <p>Please provide a valid Unit Serial Number to proceed.</p>
+                <p>Unit Serial Number is missing or invalid.\nPlease provide a valid Unit Serial Number to proceed.</p>
             `;
-            showModal({ title: 'Error: Missing Unit Serial Number' }, content);
+            showModal({ title: 'Check-in Error: Missing Unit serial number' }, content);
             return;  // Stop further execution
         }
     
@@ -590,7 +610,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                     <p><strong>Capacity is missing for this part.</strong></p>
                     <p>Please provide a valid capacity for part: ${partSn}.</p>
                 `;
-                showModal({ title: 'Error: Missing Capacity' }, content);
+                showModal({ title: 'Check-in Error: Missing Part capacity' }, content);
                 return;
             }
     
@@ -600,7 +620,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                     <p><strong>Type is missing for this part.</strong></p>
                     <p>Please provide a valid type for part: ${partSn}.</p>
                 `;
-                showModal({ title: 'Error: Missing Type' }, content);
+                showModal({ title: 'Check-in Error: Missing Part type' }, content);
                 return;
             }
     
@@ -841,9 +861,9 @@ function handleCheckInErrors(response, partData) {
     } else if (response.error === 'missing_serial_number') {
         const content = `
             <p><strong>Unit Serial Number is missing:</strong></p>
-            <p>Please provide a valid Unit Serial Number for part: ${partSn}.</p>
+            <p>Please provide a valid Unit serial number.</p>
         `;
-        showModal({ title: 'Check-in Error: Missing Serial Number' }, content);
+        showModal({ title: 'Check-in Error: Missing Unit serial number' }, content);
     }
 }
 
@@ -855,10 +875,10 @@ function checkOutPart(dataObject) {
         // Validate if Unit Serial Number is missing
         if (!unitSn || unitSn.trim() === '') {
             const content = `
-                <p><strong>Unit Serial Number is missing.</strong></p>
-                <p>Please provide a valid serial number for part: ${partSn}.</p>
+                <p><strong>Unit serial number is missing.</strong></p>
+                <p>Unit Serial Number is missing or invalid.\nPlease provide a valid Unit Serial Number to proceed.</p>
             `;
-            showModal({ title: 'Error: Missing Unit Serial Number' }, content);
+            showModal({ title: 'Check-out Error: Missing Unit serial number' }, content);
             return;
         }
 
@@ -868,7 +888,7 @@ function checkOutPart(dataObject) {
                 <p><strong>Capacity is missing for this part.</strong></p>
                 <p>Please provide a valid capacity for part: ${partSn}.</p>
             `;
-            showModal({ title: 'Error: Missing Capacity' }, content);
+            showModal({ title: 'Check-out Error: Missing Part capacity' }, content);
             return;
         }
 
@@ -878,7 +898,7 @@ function checkOutPart(dataObject) {
                 <p><strong>Type is missing for this part.</strong></p>
                 <p>Please provide a valid type for part: ${partSn}.</p>
             `;
-            showModal({ title: 'Error: Missing Type' }, content);
+            showModal({ title: 'Check-out Error: Missing Part type' }, content);
             return;
         }
 
@@ -937,12 +957,9 @@ function checkOutPart(dataObject) {
     function handleCheckOutErrors(response, partSn, partData) {
         if (response.error === 'size_mismatch') {
             const content = `
-                <p><strong>Size mismatch detected:</strong></p>
-                <p>Expected: ${response.expected.Size}</p>
-                <p>Provided: ${response.actual.Size}</p>
-                <p>Please correct the Size.</p>
+                <p><strong>Expected:</strong> ${response.actual.Size}<br /><strong>Found:</strong> ${response.expected.Size}</p>
             `;
-            showModal({ title: 'Check-out Error: Size Mismatch' }, content);
+            showModal({ title: 'Check-out Error: Mismatch in size.' }, content);
         } else if (response.error === 'mismatch') {
             const content = `
                 <p><strong>Mismatch detected:</strong></p>
