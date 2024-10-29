@@ -41,6 +41,7 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        remember_me = request.form.get('remember_me')  # Get the remember_me checkbox value
 
         conn = get_db()
         cursor = conn.cursor()
@@ -48,7 +49,6 @@ def login():
         # Fetch the hashed password from the database
         cursor.execute("SELECT password FROM Admin WHERE username = ?", (username,))
         user = cursor.fetchone()
-
         if user:
             try:
                 # Verify the password using Argon2id
@@ -56,10 +56,21 @@ def login():
                     print("Password verified successfully!")
                     response = make_response(redirect(url_for('dashboard')))
                     response.set_cookie('admin_logged_in', 'true', max_age=3600)  # Expires in 1 hour
+
+                    # Set the remember_me cookie if the checkbox is checked
+                    if remember_me:
+                        print(f"Setting remember_me cookie for username: {username}")
+                        response.set_cookie('remember_me', username, max_age=30*24*60*60)  # Expires in 30 days
+                    else:
+                        # Clear the remember_me cookie if not checked
+                        print("Clearing remember_me cookie")
+                        response.set_cookie('remember_me', '', expires=0)
+
                     return response
                 else:
                     print("Password verification failed.")
                     flash('Invalid username or password')
+                    
                     return redirect(url_for('login'))
             except Exception as e:
                 print(f"Verification error: {e}")
@@ -193,6 +204,88 @@ def get_parts():
         'status': 'success',
         'data': [dict(part) for part in parts]  # Convert to list of dictionaries
     })
+
+
+from datetime import datetime
+from flask import jsonify, request
+import sqlite3
+
+@app.route('/update_part', methods=['POST'])
+def update_part():
+    data = request.get_json()
+    print("Received data for update:", data)  # Debug print to verify received data
+
+    part_sn = data.get('part_sn')
+    if not part_sn:
+        return jsonify({'status': 'error', 'message': 'No part serial number provided'}), 400
+
+    # Proceed to check the part in the database and update it if found
+    conn = get_db()
+    cursor = conn.cursor()
+
+    try:
+        # Fetch the existing part details
+        part = cursor.execute("SELECT * FROM Part WHERE Part_sn = ?", (part_sn,)).fetchone()
+        if not part:
+            return jsonify({'status': 'error', 'message': 'Part NOT FOUND'}), 404
+
+        # Mapping the fetched part to its attributes for comparison
+        old_data = {
+            'type': part['Type'],
+            'capacity': part['Capacity'],
+            'size': part['Size'],
+            'speed': part['Speed'],
+            'brand': part['Brand'],
+            'model': part['Model'],
+            'location': part['Location']
+        }
+
+        # Constructing the note for changes
+        changes = []
+        for key in old_data:
+            if old_data[key] != data[key]:
+                changes.append(f"{key.capitalize()} changed from '{old_data[key.capitalize()]}' to '{data[key]}'")
+        note = "; ".join(changes) if changes else ""
+
+        # Update the part in the Part table
+        cursor.execute('''
+            UPDATE Part SET Type = ?, Capacity = ?, Size = ?, Speed = ?, Brand = ?, Model = ?, Location = ?
+            WHERE Part_sn = ?
+        ''', (
+            data['type'],   # Match with the keys used in `index.js`
+            data['capacity'],
+            data['size'],
+            data['speed'],
+            data['brand'],
+            data['model'],
+            data['location'],
+            part_sn
+        ))
+
+        # Log the update in the Log table
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        cursor.execute('''
+            INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (
+            None,           # Assuming TID can be NULL as requested
+            None,           # Assuming Unit_sn is optional here
+            part_sn,
+            data.get('Part_status', 'in'),  # Default to 'in' if Part_status is not provided
+            timestamp,
+            note
+        ))
+
+        conn.commit()
+        print("Part updated successfully")  # Debug confirmation
+        return jsonify({'status': 'success', 'message': 'Part updated successfully'})
+    except sqlite3.Error as e:
+        conn.rollback()
+        print("Error during update:", str(e))  # Log any errors
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+    finally:
+        conn.close()
+
 
 
 def get_all_parts(search_type=None):
@@ -438,92 +531,95 @@ def sort_parts():
 
     return jsonify([dict(part) for part in sorted_parts])
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 @app.route('/check_part_in_inventory', methods=['POST'])
 def check_part_in_inventory():
     data = request.get_json()
-    part_sn = data['Part_sn']
-    size = data['Size']
-    textarea_type = data['Type']
-    textarea_capacity = data['Capacity']
-    textarea_part_status = data['Part_status']
+    part_sn = data.get('Part_sn')
+    size = data.get('Size')
+    textarea_type = data.get('Type')
+    textarea_capacity = data.get('Capacity')
+    textarea_part_status = data.get('Part_status')
+    unit_sn = data.get('Unit_sn')
+
+    # Edge case check for missing or whitespace-only Capacity
+    if not textarea_capacity or textarea_capacity.strip() == '':
+        return jsonify({
+            'exists': False,
+            'error': 'missing_capacity',
+            'message': 'Capacity is missing in the Parts Request.'
+        })
+
+    # Edge case check for missing or whitespace-only Type
+    if not textarea_type or textarea_type.strip() == '':
+        return jsonify({
+            'exists': False,
+            'error': 'missing_type',
+            'message': 'Type is missing in the Parts Request.'
+        })
 
     conn = get_db()
     try:
-        # Query to check if Part_sn exists in the Part table and is currently checked out
         part = conn.execute('SELECT * FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
 
         if part is None:
-            return jsonify({'exists': False,
-							'error': 'not_in_inventory',
-							'message': 'Part not found in inventory.',
-						   })
+            return jsonify({
+                'exists': False,
+                'error': 'not_in_inventory',
+                'message': 'Part not found in inventory.'
+            })
 
-        # Check if the existing part matches the textarea's type and capacity
-        elif part['Type'] != textarea_type or part['Capacity'] != textarea_capacity:
+        # Convert sqlite3.Row to dictionary
+        part = dict(part)
+
+        # Debugging log to verify expected and actual values
+        logging.debug(f"Expected Type: {part['Type']}, Expected Capacity: {part['Capacity']}")
+        logging.debug(f"Actual Type: {textarea_type}, Actual Capacity: {textarea_capacity}")
+
+        # Handle the Size mismatch logic
+        if part['Type'] in ['PC3', 'PC3L', 'PC4', 'HD']:  # Only relevant types
+            if part['Size'] != size:
+                return jsonify({
+                    'exists': False,
+                    'error': 'size_mismatch',
+                    'message': f'Size mismatch for Part_sn: {part_sn}. Expected {part["Size"]}, got {size}.',
+                    'expected': {'Size': part['Size']},
+                    'actual': {'Size': size}
+                })
+
+        # Mismatch check for Type and Capacity
+        if part['Type'] != textarea_type or (part['Capacity'] or '') != textarea_capacity:
+            logging.debug("Mismatch detected in Type or Capacity")
             return jsonify({
                 'exists': False,
                 'error': 'mismatch',
-                'message': 'Mismatch in type or capacity.',
-                'expected': {'Type': textarea_type, 'Capacity': textarea_capacity},
-                'actual': {'Type': part['Type'], 'Capacity': part['Capacity']}
+                'message': 'Mismatch in Type or Capacity.',
+                'expected': {'Type': part['Type'], 'Capacity': part['Capacity']},
+                'actual': {'Type': textarea_type, 'Capacity': textarea_capacity}
             })
-		# Check if the existing part is already checked in
-        elif textarea_part_status == 'In':
-            if part['Status'] == 'In':
-                return jsonify({
-                    'exists': False,    # make index.js around line 724 show the modal with this data 
-                    'error': 'checked-in',
-                    'message': 'Already checked-in.',
-                    'part': {'Part_sn': part_sn,
-                             'Type': part['Type'],
-                             'Capacity': part['Capacity'],
-                             'Size': part['Size'],
-                             'Speed': part['Speed'],
-                             'Brand': part['Brand'],
-                             'Model': part['Model'],
-                             'Location': part['Location']}
-                })
-            else:
-                return jsonify({'exists': True, 'message': 'Part exists with matching type and capacity.'})
-        # Check if the existing part is already checked out
-        elif textarea_part_status == 'Out':
-            if part['Status'] == 'Out':
-                return jsonify({
-                    'exists': False,
-                    'error': 'checked-out',
-                    'message': 'Already checked-out.',
-                    'part': {'Part_sn': part_sn,
-                             'Type': part['Type'],
-                             'Capacity': part['Capacity'],
-                             'Size': part['Size'],
-                             'Speed': part['Speed'],
-                             'Brand': part['Brand'],
-                             'Model': part['Model'],
-                             'Location': part['Location']}
-                })
-            else:
-                return jsonify({'exists': True,
-                                'part': {'Part_sn': part_sn,
-                                'Type': part['Type'],
-                                'Capacity': part['Capacity'],
-                                'Size': part['Size'],
-                                'Speed': part['Speed'],
-                                'Brand': part['Brand'],
-                                'Model': part['Model'],
-                                'Location': part['Location']},
-                                'message': 'Part exists with matching type and capacity.'})
-        else:
+
+        # Check if already checked-in or checked-out
+        if textarea_part_status == 'In' and part['Status'] == 'In':
             return jsonify({
                 'exists': False,
-                'error': 'uncaught',
-                'message': 'Uncaught error.',
-                'part': {'Part_sn': part_sn, 'Type': part['Type'], 'Capacity': part['Capacity'], 'Size': part['Size']}
+                'error': 'checked-in',
+                'message': 'Already checked-in.',
+                'part': part
             })
+        elif textarea_part_status == 'Out' and part['Status'] == 'Out':
+            return jsonify({
+                'exists': False,
+                'error': 'checked-out',
+                'message': 'Already checked-out.',
+                'part': part
+            })
+
+        return jsonify({'exists': True, 'message': 'Part exists with matching Type, Capacity, and Size.'})
 
     finally:
         conn.close()
-
 
 @app.route('/update_part_status', methods=['POST'])
 def update_part_status():
@@ -532,14 +628,15 @@ def update_part_status():
     tid = data['TID']
     unit_sn = data['Unit_sn']
     part_status = data['Part_status']  # update the part status given
+    location = data.get('Location')
     note = data['Note']
 
     conn = get_db()
     try:
         conn.execute('BEGIN')
         # Update Part to set Status
-        conn.execute('UPDATE Part SET Status = ? WHERE Part_sn = ?', (part_status, part_sn))
-        # Insert a new log entry with the current timestamp
+        conn.execute('UPDATE Part SET Status = ?, Location = ? WHERE Part_sn = ?', (part_status, location, part_sn))
+        # Insert a new log entry with the current timestamp, don't need location here (potentially)
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         conn.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', 
                      (tid, unit_sn, part_sn, part_status, timestamp, note))
@@ -561,6 +658,7 @@ def update_part_status():
                 'Speed': part['Speed'],
                 'Brand': part['Brand'],
                 'Model': part['Model'],
+                'Location': part['Location'],
                 'Part_sn': part_sn
             }
         })
@@ -571,8 +669,6 @@ def update_part_status():
 
     finally:
         conn.close()
-
-
 
 
 @app.route('/automated_test')

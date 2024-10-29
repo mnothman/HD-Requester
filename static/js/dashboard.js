@@ -1,9 +1,3 @@
-// Array of box headers
-const boxHeaders = [
-    'PC3 Desktop', 'PC3L Desktop', 'PC4 Desktop', 'SSD', 'HD 2.5"', 'Apple', 
-    'PC3 Laptop', 'PC3L Laptop', 'PC4 Laptop', 'm.2', 'HD 3.5"', 'mSATA'
-];
-
 // Array of background colors to cycle through
 const colors = [
     'rgb(202, 239, 69)', // Light Green
@@ -22,8 +16,9 @@ const colors = [
 
 $(document).ready(function () {
     loadInventory();
-    $('#partsTable').DataTable();  // Initialize DataTables on the table
-     
+    new DataTable('#partsTable', {
+        order: [0, 'dec']
+    });
 });
 
 /// Function to sanitize IDs for CSS selectors
@@ -32,23 +27,22 @@ function sanitizeId(id) {
 }
 
 // Function to fetch part counts for the selected capacity and size
-function fetchPartCount(type, capacity, size) {
-    return fetch(`/get_part_count?type=${type}&capacity=${capacity}&size=${size}`)
-        .then(response => response.json())  // Parse JSON response
-        .then(data => {
-            if (data.count !== undefined) {
-                return data.count;  // Return the count
-            } else {
-                console.error('No count returned from API');
-                return 0;  // Return 0 if there's an issue
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching part count:', error);
-            return 0;  // Return 0 if there's an error
-        });
-}
+async function fetchPartCount(type, capacity, size) {
+    try {
+        const response = await fetch(`/get_part_count?type=${type}&capacity=${capacity}&size=${size}`);
+        const data = await response.json();
 
+        if (data.count !== undefined) {
+            return data.count;  // Return the count
+        } else {
+            console.error('No count returned from API');
+            return 0;  // Return 0 if there's an issue
+        }
+    } catch (error) {
+        console.error('Error fetching part count:', error);
+        return 0;  // Return 0 if there's an error
+    }
+}
 
 // Function to fetch inventory data and dynamically create boxes
 function loadInventory() {
@@ -71,14 +65,16 @@ function loadInventory() {
             });
 
             // Function to fetch capacities for a given Type and Size
-            function fetchCapacities(type, size) {
-                return fetch(`/get_part_capacities?type=${type}&size=${size}`)
-                    .then(response => response.json())
-                    .then(capacities => {
-                        combinedMap.get(`${type} ${size}`).capacities = capacities;
-                    });
+            async function fetchCapacities(type, size) {
+                try {
+                    const response = await fetch(`/get_part_capacities?type=${type}&size=${size}`);
+                    const capacities = await response.json();
+                    combinedMap.get(`${type} ${size}`).capacities = capacities;
+                } catch (error) {
+                    console.error('Error fetching capacities:', error);
+                }
             }
-
+            
             // Function to create a box for each part type and its details
             function createBox(type, size, quantity, capacities, index) {
                 const box = $('<div class="box"></div>'); // Create the box div
