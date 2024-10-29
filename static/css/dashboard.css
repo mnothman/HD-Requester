@@ -6,20 +6,55 @@
   }
 
   .header {
-      background-color: rgb(26, 107, 30);
-      color: white;
-      padding: 15px;
-      text-align: center;
-  }
+    background-color: rgb(26, 107, 30);
+    color: white;
+    padding: 15px;
+    display: flex; 
+    justify-content: space-between;
+    align-items: center;
+}
 
-  /* Sidebar styling */
-  .sidebar {
+/* Side Bar */
+#hamburgerBtn {
+  position: absolute;
+  top: 15px;
+  right: 10px;
+z-index: 1001;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px; 
+}
 
-      padding: 10px;
-      background-color: rgba(244, 244, 244, 0.9);
-      border: 1px solid #ddd;
-      border-radius: 5px;
-  }
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: -250px;
+  width: 250px;
+  height: 100%;
+  background-color: #343a40;
+  color: white;
+  transition: right 0.3s ease; 
+  z-index: 1000;
+}
+
+.sidebar.active {
+  right: 0; 
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 20px 10px;
+}
+
+.sidebar ul li {
+  margin: 15px 0;
+}
+
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+}
 
   .content {
       padding: 0px;
