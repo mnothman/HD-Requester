@@ -377,6 +377,10 @@ function showModal(dataObject, htmlContent, onConfirm) {
         // Handle form submission
         $('#add_btn').click(function () {
             const partData = {
+                TID: '',
+                Unit_sn: '',
+                Part_status: 'Out',
+                Note: 'New part added to inventory',
                 Type: $('#iType').val(),
                 Capacity: $('#iCapacity').val(),
                 Size: $('#ddSize').val(),
@@ -626,6 +630,8 @@ function showModal(dataObject, htmlContent, onConfirm) {
     
             // Prepare data to send to the server
             const partData = {
+                TID: '',
+                Note: 'New part added to inventory',
                 Part_sn: partSn,
                 Type: part.type,
                 Capacity: part.capacity,
