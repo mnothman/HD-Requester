@@ -212,38 +212,28 @@ class PartCheckInOutTest(unittest.TestCase):
 
     def test08_checkout_missing_type(self):
        # Test case: Check-out Error: Missing Type
-        print("\nTest 8: Check-out Error: Missing Type - Skip")
+        print("\nTest 8: Check-out Error: Missing Type")
 
-        ### Need to fix our app and then remove this pass
-        ##  and the ''' '''
-        #
-        pass
-        r'''
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
-        # Using Serial number 5001
-        textarea.send_keys("TI000000-00000001\n123456\n256GB\nLaptop\n00005001")
-        self.driver.find_element(By.ID, "btnIn").click()
+        # Using Serial number 000000001
+        textarea.send_keys("TI000000-00000001\n123456\n4GB\nLaptop\n00000001")
+        self.driver.find_element(By.ID, "btnOut").click()
         self.driver.find_element(By.ID, "btn-submit-request").click()
 
         # Expecting modal to show mismatch error
         
-                        self.check_modal(
-            "Check-out Error: Missing Part Capacity.",
-            "Expected: 256GB HD 3.5\nFound: HD 3.5"
+        self.check_modal(
+            "Check-out Error: Missing Part type",
+            "Type is missing for this part.\nPlease provide a valid type for part: 00000001."
         )
         self.close_modal()
-        '''
+ 
 
     def test09_checkout_missing_capacity(self):
-       # Test case: Check-out Error: Missing capacity - Skip
-        print("\nTest 9: Check-out Error: Missing Capacity - Skip")
+       # Test case: Check-out Error: Missing capacity
+        print("\nTest 9: Check-out Error: Missing Part Capacity")
 
-        ### Need to fix our app and then remove this pass
-        ##  and the ''' '''
-        #
-        pass
-        r'''
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
         # Using Serial number 00000001
@@ -254,21 +244,16 @@ class PartCheckInOutTest(unittest.TestCase):
         # Expecting modal to show mismatch error
         
         self.check_modal(
-            "Check-out Error: Missing Part Capacity.",
-            "Expected: 256GB HD 3.5\nFound: HD 3.5"
+            "Check-out Error: Missing Part capacity",
+            "Capacity is missing for this part.\nPlease provide a valid capacity for part: 00000001."
         )
         self.close_modal()
-        '''
+
 
     def test10_checkout_missing_unit_sn(self):
        # Test case: Check-out Error: Missing Unit Serial Number
-        print("\nTest 10: Check-out Error: Missing Unit Serial Number - Skip")
+        print("\nTest 10: Check-out Error: Missing Unit Serial Number")
 
-        ### Need to fix our app and then remove this pass
-        ##  and the ''' '''
-        #
-        pass
-        r'''
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
         # Using Serial number 00000001
@@ -278,38 +263,50 @@ class PartCheckInOutTest(unittest.TestCase):
 
         # Expecting modal to show mismatch error
         self.check_modal(
-            "Check-out Error: Missing unit serial number.",
-            "Add unit serial number"
+            "Error: Missing Unit serial number",
+            "Unit Serial Number is missing or invalid.\nPlease provide a valid Unit Serial Number to proceed."
         )
         self.close_modal()
-        '''
 
     def test11_checkout_mismatch_size(self):
         # Test case: Check-out Error: Mismatch in size
-        print("\nTest 11: Check-out Error: Mismatch in Size - skip")
-        ### Need to fix our app and then remove this pass
-        ##  and the ''' '''
-        #
-        pass
-        r'''
+        print("\nTest 11: Check-out Error: Mismatch in Size")
+
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
         # Using Serial number 00000001
-        textarea.send_keys("TI000000-00000001\n123456\n256GB HD 3.5\Desktop\n00005001")
+        textarea.send_keys("TI000000-00000001\n123456\nPC4 4GB\nDesktop\n00000001")
         self.driver.find_element(By.ID, "btnOut").click()
         self.driver.find_element(By.ID, "btn-submit-request").click()
         
         # Expecting modal to show mismatch error
         self.check_modal(
             "Check-out Error: Mismatch in size.",
-            "Expected: Desktop\n Found: Laptop"
+            "Expected: Desktop\nFound: Laptop"
         )
         self.close_modal()
-        '''
+    
+    def test12_checkout_missing_size(self):
+        # Test case: Check-out Error: Missing in size
+        print("\nTest 12: Check-out Error: Missing Size")
 
-    def test12_checkout_missing_part_serial_number(self):
+        textarea = self.driver.find_element(By.ID, "textarea-request")
+        textarea.clear()
+        # Using Serial number 00000001
+        textarea.send_keys("TI000000-00000001\n123456\nPC4 4GB\n00000001")
+        self.driver.find_element(By.ID, "btnOut").click()
+        self.driver.find_element(By.ID, "btn-submit-request").click()
+        
+        # Expecting modal to show mismatch error
+        self.check_modal(
+            "Error: Missing Unit Size",
+            "Missing or invalid Unit size."
+        )
+        self.close_modal()
+
+    def test13_checkout_missing_part_serial_number(self):
         # Test case: Check-out Error: Missing Serial Number
-        print("\nTest 12: Missing Part serial number")
+        print("\nTest 13: Missing Part serial number")
         textarea = self.driver.find_element(By.ID, "textarea-request")
         textarea.clear()
         textarea.send_keys("TI000000-00000001\n123456\nPC4 4GB\nLaptop")
