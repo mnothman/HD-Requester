@@ -50,6 +50,7 @@ class AdminLoginTests(unittest.TestCase):
     def test01_login_with_valid_credentials(self):
         print("Test01: Valid login credentials.")
         self.driver.find_element(By.ID, "hamburgerBtn").click()
+        time.sleep(1)
         self.driver.find_element(By.ID, "loginLink").click()
         self.driver.find_element(By.ID, "username").send_keys("admin")
         self.driver.find_element(By.ID, "password").send_keys("admin123")
@@ -63,10 +64,12 @@ class AdminLoginTests(unittest.TestCase):
 
         # Logout for next test
         self.driver.find_element(By.ID, "hamburgerBtn").click()
+        time.sleep(1)
         self.driver.find_element(By.ID, "logoutLink").click()
 
     def test02_login_with_incorrect_password(self):
         self.driver.find_element(By.ID, "hamburgerBtn").click()
+        time.sleep(1)
         self.driver.find_element(By.ID, "loginLink").click()
         time.sleep(1)
         print("\nTest02: Login with incorrect password.")
@@ -77,6 +80,7 @@ class AdminLoginTests(unittest.TestCase):
 
     def test03_password_recovery_incorrect_answer(self):
         self.driver.find_element(By.ID, "hamburgerBtn").click()
+        time.sleep(1)
         self.driver.find_element(By.ID, "loginLink").click()
         time.sleep(1)
         print("\nTest03: Password recovery with incorrect security answers.")
@@ -93,6 +97,7 @@ class AdminLoginTests(unittest.TestCase):
         # Check if the login form is displayed
         print("\nTest04: Cancel Password Recovery Answers")
         self.driver.find_element(By.ID, "hamburgerBtn").click()
+        time.sleep(1)
         self.driver.find_element(By.ID, "loginLink").click()
         time.sleep(1)
         self.driver.find_element(By.ID, "forgotPass").click()
@@ -106,6 +111,7 @@ class AdminLoginTests(unittest.TestCase):
 
     def test05_password_recovery_change_password(self):
         self.driver.find_element(By.ID, "hamburgerBtn").click()
+        time.sleep(1)
         self.driver.find_element(By.ID, "loginLink").click()
         time.sleep(1)
         print("\nTest05: Cancel Password Recovery Change Password.")
