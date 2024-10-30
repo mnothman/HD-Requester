@@ -641,6 +641,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 Note: dataObject.note
             };
     
+            // Response.part?.Brand and Model is retrieved from jsonify in check_part_in_inventory app.py
             $.ajax({
                 url: '/check_part_in_inventory',
                 type: 'POST',

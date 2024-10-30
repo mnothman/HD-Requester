@@ -616,7 +616,21 @@ def check_part_in_inventory():
                 'part': part
             })
 
-        return jsonify({'exists': True, 'message': 'Part exists with matching Type, Capacity, and Size.'})
+        # return jsonify({'exists': True, 'message': 'Part exists with matching Type, Capacity, and Size.'})
+        # Return the part details in order to retrieve later in frontend modals (specifically checkInPart)
+        return jsonify({
+        'exists': True,
+        'message': 'Part exists with matching Type, Capacity, and Size.',
+        'part': {
+            'Type': part['Type'],
+            'Capacity': part['Capacity'],
+            'Size': part['Size'],
+            'Speed': part.get('Speed'),
+            'Brand': part.get('Brand'),
+            'Model': part.get('Model'),
+            'Location': part.get('Location')
+        }
+    })
 
     finally:
         conn.close()
