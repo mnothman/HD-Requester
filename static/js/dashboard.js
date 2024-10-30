@@ -15,19 +15,17 @@ const colors = [
 ];
 
 $(document).ready(function () {
-    
-    // Sidebar toggle functionality
-    const hamburgerBtn = $('#hamburgerBtn');
-    const sidebar = $('#sidebar');
-
-    hamburgerBtn.on('click', function() {
-        sidebar.toggleClass('active');
-    }); 
-
     loadInventory();
     new DataTable('#partsTable', {
         order: [0, 'dec']
     });
+    
+    // Sidebar toggle functionality
+    const hamburgerBtn = $('#hamburgerBtn');
+    const sidebar = $('#sidebar');
+    hamburgerBtn.on('click', function() {
+        sidebar.toggleClass('active');
+    }); 
 });
 
 /// Function to sanitize IDs for CSS selectors
