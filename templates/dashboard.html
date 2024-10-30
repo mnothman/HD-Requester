@@ -11,6 +11,7 @@
 
     <!-- DataTables CSS for Sorting and Searching -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+
 </head>
 
 <body>
@@ -37,22 +38,40 @@
 
     <!-- Main Content -->
     <div class="content">
+
+        <!-- Inventory Levels -->
         <div id="inventory-levels" class="table-container">
             <h2>Inventory Levels</h2>
             <div class="inventory-levels-container"></div>
         </div>
+
+        <!-- Monthly Trends -->
         <div id="monthly-trends" class="table-container">
-            <h2>Monthly Trends</h2>
-            <div class="monthly-trends-container">
-                <div class="monthly-trends-date-column">
-                    <h3>Dates</h3>
-                    <p>This is the first column, which takes up about 1/6 of the width.</p>
+            <h2> Monthly Trends</h2>
+            <div class="monthly-trends">
+                <div class="monthly-trends-menu">
+                    <ul id="monthsList">
+                        <li data-month="1">January</li>
+                        <li data-month="2">February</li>
+                        <li data-month="3">March</li>
+                        <li data-month="4">April</li>
+                        <li data-month="5">May</li>
+                        <li data-month="6">June</li>
+                        <li data-month="7">July</li>
+                        <li data-month="8">August</li>
+                        <li data-month="9">September</li>
+                        <li data-month="10">October</li>
+                        <li data-month="11">November</li>
+                        <li data-month="12">December</li>
+                    </ul>
                 </div>
+            
                 <div class="monthly-trends-graph-column">
-                    <h3>Graph</h3>
-                    <p>This is the second column, which takes up the rest (5/6) of the width.</p>
+                    <h3 id="parts-by-date-title">Parts by Date</h3>
+                    <canvas id="trendsChart"></canvas>  
                 </div>
             </div>
+            
         </div>
         <!-- Table for displaying records -->
         <div class="table-container">

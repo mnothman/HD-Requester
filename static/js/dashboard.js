@@ -180,3 +180,144 @@ function loadInventory() {
     })
     .catch(error => console.error('Error fetching inventory data:', error));
 }
+
+// Function to update the dashboard table with new records
+function updateDashboard(data) {
+    console.log(data)
+
+
+    const tableBody = document.querySelector('#partsTable tbody');
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+    <td>${data.timestamp}</td>
+    <td>${data.action}</td>
+    <td>${data.TID}</td>
+    <td>${data.unit_sn}</td>
+    <td>${data.Type}</td>
+    <td>${data.Capacity}</td>
+    <td>${data.Size}</td>
+    <td>${data.Speed}</td>
+    <td>${data.Brand}</td>
+    <td>${data.Model}</td>
+    <td>${data.Part_sn}</td>
+    <td>${data.Note}</td>
+`;
+    tableBody.appendChild(newRow);
+
+
+    // Reinitialize DataTables to recognize the new row
+    $('#partsTable').DataTable().row.add($(newRow)).draw();
+
+    console.log('updateDashbaord')
+}
+
+
+function checkPartStatus(data) {
+    fetch('/update_part_status', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                updateDashboard(data.data);
+            } else {
+                console.error(data.message);
+            }
+        });
+}
+
+$(document).ready(function () {
+    const monthsList = $('#monthsList li');
+    let trendsChart;
+
+    // Initialize chart
+    const ctx = document.getElementById('trendsChart').getContext('2d');
+    function initChart(labels, datasets) {
+        if (trendsChart) {
+            trendsChart.destroy();  
+        }
+        trendsChart = new Chart(ctx, {
+            type: 'line',  
+            data: {
+                labels: labels,  // Dates
+                datasets: datasets  // Array of datasets: check-ins, check-outs)
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Date' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Transactions' },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Handle month click
+    monthsList.on('click', function () {
+        monthsList.removeClass('active'); // Remove active class from all months
+        $(this).addClass('active');  // Add active class to the clicked month
+        
+        const month = $(this).data('month');
+        const year = new Date().getFullYear(); 
+        
+        // Fetch trends data
+        $.getJSON(`/get_trends?month=${month}&year=${year}`, function (response) {
+            console.log(response);  
+            if (response.status === 'success') {
+                const trends = response.data;
+                
+                const dates = Object.keys(trends);
+                const checkIns = dates.map(date => trends[date].check_ins);
+                const checkOuts = dates.map(date => trends[date].check_outs);
+                const laptops = dates.map(date => trends[date].laptop_transactions);
+                const desktops = dates.map(date => trends[date].desktop_transactions);
+
+                const datasets = [
+                    {
+                        label: 'Check-ins',
+                        data: checkIns,
+                        backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                        borderColor: 'rgba(46, 204, 113, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Check-outs',
+                        data: checkOuts,
+                        backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                        borderColor: 'rgba(231, 76, 60, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Laptop',
+                        data: laptops,
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Desktop',
+                        data: desktops,
+                        backgroundColor: 'rgba(241, 196, 15, 0.2)',
+                        borderColor: 'rgba(241, 196, 15, 1)',
+                        borderWidth: 1
+                    }
+                ];
+                
+                initChart(dates, datasets);
+            } else {
+                console.error('Error fetching trends:', response.message);
+            }
+        });
+    });
+
+    monthsList.first().trigger('click');
+});
