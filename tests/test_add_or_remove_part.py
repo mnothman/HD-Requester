@@ -29,11 +29,12 @@ class PartAddRemoveTests(unittest.TestCase):
         cls.driver.get("http://127.0.0.1:5000/")
 
 
-    def close_alert(self):
+    def close_alert(self, expected_alert_text):
         # Close alert
         WebDriverWait(self.driver, 5).until(EC.alert_is_present())
         alert = self.driver.switch_to.alert
-        alert.accept()
+        alert_text = alert.text
+        self.assertEqual(alert_text, expected_alert_text)
 
         # Wait briefly to ensure alert handling completes
         time.sleep(0.5)
@@ -85,9 +86,6 @@ class PartAddRemoveTests(unittest.TestCase):
         size_dropdown = Select(size)
         size_dropdown.select_by_visible_text(sizeOption)
 
-        speed = self.driver.find_element(By.ID, "iSpeed")
-        speed.send_keys("3200Mhz")
-
         brand = self.driver.find_element(By.ID, "iBrand")
         brand.send_keys("Samsung")
 
@@ -100,15 +98,11 @@ class PartAddRemoveTests(unittest.TestCase):
         part_sn = self.driver.find_element(By.ID, "iPart_sn")
         part_sn.send_keys(serial_n)
 
-
         # Add part with the information filled above
         ok_btn = self.driver.find_element(By.ID, "add_btn")
         ok_btn.click()
 
-        self.close_alert()
-        
-        # Close modal
-        self.close_modal()
+        print("Clicked ok for add part")
 
     def remove_part(self):
         last_page = WebDriverWait(self.driver, 10).until(
@@ -116,22 +110,9 @@ class PartAddRemoveTests(unittest.TestCase):
         )
         last_page.click()
 
-        table = self.driver.find_element(By.XPATH, "//table[@id='partsTable']/tbody")
-
-        # Find all <tr> elements within the <tbody>
-        rows = table.find_elements(By.TAG_NAME, "tr")
+        last_tr = self.driver.find_element("xpath", "//table[@id='partsTable']/tbody/tr[last()]")
         
-        # Loop through each row and click on it
-        for row in rows:
-            # Get the Serial Number cell
-            serial_number_cell = row.find_elements(By.TAG_NAME, "td")[-1]
-            serial_number = serial_number_cell.text
-
-            # Check if the serial number is over "5000".  Example: 00005024 > 5024
-            if int(serial_number) > 5000:
-                #print(f"Clicking serial number: {serial_number}")
-                # Click on the serial number cell
-                serial_number_cell.click()
+        last_tr.click()
 
         self.rmv_part_btn()
 
@@ -140,12 +121,6 @@ class PartAddRemoveTests(unittest.TestCase):
         confirm_btn = self.driver.find_element(By.ID, "confirmBtn")
         confirm_btn.click()
 
-        self.close_alert()
-
-        time.sleep(.5)
-
-        previous_page = self.driver.find_element(By.ID, "partsTable_previous")
-        previous_page.click()
 
     def close_modal(self):
         # Close the modal by clicking the close button
@@ -207,13 +182,34 @@ class PartAddRemoveTests(unittest.TestCase):
 
         # Error occurred:  UNIQUE constraint failed: Part.Part_sn
         self.add_part("Desktop", "00005001")
+        WebDriverWait(self.driver, 5).until(EC.alert_is_present())
+        alert = self.driver.switch_to.alert
+        alert_text = alert.text
+        self.assertEqual(alert_text, "Part added successfully.")
+        alert.accept()
+        
+        '''
+        self.add_part("Laptop", "00005002")
+        WebDriverWait(self.driver, 5).until(EC.alert_is_present())
+        alert = self.driver.switch_to.alert
+        alert_text = alert.text
+        self.assertEqual(alert_text, "Part added successfully.")
+        alert.accept()
 
-        #self.add_part("Laptop", "00005002")
+        self.add_part('2.5" HD', "00005003")
+        WebDriverWait(self.driver, 5).until(EC.alert_is_present())
+        alert = self.driver.switch_to.alert
+        alert_text = alert.text
+        self.assertEqual(alert_text, "Part added successfully.")
+        alert.accept()
 
-        #self.add_part('2.5" HD', "00005003")
-
-        #self.add_part('3.5" HD', "00005004")
-
+        self.add_part('3.5" HD', "00005004")
+        WebDriverWait(self.driver, 5).until(EC.alert_is_present())
+        alert = self.driver.switch_to.alert
+        alert_text = alert.text
+        self.assertEqual(alert_text, "Part added successfully.")
+        alert.accept()
+        '''
     def test04_remove_part_no_selection(self):
         print("\n\n === Test 4: Remove Part - No Selection ===\n")
 
@@ -222,7 +218,10 @@ class PartAddRemoveTests(unittest.TestCase):
         self.rmv_part_btn()
 
         # Close the alert - Successful or error request
+        WebDriverWait(self.driver, 5).until(EC.alert_is_present())
         alert = self.driver.switch_to.alert
+        alert_text = alert.text
+        self.assertEqual(alert_text, "No parts selected for removal.")
         alert.accept()
 
 
@@ -233,15 +232,39 @@ class PartAddRemoveTests(unittest.TestCase):
 
         print(parts_count)
 
-        while int(parts_count) > 5000:
-            self.remove_part()        
-            parts_count = self.getPartsCount()
+        self.remove_part()
+
+        WebDriverWait(self.driver, 5).until(EC.alert_is_present())
+        alert = self.driver.switch_to.alert
+        alert_text = alert.text
+        self.assertEqual(alert_text, "All selected parts have been marked as deleted.")
         
         time.sleep(1)
 
     @classmethod
     def tearDownClass(cls):
+        # Set up the database connection
+        db_path = os.path.join(os.path.dirname(__file__), '..', 'refresh.db')
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+
+        # Define the queries
+        query1 = "DELETE FROM Log WHERE Part_sn = ?"
+        query2 = "DELETE FROM Part WHERE Part_sn = ?"
+
+        # Execute each query with the parameter
+        cursor.execute(query1, ('00005001',))
+        cursor.execute(query2, ('00005001',))
+
+        # Commit the transaction
+        conn.commit()
+
+        # Close the database connection
+        conn.close()
+
+        # Quit the driver
         cls.driver.quit()
+
 
 if __name__ == "__main__":
     unittest.main()
