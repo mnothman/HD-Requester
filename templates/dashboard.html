@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://pro.fontawesome.com/releases/v5.10.1/css/all.css" rel="stylesheet">
+    <link href="https://pro.fontawesome.com/releases/v5.10.1/css/all.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet"> <!-- Updated path -->
     <title>Dashboard</title>
 
@@ -19,10 +20,20 @@
     <!--Graph: Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+
+    <!--Graph: Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
 </head>
 
 <body>
 
+    <nav>
+        <div class="header d-flex justify-content-between align-items-center">
+            <h1>Dashboard</h1>
+            <button id="hamburgerBtn" class="btn btn-hbr">
+                <i class="fas fa-bars"></i>
+            </button>
     <nav>
         <div class="header d-flex justify-content-between align-items-center">
             <h1>Dashboard</h1>
@@ -41,10 +52,23 @@
 				<a href="/logout" id="logoutLink" class="linkLogout">Log Out</a>
 			</li>		
 		</ul>
+    </nav>
+    
+    <div id="sidebar" class="sidebar">
+        <ul class="adminLogin">
+			<li>
+				<a href="/" id="loginLink" class="linkLogin">Home</a>
+			</li>
+			<li>
+				<a href="/logout" id="logoutLink" class="linkLogout">Log Out</a>
+			</li>		
+		</ul>
     </div>
 
     <!-- Main Content -->
     <div class="content">
+
+        <!-- Inventory Levels -->
 
         <!-- Inventory Levels -->
         <div id="inventory-levels" class="table-container">
@@ -71,13 +95,34 @@
                         <li data-month="11">November</li>
                         <li data-month="12">December</li>
                     </ul>
+            <h2> Monthly Trends</h2>
+            <div class="monthly-trends">
+                <div class="monthly-trends-menu">
+                    <ul id="monthsList">
+                        <li data-month="1">January</li>
+                        <li data-month="2">February</li>
+                        <li data-month="3">March</li>
+                        <li data-month="4">April</li>
+                        <li data-month="5">May</li>
+                        <li data-month="6">June</li>
+                        <li data-month="7">July</li>
+                        <li data-month="8">August</li>
+                        <li data-month="9">September</li>
+                        <li data-month="10">October</li>
+                        <li data-month="11">November</li>
+                        <li data-month="12">December</li>
+                    </ul>
                 </div>
+            
             
                 <div class="monthly-trends-graph-column">
                     <h3 id="parts-by-date-title">Parts by Date</h3>
                     <canvas id="trendsChart"></canvas>  
+                    <h3 id="parts-by-date-title">Parts by Date</h3>
+                    <canvas id="trendsChart"></canvas>  
                 </div>
             </div>
+            
             
         </div>
         <!-- Table for displaying records -->
