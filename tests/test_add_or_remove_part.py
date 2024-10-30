@@ -36,7 +36,7 @@ class PartAddRemoveTests(unittest.TestCase):
         alert_text = alert.text
         self.assertEqual(alert_text, expected_alert_text)
 
-        # Wait briefly to ensure alert handling completes
+        # Wait briefly to ensure alert handling completess
         time.sleep(0.5)
 
     def add_part_btn(self):
