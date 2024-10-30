@@ -387,6 +387,10 @@ function showModal(dataObject, htmlContent, onConfirm) {
         // Handle form submission
         $('#add_btn').click(function () {
             const partData = {
+                TID: '',
+                Unit_sn: '',
+                Part_status: 'Out',
+                Note: 'New part added to inventory',
                 Type: $('#iType').val(),
                 Capacity: $('#iCapacity').val(),
                 Size: $('#ddSize').val(),
@@ -636,6 +640,8 @@ function showModal(dataObject, htmlContent, onConfirm) {
     
             // Prepare data to send to the server
             const partData = {
+                TID: '',
+                Note: 'New part added to inventory',
                 Part_sn: partSn,
                 Type: part.type,
                 Capacity: part.capacity,
@@ -645,6 +651,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 Note: dataObject.note
             };
     
+            // Response.part?.Brand and Model is retrieved from jsonify in check_part_in_inventory app.py
             $.ajax({
                 url: '/check_part_in_inventory',
                 type: 'POST',
