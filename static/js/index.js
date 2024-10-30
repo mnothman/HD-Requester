@@ -62,12 +62,22 @@ $(document).ready(function () {
     toggleNotesBtn.onclick = function () {
         if (notesContainer.style.display === "none") {
             notesContainer.style.display = "block";
+            toggleNotesBtn.classList.add('notes-active');
         } else {
             notesContainer.style.display = "none";
+            toggleNotesBtn.classList.remove('notes-active'); 
             textarea.value = ""; // Clear the textarea when hiding
         }
     };
 
+    // Sidebar toggle functionality
+    const hamburgerBtn = $('#hamburgerBtn');
+    const sidebar = $('#sidebar');
+
+    hamburgerBtn.on('click', function() {
+        sidebar.toggleClass('active');
+    }); 
+     
     setupRowClick();
 
     /* ====== EVENT LISTENERS ===== */
@@ -641,6 +651,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 Note: dataObject.note
             };
     
+            // Response.part?.Brand and Model is retrieved from jsonify in check_part_in_inventory app.py
             $.ajax({
                 url: '/check_part_in_inventory',
                 type: 'POST',

@@ -20,13 +20,21 @@
 <body>
 	<nav>
 		<div class="logo">HD Requester</div>
-		<div class="adminLogin">
-			<a href="/login">
-				<button id="loginButton" class="btnLogin" type="button">Admin Login</button>
-			</a>
-			<button id="logoutButton" class="btn btn-danger" style="display:none;">Log Out</button>
-		</div>
+		<button id="hamburgerBtn" class="btn btn-secondary">
+            <i class="fas fa-bars"></i>
+        </button>
 	</nav>
+
+	<div id="sidebar" class="sidebar">
+        <ul class="adminLogin">
+			<li>
+				<a href="/login" id="loginLink" class="linkLogin">Login</a>
+			</li>
+			<li>
+				<a href="/logout" id="logoutLink" class="linkLogout">Log Out</a>
+			</li>		
+		</ul>
+    </div>
 
 	<div class="container-fluid">
 		<div class="row">
@@ -41,7 +49,7 @@
 					<label id="btnOut" class="btn btn-secondary" for="btnradio2">OUT</label>
 				</div>
 
-				<button type="button" class="btn btn-secondary mt-3" id="toggleNotesBtn">Add Note</button>
+				<button type="button" class="btn btn-secondary" id="toggleNotesBtn">Add Note</button>
 
 				<div id="notesContainer" style="display: none;">
                     <textarea id="textarea-notes" class="form-control mt-2" rows="3" placeholder="Enter your note here..."></textarea>
@@ -171,35 +179,33 @@
 
 	<script>
 		window.onload = function() {
-			const loginButton = document.getElementById('loginButton'); // Button for "Admin Login" or "Dashboard"
-			const logoutButton = document.getElementById('logoutButton'); // Button for "Log Out"
-			
+			const loginLink = document.getElementById('loginLink'); // Link for "Admin Login" or "Dashboard"
+			const logoutLink = document.getElementById('logoutLink'); // Link for Log Out
+
 			// Check if the "admin_logged_in" cookie exists
 			const isLoggedIn = document.cookie.split('; ').find(row => row.startsWith('admin_logged_in='));
 
 			if (isLoggedIn) {
 				// User is logged in
-				loginButton.textContent = 'Dashboard';
-				logoutButton.style.display = 'block';  // Show the logout button
-				loginButton.addEventListener('click', function() {
+				loginLink.textContent = 'Dashboard';
+				logoutButton.style.display = 'block';  // Show the logout link
+				loginLink.addEventListener('click', function(e) {
 					window.location.href = '/admin_dashboard';  // Redirect to dashboard if logged in
 				});
 			} else {
 				// User is logged out
-				loginButton.textContent = 'Admin Login';
-				logoutButton.style.display = 'none';  // Hide the logout button
-				loginButton.addEventListener('click', function() {
+				loginLink.textContent = 'Login';
+				logoutLink.style.display = 'none';  // Hide the logout link
+				loginLink.addEventListener('click', function(e) {
 					window.location.href = '/login';  // Redirect to login page if not logged in
 				});
 			}
 
 			// Add event listener for the log out button
-			logoutButton.addEventListener('click', function() {
+			logoutLink.addEventListener('click', function(e) {
 				window.location.href = '/logout';  // Redirect to the logout route
 			});
 		};
-
-
 	</script>
 
 </body>
