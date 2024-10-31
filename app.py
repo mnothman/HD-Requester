@@ -225,6 +225,7 @@ def update_part():
 
     try:
         # Fetch the existing part details
+        print("Checking")
         part = cursor.execute("SELECT * FROM Part WHERE Part_sn = ?", (part_sn,)).fetchone()
         if not part:
             return jsonify({'status': 'error', 'message': 'Part NOT FOUND'}), 404
@@ -239,12 +240,13 @@ def update_part():
             'model': part['Model'],
             'location': part['Location']
         }
+        print(part['Capacity'])
 
         # Constructing the note for changes
         changes = []
         for key in old_data:
             if old_data[key] != data[key]:
-                changes.append(f"{key.capitalize()} changed from '{old_data[key.capitalize()]}' to '{data[key]}'")
+                changes.append(f"{key} changed from '{old_data[key]}' to '{data[key]}'")
         note = "; ".join(changes) if changes else ""
 
         # Update the part in the Part table
