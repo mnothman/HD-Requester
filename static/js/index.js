@@ -189,10 +189,19 @@ $(document).ready(function () {
         $(".context-menu").hide();
     });
 
-    // Close the modal when clicking close button
-    $('#closeModalBtn').click(function () {
+    // handle closing the modal with close button and outside clicks
+    $(document).on('click', '#closeModalBtn', function () {
+        console.log("Close button clicked"); // Troubleshooting message
         $('#editPartModal').hide();
     });
+    $(window).click(function (event) {
+        if ($(event.target).is('#editPartModal')) {
+            $('#editPartModal').hide()
+        }
+    });
+    
+
+     
 
     // Handle form submission for editing a part
     $('#editPartForm').submit(function (e) {
