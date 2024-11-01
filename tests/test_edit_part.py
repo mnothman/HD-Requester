@@ -14,7 +14,7 @@ from selenium.common.exceptions import TimeoutException
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # Add the root directory to the path
 
 
-class EditPartTest(unittest.TestCase):
+class EditPartTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         print("\n\n=== Edit Part Tests ===")
@@ -142,7 +142,7 @@ class EditPartTest(unittest.TestCase):
         # Assert that the Capacity has changed as expected
         self.assertNotEqual(capacity_before, capacity_after, "Capacity should be updated")
         self.assertEqual(capacity_after, "2TB", "Capacity should be updated to '2TB'")
-
+        time.sleep(1)
         # Check Log records
         query = 'SELECT Note FROM Log ORDER BY Date_time DESC LIMIT 1'
         note = self.execute_query(query)
