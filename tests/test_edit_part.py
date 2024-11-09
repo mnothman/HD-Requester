@@ -142,7 +142,7 @@ class EditPartTests(unittest.TestCase):
         # Assert that the Capacity has changed as expected
         self.assertNotEqual(capacity_before, capacity_after, "Capacity should be updated")
         self.assertEqual(capacity_after, "2TB", "Capacity should be updated to '2TB'")
-        time.sleep(1)
+        time.sleep(2)
         # Check Log records
         query = 'SELECT Note FROM Log ORDER BY Date_time DESC LIMIT 1'
         note = self.execute_query(query)
