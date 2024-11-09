@@ -141,18 +141,29 @@ nav {
 }
 
 #btn-group-inout {
-	display: block;
+    display: flex;
+    overflow: hidden; /* Ensures the border-radius is respected */
 }
 
 #btn-group-inout .btn {
-	width: 50%;
-	padding: 10px 0px;
-	margin: 10px 0px;
-	box-sizing: border-box;
-	border: 1px solid black;
-	font-size: 20px;
-	float: left;
+    width: 50%;
+    padding: 10px 20px;
+    box-sizing: border-box;
+    border: 1px solid black;
+    font-size: 20px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    margin: 0; /* Remove any margin to prevent separation */
 }
+
+/* Apply specific border-radius values */
+#btn-group-inout .btn:first-child {
+    border-radius: 8px 0 0 8px; /* Rounded on left corners for first button */
+}
+
+#btn-group-inout .btn:last-child {
+    border-radius: 0 8px 8px 0; /* Rounded on right corners for last button */
+}
+
 
 .btn-primary {
 	background-color: rgb(26, 107, 30);
