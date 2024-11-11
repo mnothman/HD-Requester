@@ -141,10 +141,6 @@ $(document).ready(function () {
         }
     });
 
-    // $('#rmvPartBtn').click(function () {
-    // 	handleRemovePart();
-    // });
-
     // Handle right-click on table row
     // Prevent the default right-click context menu
     $('#partsTable tbody').on('contextmenu', 'tr', function (e) {
@@ -260,12 +256,6 @@ $(document).ready(function () {
     
 });
 
-/* ====== FUNCTIONS ===== */
-/*  deleted formatValue() on 10-17-2024
-    because we are replacing null values as the
-    table is rendered. RC
-*/
-
 function checkPartStatus(data) {
     fetch('/get_parts', {
         method: 'GET',
@@ -284,19 +274,6 @@ function checkPartStatus(data) {
         }
     });
 }
-
-/*  deleted updateDashboard(data) on 10-17-2024
-    because it was an exact copy. RC
-*/
-
-/*  deleted fetchAndDisplayParts() on 10/17/2024
-    because we're using a new way to get the parts
-    and display them. RC
-*/
-
-/*  deleted copy of checkPartStatus(data) on 10-17-2024
-    because it was an exact copy. RC
-*/
 
 function updateDashboard(data) {
     const tableBody = document.querySelector('#partsTable tbody');
@@ -343,15 +320,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
         }
     });
 } // end Modal
-
-    /*  deleted handleSort on 10-17-2024
-        because we implemented sorting differently
-        RC
-    */
-    /*  deleted updateTable(parts) on 10-17-2024
-        because we are displaying the new row as it's
-        created. RC
-    */
 
     function handleAddPart() {
         const content = `
@@ -478,10 +446,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
         });
     }
 
-
-/*  deleted updateDataTable on 10-17-2024
-    because it isn't being used. RC
-*/
 
     // Function to submit part data to the server used by handleAddPart
     function submitPart(partData) {
