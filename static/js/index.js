@@ -148,7 +148,7 @@ $(document).ready(function () {
     // Handle right-click on table row
     // Prevent the default right-click context menu
     $('#partsTable tbody').on('contextmenu', 'tr', function (e) {
-        e.preventDefault();  
+        e.preventDefault();   
         // Get the part data from the row
         const partData = $(this).children("td").map(function () {
             return $(this).text();
@@ -172,39 +172,57 @@ $(document).ready(function () {
     $(".context-menu .edit").on("click", function () {
         const partData = $(".context-menu").data('partData');
 
-         // Populate the modal form with the part data
-        $("#editType").val(partData[0]);
-        $("#editCapacity").val(partData[1]);
-        $("#editSize").val(partData[2]);
-        $("#editSpeed").val(partData[3]);
-        $("#editBrand").val(partData[4]);
-        $("#editModel").val(partData[5]);
-        $("#editLocation").val(partData[6]);
-        $("#editPart_sn").val(partData[7]);
+        // Generate modal content dynamically to match the design of other modals
+        const modalContent = `
+            <form id="editPartForm">
+                <div class="form-group">
+                    <label for="editType">Type:</label>
+                    <input type="text" id="editType" class="form-control" value="${partData[0]}" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCapacity">Capacity:</label>
+                    <input type="text" id="editCapacity" class="form-control" value="${partData[1]}" required>
+                </div>
+                <div class="form-group">
+                    <label for="editSize">Size:</label>
+                    <input type="text" id="editSize" class="form-control" value="${partData[2]}" required>
+                </div>
+                <div class="form-group">
+                    <label for="editSpeed">Speed:</label>
+                    <input type="text" id="editSpeed" class="form-control" value="${partData[3]}">
+                </div>
+                <div class="form-group">
+                    <label for="editBrand">Brand:</label>
+                    <input type="text" id="editBrand" class="form-control" value="${partData[4]}" required>
+                </div>
+                <div class="form-group">
+                    <label for="editModel">Model:</label>
+                    <input type="text" id="editModel" class="form-control" value="${partData[5]}" required>
+                </div>
+                <div class="form-group">
+                    <label for="editLocation">Location:</label>
+                    <input type="text" id="editLocation" class="form-control" value="${partData[6]}">
+                </div>
+                <div class="form-group">
+                    <label for="editPart_sn">Part Serial Number:</label>
+                    <input type="text" id="editPart_sn" class="form-control" value="${partData[7]}" readonly>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="button" class="btn btn-secondary" id="closeModalBtn">Cancel</button>
+            </form>
+        `;
 
-        // Show the modal
-        $("#editPartModal").show();
+        showModal(
+            { title: 'Edit Part' }, 
+            modalContent
+        );
 
         // Hide the context menu
         $(".context-menu").hide();
     });
 
-    // handle closing the modal with close button and outside clicks
-    $(document).on('click', '#closeModalBtn', function () {
-        console.log("Close button clicked"); // Troubleshooting message
-        $('#editPartModal').hide();
-    });
-    $(window).click(function (event) {
-        if ($(event.target).is('#editPartModal')) {
-            $('#editPartModal').hide()
-        }
-    });
-    
-
-     
-
     // Handle form submission for editing a part
-    $('#editPartForm').submit(function (e) {
+    $(document).on('submit', '#editPartForm', function (e) {
         e.preventDefault();
 
         const updatedPartData = {
@@ -226,7 +244,7 @@ $(document).ready(function () {
             contentType: 'application/json',
             success: function (response) {
                 alert(response.message);
-               partsTable.ajax.reload(null, false);
+                partsTable.ajax.reload(null, false);
             },
             //error: function (xhr, status, error) {
             //    alert("Error updating part: " + error);
@@ -238,7 +256,7 @@ $(document).ready(function () {
         });
 
         // Close the modal after submission
-        $('#editPartModal').hide();
+        $('#Modal').css('display', 'none');
     });
 });
 
