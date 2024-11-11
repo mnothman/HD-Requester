@@ -217,6 +217,11 @@ $(document).ready(function () {
             modalContent
         );
 
+        // Add listener for Cancel button to close the modal
+        $(document).on('click', '#closeModalBtn', function () {
+            $('#Modal').css('display', 'none');
+        });
+
         // Hide the context menu
         $(".context-menu").hide();
     });
