@@ -16,7 +16,7 @@ class AdminLoginCookieTests(unittest.TestCase):
         chrome_options = Options()        
         # Use webdriver-manager to install and manage ChromeDriver
         cls.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-        cls.driver.get("http://localhost:5000/login")  # Replace with the actual login page URL
+        cls.driver.get("http://127.0.0.1:8000/login")  # Replace with the actual login page URL
 
     def setUp(self):
         # Clear cookies before each test to avoid issues with old cookies

@@ -19,7 +19,7 @@ class PartSearchSortTests(unittest.TestCase):
         cls.driver.implicitly_wait(10)
 
     def setUp(self):
-        self.driver.get("http://127.0.0.1:5000/") 
+        self.driver.get("http://127.0.0.1:8000/") 
     def test_search_functionality(self):
         print("Testing search functionality.")
         driver = self.driver

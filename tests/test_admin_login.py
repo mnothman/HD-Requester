@@ -20,7 +20,7 @@ class AdminLoginTests(unittest.TestCase):
         cls.driver.implicitly_wait(10)  # Wait for elements to appear
 
     def setUp(self):
-        self.driver.get("http://127.0.0.1:5000/")
+        self.driver.get("http://127.0.0.1:8000/")
 
     def assertMessage(self, expected_text):
         try:

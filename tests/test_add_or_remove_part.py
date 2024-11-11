@@ -26,7 +26,7 @@ class PartAddRemoveTests(unittest.TestCase):
         options.add_argument('--log-level=1') # supress info message in output
         cls.service = Service(executable_path="chromedriver.exe")
         cls.driver = webdriver.Chrome(service=cls.service, options=options)
-        cls.driver.get("http://127.0.0.1:5000/")
+        cls.driver.get("http://127.0.0.1:8000/")
 
 
     def close_alert(self, expected_alert_text):
