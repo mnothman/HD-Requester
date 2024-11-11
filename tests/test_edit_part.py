@@ -96,7 +96,7 @@ class EditPartTests(unittest.TestCase):
     def test01_edit_part_modal_close(self):
         print("\nTest 1: Close Modal Edit Part")
         
-        modal = self.driver.find_element(By.XPATH, "//*[contains(@id, 'editPartModal')]")
+        modal = self.driver.find_element(By.XPATH, "//*[contains(@id, 'Modal')]")
 
         display_style = modal.value_of_css_property("display")
         self.assertEqual(display_style, "none", "Modal should not be displayed")
