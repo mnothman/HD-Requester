@@ -727,6 +727,73 @@ def simulate_text_area_input(user_input):
         conn.close()
 
 
+@app.route('/get_utilization', methods=['GET'])
+def get_utilization():
+    month = request.args.get('month', type=int)
+    year = request.args.get('year', type=int)
+
+    # Check for complete parameters
+    if not month or not year:
+        return jsonify({'status': 'error', 'message': 'Month and year are required.'}), 400
+
+    # Set date range for query
+    first_day = datetime(year, month, 1)
+    last_day = datetime(year + (1 if month == 12 else 0), (month % 12) + 1, 1)
+
+    db = get_db()
+    query = '''
+    SELECT 
+        COUNT(CASE WHEN Part_status = 'In' THEN 1 END) AS checked_in,
+        COUNT(CASE WHEN Part_status = 'Out' THEN 1 END) AS checked_out
+    FROM Log
+    WHERE Date_time >= ? AND Date_time < ?
+    '''
+
+    try:
+        result = db.execute(query, (first_day, last_day)).fetchone()
+        utilization_data = {
+            'checked_in': result['checked_in'] or 0,
+            'checked_out': result['checked_out'] or 0
+        }
+
+        return jsonify({'status': 'success', 'data': utilization_data})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/get_technology', methods=['GET'])
+def get_technology():
+    month = request.args.get('month', type=int)
+    year = request.args.get('year', type=int)
+
+    # Check for complete parameters
+    if not month or not year:
+        return jsonify({'status': 'error', 'message': 'Month and year are required.'}), 400
+
+    # Set date range for query
+    first_day = datetime(year, month, 1)
+    last_day = datetime(year + (1 if month == 12 else 0), (month % 12) + 1, 1)
+
+    db = get_db()
+    query = '''
+    SELECT 
+        p.Type AS Technology, 
+        COUNT(*) AS count
+    FROM Log l
+    JOIN Part p ON l.Part_sn = p.Part_sn
+    WHERE l.Date_time >= ? AND l.Date_time < ?
+    GROUP BY p.Type
+    HAVING count > 0
+    '''
+
+    try:
+        results = db.execute(query, (first_day, last_day)).fetchall()
+        technology_data = {row['Technology']: row['count'] for row in results}
+
+        return jsonify({'status': 'success', 'data': technology_data})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 
 if __name__ == '__main__':
