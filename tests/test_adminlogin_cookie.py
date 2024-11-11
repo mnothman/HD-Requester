@@ -26,7 +26,7 @@ class AdminLoginCookieTests(unittest.TestCase):
         driver = self.driver
 
         # Step 1: Ensure the login page is loaded
-        driver.get("http://localhost:5000/login")
+        driver.get("http://127.0.0.1:8000/login")
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
 
         # Step 2: Fill in the login form
@@ -61,7 +61,7 @@ class AdminLoginCookieTests(unittest.TestCase):
         driver = self.driver
 
         # Step 1: Ensure the page is loaded before interacting
-        driver.get("http://localhost:5000/login")
+        driver.get("http://127.0.0.1:8000/login")
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
 
         # Step 2: Fill in the login form
@@ -96,7 +96,7 @@ class AdminLoginCookieTests(unittest.TestCase):
         driver.delete_all_cookies()
 
         # Step 2: Reload the login page
-        driver.get("http://localhost:5000/login")
+        driver.get("http://127.0.0.1:8000/login")
 
         # Step 3: Verify that there are no cookies pre-set
         cookies = driver.get_cookies()
@@ -110,7 +110,7 @@ class AdminLoginCookieTests(unittest.TestCase):
         driver = self.driver
 
         # Step 1: Log in (without Remember Me)
-        driver.get("http://localhost:5000/login")
+        driver.get("http://127.0.0.1:8000/login")
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
 
         username_input = driver.find_element(By.ID, "username")
@@ -123,7 +123,7 @@ class AdminLoginCookieTests(unittest.TestCase):
         login_button.click()
 
         # Step 2: Log out
-        driver.get("http://localhost:5000/logout")
+        driver.get("http://127.0.0.1:8000/logout")
 
         # Step 3: Check remaining cookies after logout
         cookies = driver.get_cookies()
@@ -136,7 +136,7 @@ class AdminLoginCookieTests(unittest.TestCase):
         driver = self.driver
 
         # Log in with "Remember Me"
-        driver.get("http://localhost:5000/login")
+        driver.get("http://127.0.0.1:8000/login")
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
         username_input = driver.find_element(By.ID, "username")
         password_input = driver.find_element(By.ID, "password")
@@ -162,12 +162,12 @@ class AdminLoginCookieTests(unittest.TestCase):
         driver = self.driver  # Ensure we use the reopened driver instance
 
         # Restore the cookies
-        driver.get("http://localhost:5000")  # Open any page to set cookies
+        driver.get("http://127.0.0.1:8000")  # Open any page to set cookies
         for cookie in cookies:
             driver.add_cookie(cookie)
 
         # Reload the login page and check if the "remember_me" cookie persists
-        driver.get("http://localhost:5000/login")
+        driver.get("http://127.0.0.1:8000/login")
         cookies = driver.get_cookies()
 
         remember_me_cookie = next((cookie for cookie in cookies if cookie['name'] == 'remember_me'), None)
@@ -177,7 +177,7 @@ class AdminLoginCookieTests(unittest.TestCase):
         driver = self.driver
 
         # Log in with "Remember Me"
-        driver.get("http://localhost:5000/login")
+        driver.get("http://127.0.0.1:8000/login")
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
         username_input = driver.find_element(By.ID, "username")
         password_input = driver.find_element(By.ID, "password")
@@ -194,8 +194,8 @@ class AdminLoginCookieTests(unittest.TestCase):
         WebDriverWait(driver, 10).until(EC.url_contains("/dashboard"))
 
         # Log out and check auto-fill behavior
-        driver.get("http://localhost:5000/logout")
-        driver.get("http://localhost:5000/login")
+        driver.get("http://127.0.0.1:8000/logout")
+        driver.get("http://127.0.0.1:8000/login")
 
         pre_filled_username = driver.find_element(By.ID, "username").get_attribute("value")
         self.assertEqual(pre_filled_username, "admin", "Username should be auto-filled after logging out with 'Remember Me'.")
@@ -204,7 +204,7 @@ class AdminLoginCookieTests(unittest.TestCase):
         driver = self.driver
 
         # Load login page
-        driver.get("http://localhost:5000/login")
+        driver.get("http://127.0.0.1:8000/login")
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
 
         # Enter invalid credentials
@@ -231,7 +231,7 @@ class AdminLoginCookieTests(unittest.TestCase):
         driver = self.driver
 
         # Log in with "Remember Me"
-        driver.get("http://localhost:5000/login")
+        driver.get("http://127.0.0.1:8000/login")
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
 
         # Fill in credentials and select "Remember Me"
@@ -258,7 +258,7 @@ class AdminLoginCookieTests(unittest.TestCase):
         })
 
         # Reload page and verify that the "remember_me" cookie is no longer present
-        driver.get("http://localhost:5000/login")
+        driver.get("http://127.0.0.1:8000/login")
         cookies = driver.get_cookies()
         remember_me_cookie = next((cookie for cookie in cookies if cookie['name'] == 'remember_me'), None)
         self.assertIsNone(remember_me_cookie, "The 'remember_me' cookie should be removed after expiry.")
