@@ -249,6 +249,11 @@ $(document).ready(function () {
             $('#Modal').css('display', 'none');
         });
 
+        // Add Cancel button functionality
+        $(document).on('click', '#closeModalBtn', function () {
+            $('#Modal').css('display', 'none');
+        });
+
         // Hide the context menu
         $(".context-menu").hide();
     });
