@@ -90,6 +90,17 @@ th {
   cursor: pointer;
 }
 
+#dashboard-title a,
+#dashboard-title a:visited{
+	color: rgb(255,255,255);
+	text-decoration: none;
+}
+
+#dashboard-title a:hover {
+	color:rgb(255, 255, 255);
+	text-decoration: none;
+}
+
 /* Alternating row colors same colors as homepage*/
 #partsTable .even{
 background-color: rgb(255, 255, 255);
