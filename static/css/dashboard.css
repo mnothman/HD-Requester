@@ -196,6 +196,72 @@ border: 2px solid #333;
 padding: 2px;
 }
 
+/* Search */
+#partsTable_filter {
+	position: relative;
+	top: -5px; /* fix alignment with other items in row */
+}
+
+#partsTable_filter input {
+	background-color: white;
+	width: 300px;
+	padding-left: 10px;
+	font-size: 16px;
+	border-radius: 30px;
+}
+
+#partsTable_filter input:hover {
+	border: 1px solid #7babe2;
+}
+
+#partsTable_filter button {
+	background-color: #FFF;
+	color: black;
+	outline: none;
+	padding: 0px 10px;
+	border-radius: 20px;
+	border: solid 0px #FFF;
+	cursor: pointer;
+}
+
+#partsTable_filter::after {
+	content: '\f002';
+	/* FontAwesome search icon unicode */
+	font-family: 'Font Awesome 5 Pro';
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	pointer-events: none;
+	/* Makes the icon non-interactive */
+	color: #ccc;
+	/* Icon color, can be changed as needed */
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	display: inline-block;
+	font-style: normal;
+	font-variant: normal;
+	text-rendering: auto;
+	line-height: 1;
+}
+
+#partsTable_filter label {
+	margin-bottom: 0px !important; /* override for search icon alignment */
+}
+
+#clearButton {
+	display: none;
+	position: absolute;
+	right: 4px;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 1000;
+	font-size: 1.3em;
+}
+
+
+/* end Search */
+
 /* Breakpoints */
 @media (max-width: 1200px) {
 .inventory-levels-container {
