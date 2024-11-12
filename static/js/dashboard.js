@@ -162,10 +162,10 @@ function loadInventory() {
                 // Set up click event to expand/collapse the box-header
                 boxHeader.on('click', function () {
                     if (boxHeader.height() === 24) {
-                        boxHeader.css('height', '170px').css('z-index', '2');
+                        boxHeader.css('height', 'auto').css('z-index', '2');
                         capacitiesList.toggleClass('show');
                     } else {
-                        boxHeader.css('height', '24px');
+                        boxHeader.css('height', '24px').css('z-index', '1');
                         capacitiesList.toggleClass('show');
 
                         // Reset the headerTitle to the originalHeaderTitle

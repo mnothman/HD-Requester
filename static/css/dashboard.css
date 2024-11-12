@@ -137,7 +137,8 @@ box-sizing: content-box;
 #inventory-levels .box h3 {
 margin: 0;
 font-size: 1em;
-padding: 3px 0px 0px;
+font-weight:normal;
+padding: 3px 0px 15px;
 }
 
 #inventory-levels .box-header {
@@ -320,11 +321,12 @@ font-size: 20;
 }
 
 .monthly-trends-menu ul li:hover {
-background-color:  rgb(26, 107, 30);
+background-color:  rgb(223, 223, 223)
 }
 
 .monthly-trends-menu ul li.active {
 background-color:  rgb(26, 107, 30);
+color:rgb(255, 255, 255);
 }
 
 .monthly-trends-graph-column {
