@@ -516,7 +516,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
         }
         // Proceed with parsing parts, size, and serial numbers as usual
         var i = 2;
-        while (lines[i] && !["Laptop", "Desktop", "Server"].includes(lines[i].trim())) {
+        while (lines[i] && !["Laptop", "Desktop", "Server", "AiO"].includes(lines[i].trim())) {
             var details = lines[i].trim().split(' ');
             var part = {};
     

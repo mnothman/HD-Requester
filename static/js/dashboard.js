@@ -218,6 +218,12 @@ function updateDashboard(data) {
 
     const tableBody = document.querySelector('#partsTable tbody');
     const newRow = document.createElement('tr');
+
+
+    if (data.Technology === "AiO" && data.Capacity === "RAM") {
+        data.Size = "Laptop";  // Set size to Laptop if it's AiO and RAM
+    }
+
     newRow.innerHTML = `
     <td>${data.timestamp}</td>
     <td>${data.action}</td>
