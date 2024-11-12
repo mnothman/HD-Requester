@@ -168,7 +168,7 @@ $(document).ready(function () {
     $(".context-menu .edit").on("click", function () {
         const partData = $(".context-menu").data('partData');
 
-        // Generate modal content dynamically to match the design of other modals
+        // Generate modal content dynamically to match the design of other modals based on selected row data. 
         const modalContent = `
             <form id="editPartForm">
                 <div class="form-group">
