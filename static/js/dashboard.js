@@ -219,10 +219,23 @@ function updateDashboard(data) {
     const tableBody = document.querySelector('#partsTable tbody');
     const newRow = document.createElement('tr');
 
-
     if (data.Technology === "AiO" && data.Capacity === "RAM") {
-        data.Size = "Laptop";  // Set size to Laptop if it's AiO and RAM
+        data.Size = "Laptop";  
+    } else {
+        if (data.Size === "AiO") {
+            data.Technology = "AiO";
+            data.Size = "";
+        }
     }
+
+    if (!data.Technology) {
+        data.Technology = "--";
+    }
+
+    if (!data.Size) {
+        data.Size = "--";
+    }
+
 
     newRow.innerHTML = `
     <td>${data.timestamp}</td>
