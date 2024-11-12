@@ -467,6 +467,126 @@ def get_trends():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+# Function to get data regarding upgrades
+@app.route('/get_upgrades', methods=['GET'])
+def get_upgrades():
+    month = request.args.get('month', type=int)
+    year = request.args.get('year', type=int)
+
+    if not month or not year:
+        return jsonify({'status': 'error', 'message': 'Month and year are required.'}), 400
+
+    first_day = datetime(year, month, 1)
+    last_day = datetime(year + (1 if month == 12 else 0), (month % 12) + 1, 1)
+
+    db = get_db()
+    query = '''
+    SELECT 
+        DATE(Date_time) AS date, 
+        Unit_sn,
+        Type,
+        Capacity,
+        COUNT(CASE WHEN Part_status = 'In' THEN 1 END) AS check_ins,
+        COUNT(CASE WHEN Part_status = 'Out' THEN 1 END) AS check_outs
+    FROM Log l
+    JOIN Part p ON l.Part_sn = p.Part_sn
+    WHERE Date_time >= ? AND Date_time < ?
+    GROUP BY date, Unit_sn, Type, Capacity
+    HAVING COUNT(DISTINCT Capacity) > 1  
+        AND (COUNT(CASE WHEN Part_status = 'In' THEN 1 END) > 0 
+            OR COUNT(CASE WHEN Part_status = 'Out' THEN 1 END) > 0)
+    ORDER BY date, Unit_sn, Type, Capacity
+    '''
+
+    try:
+        results = db.execute(query, (first_day, last_day)).fetchall()
+        upgrades = {}
+
+        for row in results:
+            date = row['date']
+            unit_sn = row['Unit_sn']
+            part_type = row['Type']
+            capacity = row['Capacity']
+
+            if date not in upgrades:
+                upgrades[date] = {}
+
+            if unit_sn not in upgrades[date]:
+                upgrades[date][unit_sn] = {}
+
+            if part_type not in upgrades[date][unit_sn]:
+                upgrades[date][unit_sn][part_type] = {}
+
+            if capacity in upgrades[date][unit_sn][part_type]:
+                upgrades[date][unit_sn][part_type][capacity]['check_ins'] += row['check_ins']
+                upgrades[date][unit_sn][part_type][capacity]['check_outs'] += row['check_outs']
+            else:
+                upgrades[date][unit_sn][part_type][capacity] = {
+                    'check_ins': row['check_ins'],
+                    'check_outs': row['check_outs']
+                }
+
+        return jsonify({'status': 'success', 'data': upgrades})
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+# Function to get data regarding repeated upgrades
+@app.route('/get_repeated', methods=['GET'])
+def get_repeated():
+    month = request.args.get('month', type=int)
+    year = request.args.get('year', type=int)
+
+    if not month or not year:
+        return jsonify({'status': 'error', 'message': 'Month and year are required.'}), 400
+
+    start_date = datetime(year, month + 1, 1)
+    end_date = datetime(year - 1, month, 1)
+    
+    db = get_db()
+    check_in_query = '''
+        SELECT Unit_sn, MAX(Date_time) AS last_request_date, COUNT(*) AS check_count
+        FROM Log
+        WHERE Date_time >= ? AND Date_time < ? AND Part_status = 'In'
+        GROUP BY Unit_sn
+        HAVING COUNT(*) > 1;
+        '''
+    check_out_query = '''
+        SELECT Unit_sn, MAX(Date_time) AS last_request_date, COUNT(*) AS check_count
+        FROM Log
+        WHERE Date_time >= ? AND Date_time < ? AND Part_status = 'Out'
+        GROUP BY Unit_sn
+        HAVING COUNT(*) > 1;
+        '''
+    
+    try:
+        check_in_results = db.execute(check_in_query, (end_date, start_date)).fetchall()
+        repeated_check_ins = [
+            {
+                "Unit_sn": row[0],
+                "last_request_date": row[1],
+                "check_count": row[2],
+                "status": "In"
+            } for row in check_in_results
+        ]
+
+        check_out_results = db.execute(check_out_query, (end_date, start_date)).fetchall()
+        repeated_check_outs = [
+            {
+                "Unit_sn": row[0],
+                "last_request_date": row[1],
+                "check_count": row[2],
+                "status": "Out"
+            } for row in check_out_results
+        ]
+
+        repeated_requests = repeated_check_ins + repeated_check_outs
+
+        return jsonify({'status': 'success', 'data': repeated_requests})
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 @app.route('/add_part', methods=['POST'])
 def add_part():
