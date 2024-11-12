@@ -16,9 +16,41 @@ const colors = [
 
 $(document).ready(function () {
     loadInventory();
-    new DataTable('#partsTable', {
+
+    //new DataTable('#partsTable', {
+    //    order: [0, 'dec']
+    //});
+    //Removed extra DataTable setup to avoid repeating and make sure the partsTable works properly. 
+
+    const partsTable = new DataTable('#partsTable', {
         order: [0, 'dec']
     });
+
+    // Setup to add ID for the live search bar
+    $('#partsTable_filter input').attr('id', 'searchInput');
+    // Setup clear button to search bar
+    $('#partsTable_filter').append('<button id="clearButton">&times;</button>');
+
+    // Show/hide clear button functionality
+    $('#searchInput').on('input', function () {
+        var searchTerm = $(this).val().toLowerCase();
+
+        // Show clear button if more than one character is entered
+        if (searchTerm.length > 0) {
+            $('#clearButton').show();
+            $('#searchInput').addClass('inputFilled');
+        } else {
+            $('#clearButton').hide();
+            $('#searchInput').removeClass('inputFilled');
+        }
+    });
+
+    // Clear search bar when clear icon is clicked
+    $('#clearButton').on('click', function () {
+        $('#searchInput').val('');
+        partsTable.search('').draw();
+        $(this).hide(); // Hide clear button after clearing the input
+    });    
     
     // Sidebar toggle functionality
     const hamburgerBtn = $('#hamburgerBtn');
