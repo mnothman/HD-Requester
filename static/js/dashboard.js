@@ -281,33 +281,53 @@ function checkPartStatus(data) {
 
 $(document).ready(function () {
     const monthsList = $('#monthsList li');
+    const trendButtons = $('#trendButtons .btn');
     let trendsChart;
 
     // Initialize chart
     const ctx = document.getElementById('trendsChart').getContext('2d');
-    function initChart(labels, datasets) {
+
+    // Function to initialize or update the chart
+    function initChart(labels, datasets, title, chartType = 'line', xAxisLabel = 'Date') {
         if (trendsChart) {
             trendsChart.destroy();  
         }
         trendsChart = new Chart(ctx, {
-            type: 'line',  
+            type: chartType,  // Use the passed chartType (default is 'line')
             data: {
-                labels: labels,  // Dates
-                datasets: datasets  // Array of datasets: check-ins, check-outs)
+                labels: labels,  // Dates or Unit SNs
+                datasets: datasets  // Array of datasets
             },
             options: {
                 responsive: true,
                 scales: {
                     x: {
-                        title: { display: true, text: 'Date' }
+                        title: { display: true, text: xAxisLabel }  // Dynamic x-axis title
                     },
                     y: {
                         title: { display: true, text: 'Transactions' },
                         beginAtZero: true
                     }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            // Default callback behavior for tooltips
+                            title: function(tooltipItems) {
+                                const unitSN = tooltipItems[0].label;
+                                return unitSN;
+                            },
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.raw} transactions`;
+                            }
+                        }
+                    }
                 }
             }
         });
+
+        // Update chart title
+        $('#parts-by-date-title').text(title);
     }
 
     // Handle month click
@@ -315,12 +335,14 @@ $(document).ready(function () {
         monthsList.removeClass('active'); // Remove active class from all months
         $(this).addClass('active');  // Add active class to the clicked month
         
+        // Remove active class from all trend buttons
+        trendButtons.removeClass('active');
+
         const month = $(this).data('month');
         const year = new Date().getFullYear(); 
         
         // Fetch trends data
         $.getJSON(`/get_trends?month=${month}&year=${year}`, function (response) {
-            console.log(response);  
             if (response.status === 'success') {
                 const trends = response.data;
                 
@@ -360,13 +382,153 @@ $(document).ready(function () {
                         borderWidth: 1
                     }
                 ];
-                
-                initChart(dates, datasets);
+
+                // Line chart for trends
+                initChart(dates, datasets, 'Parts by Date');
             } else {
                 console.error('Error fetching trends:', response.message);
             }
         });
     });
 
+    // Handle button click - make the clicked button active and store it
+    trendButtons.on('click', function () {
+        trendButtons.removeClass('active');  // Remove 'active' class from all buttons
+        $(this).addClass('active');  // Add 'active' class to clicked button
+
+        const buttonId = $(this).attr('id');
+        const month = $('#monthsList .active').data('month');
+        const year = new Date().getFullYear();
+
+        // Fetch data based on the selected button
+        if (buttonId === 'utilizationBtn') {
+            $.getJSON(`/get_utilization?month=${month}&year=${year}`, function (response) {
+                if (response.status === 'success') {
+                    const utilization = response.data;
+                    const dates = [month + '-' + year]; // Only one entry for month-year
+                    const checkIns = [utilization.checked_in];
+                    const checkOuts = [utilization.checked_out];
+
+                    const datasets = [
+                        {
+                            label: 'Checked In',
+                            data: checkIns,
+                            backgroundColor: 'rgba(46, 204, 113, 0.2)',  // Green color for "Checked In"
+                            borderColor: 'rgba(46, 204, 113, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Checked Out',
+                            data: checkOuts,
+                            backgroundColor: 'rgba(231, 76, 60, 0.2)',  // Red color for "Checked Out"
+                            borderColor: 'rgba(231, 76, 60, 1)',
+                            borderWidth: 1
+                        }
+                    ];
+
+                    // Initialize the chart as a bar chart for Utilization
+                    initChart(dates, datasets, 'Utilization', 'bar');
+                }
+            });
+        } else if (buttonId === 'technologyBtn') {
+            $.getJSON(`/get_technology?month=${month}&year=${year}`, function (response) {
+                if (response.status === 'success') {
+                    const technology = response.data;
+
+                    // Extract the technology categories (keys) and their corresponding counts (values)
+                    const techCategories = Object.keys(technology);  // Technology types: Apple, HD, etc.
+                    const techCounts = Object.values(technology);    // Transaction counts for each type
+
+                    const datasets = [{
+                        label: 'Technology Transactions',
+                        data: techCounts,
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',  // Blue color for technology data
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1
+                    }];
+
+                    // Initialize the chart as a bar chart, using technology categories for the x-axis
+                    initChart(techCategories, datasets, 'Technology Transactions', 'bar', 'Technology Type');
+                }
+            });
+        } else if (buttonId === 'upgradeBtn') {
+            $.getJSON(`/get_upgrades?month=${month}&year=${year}`, function (response) {
+                if (response.status === 'success') {
+                    const upgrades = response.data;
+                    const dates = Object.keys(upgrades);
+                    const checkIns = dates.map(date => upgrades[date].check_ins);
+                    const checkOuts = dates.map(date => upgrades[date].check_outs);
+
+                    const datasets = [
+                        {
+                            label: 'Check-ins',
+                            data: checkIns,
+                            backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                            borderColor: 'rgba(46, 204, 113, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Check-outs',
+                            data: checkOuts,
+                            backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                            borderColor: 'rgba(231, 76, 60, 1)',
+                            borderWidth: 1
+                        }
+                    ];
+
+                    // Initialize as a line chart for upgrade transactions
+                    initChart(dates, datasets, 'Upgrades');
+                }
+            });
+        } else if (buttonId === 'repeatBtn') {
+            $.getJSON(`/get_repeated?month=${month}&year=${year}`, function (response) {
+                if (response.status === 'success') {
+                    const repeated = response.data;
+
+                    // Extract Unit SN, check count, status, and last request date
+                    const unitSNs = repeated.map(item => item.Unit_sn);
+                    const checkIns = repeated.filter(item => item.status === 'In').map(item => item.check_count);  // Filter check-ins
+                    const checkOuts = repeated.filter(item => item.status === 'Out').map(item => item.check_count);  // Filter check-outs
+                    const lastRequestDates = repeated.map(item => item.last_request_date);  // Last requested date
+
+                    // Define datasets for check-ins and check-outs
+                    const datasets = [
+                        {
+                            label: 'Repeated Check-ins',
+                            data: checkIns,
+                            backgroundColor: 'rgba(46, 204, 113, 0.2)',  // Green for check-ins
+                            borderColor: 'rgba(46, 204, 113, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Repeated Check-outs',
+                            data: checkOuts,
+                            backgroundColor: 'rgba(231, 76, 60, 0.2)',  // Red for check-outs
+                            borderColor: 'rgba(231, 76, 60, 1)',
+                            borderWidth: 1
+                        }
+                    ];
+
+                    // Initialize the chart as a stacked bar chart for Repeated Transactions
+                    initChart(unitSNs, datasets, 'Repeated Transactions by Unit SN', 'bar', 'Unit SN');
+                    
+                    // Tooltip customization for repeated transactions
+                    trendsChart.options.plugins.tooltip.callbacks = {
+                        title: function(tooltipItems) {
+                            const unitSN = tooltipItems[0].label;
+                            const status = tooltipItems[0].datasetIndex === 0 ? 'Checked In' : 'Checked Out';
+                            const date = lastRequestDates[unitSNs.indexOf(unitSN)]; // Get last request date for the current Unit SN
+                            return `${status}: ${unitSN} | Last Request Date: ${date}`;
+                        },
+                        label: function(tooltipItem) {
+                            return `Count: ${tooltipItem.raw}`;
+                        }
+                    };
+                }
+            });
+        }
+    });
+
+    // Trigger click on first month to load initial data
     monthsList.first().trigger('click');
 });

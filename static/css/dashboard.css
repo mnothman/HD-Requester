@@ -208,6 +208,48 @@ border: 2px solid #333;
 padding: 2px;
 }
 
+/* TRENDS BUTTONS */
+#trendButtons {
+    display: flex;
+    justify-content: space-evenly;  
+    margin-top: 20px;
+}
+
+
+#trendButtons .btn {
+    background-color: rgb(26, 107, 30);  /* Unselected green */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+/* Button hover effect (slightly darker green) */
+#trendButtons .btn:hover {
+    background-color: rgb(22, 95, 27);  /* Darker green on hover */
+}
+
+/* Button when selected (even darker green) */
+#trendButtons .btn:focus, 
+#trendButtons .btn.active {
+    background-color: rgb(17, 83, 23);  /* Darker green when selected */
+    outline: none;  
+    box-shadow: 0 0 8px 4px rgba(255, 255, 255, 0.6);  /* White glow effect */
+}
+
+
+#trendButtons .btn:focus {
+    outline: none;
+}
+
+/* Space between the buttons */
+#trendButtons .btn:not(:last-child) {
+    margin-right: 15px;  
+}
+
+
 /* Search */
 #partsTable_filter {
 	position: relative;
