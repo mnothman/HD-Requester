@@ -516,7 +516,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
         }
         // Proceed with parsing parts, size, and serial numbers as usual
         var i = 2;
-        while (lines[i] && !["Laptop", "Desktop", "Server", "AiO"].includes(lines[i].trim())) {
+        while (lines[i] && !["Laptop", "Desktop", "Server"].includes(lines[i].trim())) {
             var details = lines[i].trim().split(' ');
             var part = {};
     
@@ -564,30 +564,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
         return dataObject;
     }
     // end parseTextInput
-
-    function showLocationModal(partData) {
-        const content = `
-            <p><strong>Enter the location for the part:</strong></p>
-            <form id="locationForm">
-                <label for="locationInput">Location:</label>
-                <input type="text" id="locationInput" name="location" style="width: 100%;" required>
-                <button type="button" id="locationSubmitBtn" class="btn btn-primary mb-2">OK</button>
-            </form>
-        `;
-        showModal({ title: 'Set Part Location' }, content);
-
-        // Handle form submission
-        $('#locationSubmitBtn').click(function () {
-            const location = $('#locationInput').val();
-            if (location) {
-                partData.Location = location; // Set the location in part data
-                checkInPart(partData); // Proceed to check in the part
-                $('#Modal').css('display', 'none'); // Close modal
-            } else {
-                alert('Please enter a location');
-            }
-        });
-    }
 
     function checkInPart(dataObject) {
         console.log("Data object received:", dataObject);
@@ -649,81 +625,103 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 contentType: 'application/json',
                 data: JSON.stringify(partData),
                 success: function (response) {
-                    if (response.exists) {
-                        // Process success response
-                        const partDetails = `
-                            <div style="display: flex;">
-                                <div style="flex: 1; padding: 8px;">${partData.Type}</div>
-                                <div style="flex: 1; padding: 8px;">${partData.Capacity}</div>
-                                <div style="flex: 1; padding: 8px;">${partData.Size}</div>
-                                <div style="flex: 1; padding: 8px;">${response.part?.Brand || 'N/A'}</div>
-                                <div style="flex: 1; padding: 8px;">${response.part?.Model || 'N/A'}</div>
-                                <div style="flex: 1; padding: 8px;"><input type="text" id="locationInput" name="location" style="width: 100%;" placeholder="Enter location"></div>
-                                <div style="flex: 1; padding: 8px;">${partSn}</div>
-                            </div>
-                        `;
-                        const modalContent = `
-                            <div class="modal-table-wrapper">
-                                <div class="modal-table-header">
-                                    <div style="flex: 1; padding: 8px;">Type</div>
-                                    <div style="flex: 1; padding: 8px;">Capacity</div>
-                                    <div style="flex: 1; padding: 8px;">Size</div>
-                                    <div style="flex: 1; padding: 8px;">Brand</div>
-                                    <div style="flex: 1; padding: 8px;">Model</div>
-                                    <div style="flex: 1; padding: 8px;">Location</div>
-                                    <div style="flex: 1; padding: 8px;">Part SN</div>
-                                </div>
-                                ${partDetails}
-                            </div>
-                            <button type="button" id="locationSubmitBtn" class="btn btn-primary mb-2">OK</button>
-                        `;
-                        showModal({ title: 'Enter Location for Check-in' }, modalContent);
-    
-                        $('#locationSubmitBtn').click(function () {
-                            const location = $('#locationInput').val();
-                            if (location) {
-                                const partUpdateData = {
-                                    Part_sn: partSn,
-                                    TID: dataObject.tid,
-                                    Unit_sn: unitSn,
-                                    Part_status: 'In',
-                                    Location: location,
-                                    Note: dataObject.note
-                                };
-    
-                                $('#locationSubmitBtn').prop('disabled', true);
-    
-                                $.ajax({
-                                    url: '/update_part_status',
-                                    type: 'POST',
-                                    contentType: 'application/json',
-                                    data: JSON.stringify(partUpdateData),
-                                    success: function (updateResponse) {
-                                        if (updateResponse.status === 'success') {
-                                            partsTable.ajax.reload(null, false);
-                                            $('#Modal').css('display', 'none');
-                                        } else {
-                                            alert("Failed to check in the part: " + updateResponse.message);
-                                        }
-                                    },
-                                    error: function (err) {
-                                        alert('Failed to update part status: ' + err.responseText);
-                                    }
-                                });
-                            } else {
-                                alert('Please enter a location');
-                            }
-                        });
-    
-                    } else {
+                    if (!response.exists){
                         handleCheckInErrors(response, partData);
+                        return;
                     }
-                },
-                error: function (err) {
-                    alert('Error checking part in inventory: ' + err.responseText);
                 }
             });
         });
+
+        let partDetails = '';
+
+        // Loop through parts and process each individually
+        dataObject.parts.forEach((part, index) => {
+            const partSn = dataObject.serial_numbers[index];
+            // Process success response
+            // Add part details to the modal content
+            partDetails += `
+            <div style="display: flex;">
+                <div style="flex: 1; padding: 8px;">${part.type}</div>
+                <div style="flex: 1; padding: 8px;">${part.capacity}</div>
+                <div style="flex: 1; padding: 8px;">${dataObject.size}</div>
+                <div style="flex: 1; padding: 8px;">${part.brand || 'N/A'}</div>
+                <div style="flex: 1; padding: 8px;">${part.model || 'N/A'}</div>
+                <div style="flex: 1; padding: 8px;"><input type="text" id="locationInput${index}" name="location" style="width: 100%;" placeholder="Enter location for part ${index + 1}"></div>
+                <div style="flex: 1; padding: 8px;">${partSn}</div>
+            </div>
+            `;
+        })
+        const modalContent = `
+            <div class="modal-table-wrapper">
+                <div class="modal-table-header">
+                    <div style="flex: 1; padding: 8px;">Type</div>
+                    <div style="flex: 1; padding: 8px;">Capacity</div>
+                    <div style="flex: 1; padding: 8px;">Size</div>
+                    <div style="flex: 1; padding: 8px;">Brand</div>
+                    <div style="flex: 1; padding: 8px;">Model</div>
+                    <div style="flex: 1; padding: 8px;">Location</div>
+                    <div style="flex: 1; padding: 8px;">Part SN</div>
+                </div>
+                ${partDetails}
+            </div>
+            <button type="button" id="locationSubmitBtn" class="btn btn-primary mb-2">OK</button>
+        `;
+        showModal({ title: 'Enter Location for Check-in' }, modalContent);
+
+        $('#locationSubmitBtn').click(function () {
+            let allLocationsFilled = true;
+            const locations = [];
+
+            dataObject.parts.forEach((part, index) => {
+                const location = $(`#locationInput${index}`).val();
+                if (location) {
+                    locations.push(location);
+                } else {
+                    allLocationsFilled = false;
+                }
+            });
+
+            if (allLocationsFilled) {
+                dataObject.parts.forEach((part, index) => {
+                    const partSn = dataObject.serial_numbers[index];
+    
+                    // Prepare data to send to the server
+                    const partData = {
+                        TID: dataObject.tid,
+                        Note: 'New part added to inventory',
+                        Part_sn: partSn,
+                        Type: part.type,
+                        Capacity: part.capacity,
+                        Size: dataObject.size,
+                        Part_status: 'In',
+                        Unit_sn: unitSn,
+                        Location: locations[index],
+                        Note: dataObject.note
+                    };
+                    $.ajax({
+                        url: '/update_part_status',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(partData),
+                        success: function (updateResponse) {
+                            if (updateResponse.status === 'success') {
+                                partsTable.ajax.reload(null, false);
+                                $('#Modal').css('display', 'none');
+                            } else {
+                                alert("Failed to check in the part: " + updateResponse.message);
+                            }
+                        },
+                        error: function (err) {
+                            alert('Failed to update part status: ' + err.responseText);
+                        }
+                    });
+                });
+                
+            } else {
+                alert('Please enter a location');
+            }
+        }); 
     }
     
     // Function to handle edge case errors during check-in
@@ -876,19 +874,21 @@ function handleCheckInErrors(response, partData) {
 }
 
 function checkOutPart(dataObject) {
+    const unitSn = dataObject.unit_sn;
+
+    // Validate if Unit Serial Number is missing
+    if (!unitSn || unitSn.trim() === '') {
+        const content = `
+            <p><strong>Unit serial number is missing.</strong></p>
+            <p>Unit Serial Number is missing or invalid.\nPlease provide a valid Unit Serial Number to proceed.</p>
+        `;
+        showModal({ title: 'Check-out Error: Missing Unit serial number' }, content);
+        return;
+    }
+
+    // Loop through parts and process each individually
     dataObject.parts.forEach((part, index) => {
         const partSn = dataObject.serial_numbers[index];
-        const unitSn = dataObject.unit_sn;
-
-        // Validate if Unit Serial Number is missing
-        if (!unitSn || unitSn.trim() === '') {
-            const content = `
-                <p><strong>Unit serial number is missing.</strong></p>
-                <p>Unit Serial Number is missing or invalid.\nPlease provide a valid Unit Serial Number to proceed.</p>
-            `;
-            showModal({ title: 'Check-out Error: Missing Unit serial number' }, content);
-            return;
-        }
 
         // Edge Case: Check for missing Capacity
         if (!part.capacity || part.capacity.trim() === '') {
@@ -911,8 +911,8 @@ function checkOutPart(dataObject) {
         }
 
         // Prepare the data to be sent to the server including Type and Capacity
-        const partData = {
-            Part_sn: partSn,
+        let partData = {
+            Part_sn: dataObject.serial_numbers[index],
             Type: part.type,
             Capacity: part.capacity,
             Size: dataObject.size,
@@ -928,38 +928,41 @@ function checkOutPart(dataObject) {
             contentType: 'application/json',
             data: JSON.stringify(partData),
             success: function (response) {
-                if (response.exists) {
-                    // If part exists and matches type and capacity, update its status to 'Out'
-                    $.ajax({
-                        url: '/update_part_status',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({
-                            Part_sn: partSn,
-                            TID: dataObject.tid,
-                            Unit_sn: unitSn,
-                            Part_status: 'Out',
-                            Note: dataObject.note
-                        }),
-                        success: function (updateResponse) {
-                            partsTable.ajax.reload(null, false);
-                        },
-                        error: function (err) {
-                            console.error("Error updating part status: ", err);
-                        }
-                    });
-                } else {
-                    handleCheckOutErrors(response, partSn, partData);
+                if (!response.exists) {
+                    handleCheckOutErrors(response, dataObject.serial_numbers[index], partData);
+                    throw new Error("Invalid value");  // Exit the function and throw an error
                 }
             },
             error: function (err) {
                 console.error("Error checking part out inventory: ", err);
                 alert('Error checking part out inventory: ' + err.responseText);
+                return;
             }
+        })
+        dataObject.parts.forEach((part, index) => {
+            // If part exists and matches type and capacity, update its status to 'Out'
+            const partSn = dataObject.serial_numbers[index];
+            $.ajax({
+                url: '/update_part_status',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    Part_sn: partSn,
+                    TID: dataObject.tid,
+                    Unit_sn: unitSn,
+                    Part_status: 'Out',
+                    Note: dataObject.note
+                }),
+                success: function (updateResponse) {
+                    partsTable.ajax.reload(null, false);
+                },
+                error: function (err) {
+                    console.error("Error updating part status: ", err);
+                }
+            });
         });
     });
 }
-
     
     // New function to handle edge case errors during check-out
     function handleCheckOutErrors(response, partSn, partData) {
