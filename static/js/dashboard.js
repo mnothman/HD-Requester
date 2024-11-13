@@ -295,8 +295,8 @@ $(document).ready(function () {
         trendsChart = new Chart(ctx, {
             type: chartType,  // Use the passed chartType (default is 'line')
             data: {
-                labels: labels,  // Dates
-                datasets: datasets  // Array of datasets: check-ins, check-outs)
+                labels: labels,  // Dates or Unit SNs
+                datasets: datasets  // Array of datasets
             },
             options: {
                 responsive: true,
@@ -307,6 +307,20 @@ $(document).ready(function () {
                     y: {
                         title: { display: true, text: 'Transactions' },
                         beginAtZero: true
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            // Default callback behavior for tooltips
+                            title: function(tooltipItems) {
+                                const unitSN = tooltipItems[0].label;
+                                return unitSN;
+                            },
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.raw} transactions`;
+                            }
+                        }
                     }
                 }
             }
@@ -413,7 +427,7 @@ $(document).ready(function () {
                     ];
 
                     // Initialize the chart as a bar chart for Utilization
-                    initChart(dates, datasets, 'Utilization Transactions', 'bar');
+                    initChart(dates, datasets, 'Utilization', 'bar');
                 }
             });
         } else if (buttonId === 'technologyBtn') {
@@ -463,26 +477,53 @@ $(document).ready(function () {
                     ];
 
                     // Initialize as a line chart for upgrade transactions
-                    initChart(dates, datasets, 'Upgrade Transactions');
+                    initChart(dates, datasets, 'Upgrades');
                 }
             });
         } else if (buttonId === 'repeatBtn') {
             $.getJSON(`/get_repeated?month=${month}&year=${year}`, function (response) {
                 if (response.status === 'success') {
                     const repeated = response.data;
-                    const dates = repeated.map(item => item.last_request_date);
-                    const counts = repeated.map(item => item.check_count);
 
-                    const datasets = [{
-                        label: 'Repeated Requests',
-                        data: counts,
-                        backgroundColor: 'rgba(241, 196, 15, 0.2)',
-                        borderColor: 'rgba(241, 196, 15, 1)',
-                        borderWidth: 1
-                    }];
+                    // Extract Unit SN, check count, status, and last request date
+                    const unitSNs = repeated.map(item => item.Unit_sn);
+                    const checkIns = repeated.filter(item => item.status === 'In').map(item => item.check_count);  // Filter check-ins
+                    const checkOuts = repeated.filter(item => item.status === 'Out').map(item => item.check_count);  // Filter check-outs
+                    const lastRequestDates = repeated.map(item => item.last_request_date);  // Last requested date
 
-                    // Initialize as a line chart for repeated requests
-                    initChart(dates, datasets, 'Repeated Transactions');
+                    // Define datasets for check-ins and check-outs
+                    const datasets = [
+                        {
+                            label: 'Repeated Check-ins',
+                            data: checkIns,
+                            backgroundColor: 'rgba(46, 204, 113, 0.2)',  // Green for check-ins
+                            borderColor: 'rgba(46, 204, 113, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Repeated Check-outs',
+                            data: checkOuts,
+                            backgroundColor: 'rgba(231, 76, 60, 0.2)',  // Red for check-outs
+                            borderColor: 'rgba(231, 76, 60, 1)',
+                            borderWidth: 1
+                        }
+                    ];
+
+                    // Initialize the chart as a stacked bar chart for Repeated Transactions
+                    initChart(unitSNs, datasets, 'Repeated Transactions by Unit SN', 'bar', 'Unit SN');
+                    
+                    // Tooltip customization for repeated transactions
+                    trendsChart.options.plugins.tooltip.callbacks = {
+                        title: function(tooltipItems) {
+                            const unitSN = tooltipItems[0].label;
+                            const status = tooltipItems[0].datasetIndex === 0 ? 'Checked In' : 'Checked Out';
+                            const date = lastRequestDates[unitSNs.indexOf(unitSN)]; // Get last request date for the current Unit SN
+                            return `${status}: ${unitSN} | Last Request Date: ${date}`;
+                        },
+                        label: function(tooltipItem) {
+                            return `Count: ${tooltipItem.raw}`;
+                        }
+                    };
                 }
             });
         }
