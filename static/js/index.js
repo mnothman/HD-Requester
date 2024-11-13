@@ -1001,7 +1001,6 @@ function checkOutPart(dataObject) {
                         ${speedField}
                         <div style="flex: 1; padding: 8px;">Brand</div>
                         <div style="flex: 1; padding: 8px;">Model</div>
-                        <div style="flex: 1; padding: 8px;">Location</div>
                     </div>
                     <div style="display: flex;">
                         <div style="flex: 1; padding: 8px;">${response.part.Type}</div>
@@ -1010,10 +1009,11 @@ function checkOutPart(dataObject) {
                         ${speedValue}
                         <div style="flex: 1; padding: 8px;">${response.part.Brand}</div>
                         <div style="flex: 1; padding: 8px;">${response.part.Model}</div>
-                        <div style="flex: 1; padding: 8px;">${response.part.Location}</div>
+                        
                     </div>
                 </div>
             `;
+            //<div style="flex: 1; padding: 8px;">${response.part.Location}</div>
             showModal({ title: 'Check-out Error: Already checked-out.' }, content);
         } else if (response.error === 'not_in_inventory') {
             let speedField = '';  // Speed field isn't needed for HD or SSD
