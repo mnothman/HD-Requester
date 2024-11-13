@@ -394,6 +394,24 @@ def insert_part(part_data):
         part_status = part_data['Part_status']  # update the part status given
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         note = part_data['Note']
+
+        # technology = part_data['Size']
+
+        if part_data['Type'] == "PC4" and "GB" in part_data['Capacity']:
+            # If it's RAM and AiO, set Size to Laptop and Technology to AiO
+            if part_data['Size'] == "AiO":
+                technology = "AiO"
+                size = "Laptop"  # Set size to Laptop for AiO RAM
+            else:
+                technology = "--"  # Default if no AiO
+                size = part_data['Size']  # If it's not AiO, use the given size
+        else:
+            # Default case if it's not RAM or AiO, use provided size and technology
+            technology = part_data['Technology'] if 'Technology' in part_data else "--"
+            size = part_data['Size'] if 'Size' in part_data else "--"
+
+
+
         # SQL query to insert a new part into the Part table
         conn.execute('BEGIN')
         cursor.execute('''
@@ -403,8 +421,8 @@ def insert_part(part_data):
               part_data['Brand'], part_data['Model'], part_data['Location'], 'In', timestamp))
         
         # Insert a new log entry with the current timestamp
-        cursor.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note) VALUES (?, ?, ?, ?, ?, ?)', 
-                     (tid, unit_sn, part_sn, part_status, timestamp, note))
+        cursor.execute('INSERT INTO Log (TID, Unit_sn, Part_sn, Part_status, Date_time, Note, Technology) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+                     (tid, unit_sn, part_sn, part_status, timestamp, note, technology))
 
         # Commit the changes
         conn.commit()

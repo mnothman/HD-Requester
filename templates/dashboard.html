@@ -112,10 +112,23 @@
                         <td>{{ part.action }}</td>
                         <td>{{ part.tid }}</td>
                         <td>{{ part.unit_sn }}</td>
-                        <td>{{ part.technology }}</td>
+                        <!-- <td>
+                            {% if part.size == 'AiO' and part.type == 'PC4' %}
+                                AiO
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td> -->
+                        <td>{{ part.size }}</td>
                         <td>{{ part.type }}</td>
                         <td>{{ part.capacity }}</td>
-                        <td>{{ part.size }}</td>
+                        <td>
+                            {% if part.size == 'AiO' and part.type == 'PC4' %}
+                                Laptop
+                            {% else %}
+                                -- 
+                            {% endif %}
+                        </td>
                         <td>{{ part.speed }}</td>
                         <td>{{ part.brand }}</td>
                         <td>{{ part.model }}</td>

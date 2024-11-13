@@ -219,12 +219,10 @@ function updateDashboard(data) {
     const tableBody = document.querySelector('#partsTable tbody');
     const newRow = document.createElement('tr');
 
-    if (data.Technology === "AiO" && data.Capacity === "RAM") {
-        data.Size = "Laptop";  
-    } else {
+    if (data.Type === "PC4" && data.Capacity.includes("GB")) {  // Check if it's RAM
         if (data.Size === "AiO") {
-            data.Technology = "AiO";
-            data.Size = "";
+            data.Size = "Laptop";  // Set Size to Laptop for AiO RAM
+            data.Technology = "AiO";  // Set Technology to AiO for RAM
         }
     }
 
@@ -236,12 +234,13 @@ function updateDashboard(data) {
         data.Size = "--";
     }
 
-
+// Technology is either: Desktop, Laptop, AiO, or Server. Size is laptop for RAM aio only, and -- for anything else.
     newRow.innerHTML = `
     <td>${data.timestamp}</td>
     <td>${data.action}</td>
     <td>${data.TID}</td>
     <td>${data.unit_sn}</td>
+    <td>${data.Technology}</td> 
     <td>${data.Type}</td>
     <td>${data.Capacity}</td>
     <td>${data.Size}</td>
