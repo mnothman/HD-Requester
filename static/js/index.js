@@ -327,9 +327,9 @@ function showModal(dataObject, htmlContent, onConfirm) {
 
                     <form id="addPartForm">
 
-                        <div class="form-group" style="display: flex; flex-direction: column; width: 100%; border: 1px solid #000;">
+                        <div class="form-group" style="display: flex; flex-direction: column; width: 100%; border: 1px solid #000; padding: 0 .3em .3em .3em;">
                             <!-- Header Row -->
-                            <div class="form-row" style="display: flex; font-weight: bold; border-bottom: 1px solid #000; background-color: #f0f0f0;">
+                            <div class="form-row" style="font-weight: bold; background-color: #f0f0f0; border-bottom: 1px solid #000;">
                                 <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Type</div>
                                 <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Capacity</div>
                                 <div class="form-col" style="flex: 1; padding: 8px; text-align: center;">Size</div>
