@@ -52,7 +52,7 @@ class PartCheckInOutTest(unittest.TestCase):
 
     def checkin_part_add_location(self):
         # Add Part Location
-        locationInput = self.driver.find_element(By.ID, "locationInput0")
+        locationInput = self.driver.find_element(By.ID, "locationInput")
         locationInput.send_keys("Box 7 C5")
         self.driver.find_element(By.ID, "locationSubmitBtn").click()
         time.sleep(1)
