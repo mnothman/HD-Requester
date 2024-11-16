@@ -169,7 +169,6 @@ $(document).ready(function () {
         const partData = $(".context-menu").data('partData');
 
         // Generate modal content dynamically to match the design of other modals
-        // This ensures flexibility and consistency across different modals in the application.
         const modalContent = `
             <form id="editPartForm">
                 <div class="form-group">
