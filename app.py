@@ -606,6 +606,74 @@ def get_repeated():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
+@app.route('/get_utilization', methods=['GET'])
+def get_utilization():
+    month = request.args.get('month', type=int)
+    year = request.args.get('year', type=int)
+
+    # Check for complete parameters
+    if not month or not year:
+        return jsonify({'status': 'error', 'message': 'Month and year are required.'}), 400
+
+    # Set date range for query
+    first_day = datetime(year, month, 1)
+    last_day = datetime(year + (1 if month == 12 else 0), (month % 12) + 1, 1)
+
+    db = get_db()
+    query = '''
+    SELECT 
+        COUNT(CASE WHEN Part_status = 'In' THEN 1 END) AS checked_in,
+        COUNT(CASE WHEN Part_status = 'Out' THEN 1 END) AS checked_out
+    FROM Log
+    WHERE Date_time >= ? AND Date_time < ?
+    '''
+
+    try:
+        result = db.execute(query, (first_day, last_day)).fetchone()
+        utilization_data = {
+            'checked_in': result['checked_in'] or 0,
+            'checked_out': result['checked_out'] or 0
+        }
+
+        return jsonify({'status': 'success', 'data': utilization_data})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/get_technology', methods=['GET'])
+def get_technology():
+    month = request.args.get('month', type=int)
+    year = request.args.get('year', type=int)
+
+    # Check for complete parameters
+    if not month or not year:
+        return jsonify({'status': 'error', 'message': 'Month and year are required.'}), 400
+
+    # Set date range for query
+    first_day = datetime(year, month, 1)
+    last_day = datetime(year + (1 if month == 12 else 0), (month % 12) + 1, 1)
+
+    db = get_db()
+    query = '''
+    SELECT 
+        p.Type AS Technology, 
+        COUNT(*) AS count
+    FROM Log l
+    JOIN Part p ON l.Part_sn = p.Part_sn
+    WHERE l.Date_time >= ? AND l.Date_time < ?
+    GROUP BY p.Type
+    HAVING count > 0
+    '''
+
+    try:
+        results = db.execute(query, (first_day, last_day)).fetchall()
+        technology_data = {row['Technology']: row['count'] for row in results}
+
+        return jsonify({'status': 'success', 'data': technology_data})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 @app.route('/add_part', methods=['POST'])
 def add_part():
     data = request.get_json()
@@ -676,35 +744,21 @@ logging.basicConfig(level=logging.DEBUG)
 
 @app.route('/check_part_in_inventory', methods=['POST'])
 def check_part_in_inventory():
-    data = request.get_json()
-    part_sn = data.get('Part_sn')
-    size = data.get('Size')
-    textarea_type = data.get('Type')
-    textarea_capacity = data.get('Capacity')
-    textarea_part_status = data.get('Part_status')
-    unit_sn = data.get('Unit_sn')
+    textarea_data = request.get_json()
+    part_sn = textarea_data.get('Part_sn')
+    size = textarea_data['Size']
+    textarea_type = textarea_data.get('Type')
+    textarea_capacity = textarea_data.get('Capacity')
+    textarea_part_status = textarea_data.get('Part_status')
+    unit_sn = textarea_data.get('Unit_sn')
 
-    # Edge case check for missing or whitespace-only Capacity
-    if not textarea_capacity or textarea_capacity.strip() == '':
-        return jsonify({
-            'exists': False,
-            'error': 'missing_capacity',
-            'message': 'Capacity is missing in the Parts Request.'
-        })
-
-    # Edge case check for missing or whitespace-only Type
-    if not textarea_type or textarea_type.strip() == '':
-        return jsonify({
-            'exists': False,
-            'error': 'missing_type',
-            'message': 'Type is missing in the Parts Request.'
-        })
+    # The edge case for Missing Type or Capacity are handled in index.js
 
     conn = get_db()
     try:
-        part = conn.execute('SELECT * FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
+        db_part = conn.execute('SELECT * FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
 
-        if part is None:
+        if db_part is None:
             return jsonify({
                 'exists': False,
                 'error': 'not_in_inventory',
@@ -712,48 +766,48 @@ def check_part_in_inventory():
             })
 
         # Convert sqlite3.Row to dictionary
-        part = dict(part)
+        db_part = dict(db_part)
 
         # Debugging log to verify expected and actual values
-        logging.debug(f"Expected Type: {part['Type']}, Expected Capacity: {part['Capacity']}")
+        logging.debug(f"Expected Type: {textarea_data['Type']}, Expected Capacity: {textarea_data['Capacity']}")
         logging.debug(f"Actual Type: {textarea_type}, Actual Capacity: {textarea_capacity}")
 
         # Handle the Size mismatch logic
-        if part['Type'] in ['PC3', 'PC3L', 'PC4', 'HD']:  # Only relevant types
-            if part['Size'] != size:
+        if db_part['Type'] in ['PC3', 'PC3L', 'PC4']:  # Only relevant types
+            if db_part['Size'] != size:
                 return jsonify({
                     'exists': False,
                     'error': 'size_mismatch',
-                    'message': f'Size mismatch for Part_sn: {part_sn}. Expected {part["Size"]}, got {size}.',
-                    'expected': {'Size': part['Size']},
+                    'message': f'Size mismatch for Part_sn: {part_sn}. Expected {db_part["Size"]}, got {size}.',
+                    'expected': {'Size': db_part['Size']},
                     'actual': {'Size': size}
                 })
 
         # Mismatch check for Type and Capacity
-        if part['Type'] != textarea_type or (part['Capacity'] or '') != textarea_capacity:
+        if db_part['Type'] != textarea_type or (db_part['Capacity'] or '') != textarea_capacity:
             logging.debug("Mismatch detected in Type or Capacity")
             return jsonify({
                 'exists': False,
                 'error': 'mismatch',
                 'message': 'Mismatch in Type or Capacity.',
-                'expected': {'Type': part['Type'], 'Capacity': part['Capacity']},
+                'expected': {'Type': db_part['Type'], 'Capacity': db_part['Capacity']},
                 'actual': {'Type': textarea_type, 'Capacity': textarea_capacity}
             })
 
         # Check if already checked-in or checked-out
-        if textarea_part_status == 'In' and part['Status'] == 'In':
+        if textarea_part_status == 'In' and db_part['Status'] == 'In':
             return jsonify({
                 'exists': False,
                 'error': 'checked-in',
                 'message': 'Already checked-in.',
-                'part': part
+                'part': db_part
             })
-        elif textarea_part_status == 'Out' and part['Status'] == 'Out':
+        elif textarea_part_status == 'Out' and db_part['Status'] == 'Out':
             return jsonify({
                 'exists': False,
                 'error': 'checked-out',
                 'message': 'Already checked-out.',
-                'part': part
+                'part': db_part
             })
 
         # return jsonify({'exists': True, 'message': 'Part exists with matching Type, Capacity, and Size.'})
@@ -762,13 +816,14 @@ def check_part_in_inventory():
         'exists': True,
         'message': 'Part exists with matching Type, Capacity, and Size.',
         'part': {
-            'Type': part['Type'],
-            'Capacity': part['Capacity'],
-            'Size': part['Size'],
-            'Speed': part.get('Speed'),
-            'Brand': part.get('Brand'),
-            'Model': part.get('Model'),
-            'Location': part.get('Location')
+            'Type': db_part['Type'],
+            'Capacity': db_part['Capacity'],
+            'Size': db_part['Size'],
+            'Speed': db_part.get('Speed'),
+            'Brand': db_part.get('Brand'),
+            'Model': db_part.get('Model'),
+            'Location': db_part.get('Location'),
+            'Status': db_part['Status']
         }
     })
 
@@ -864,73 +919,6 @@ def simulate_text_area_input(user_input):
     finally:
         conn.close()
 
-
-@app.route('/get_utilization', methods=['GET'])
-def get_utilization():
-    month = request.args.get('month', type=int)
-    year = request.args.get('year', type=int)
-
-    # Check for complete parameters
-    if not month or not year:
-        return jsonify({'status': 'error', 'message': 'Month and year are required.'}), 400
-
-    # Set date range for query
-    first_day = datetime(year, month, 1)
-    last_day = datetime(year + (1 if month == 12 else 0), (month % 12) + 1, 1)
-
-    db = get_db()
-    query = '''
-    SELECT 
-        COUNT(CASE WHEN Part_status = 'In' THEN 1 END) AS checked_in,
-        COUNT(CASE WHEN Part_status = 'Out' THEN 1 END) AS checked_out
-    FROM Log
-    WHERE Date_time >= ? AND Date_time < ?
-    '''
-
-    try:
-        result = db.execute(query, (first_day, last_day)).fetchone()
-        utilization_data = {
-            'checked_in': result['checked_in'] or 0,
-            'checked_out': result['checked_out'] or 0
-        }
-
-        return jsonify({'status': 'success', 'data': utilization_data})
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
-
-@app.route('/get_technology', methods=['GET'])
-def get_technology():
-    month = request.args.get('month', type=int)
-    year = request.args.get('year', type=int)
-
-    # Check for complete parameters
-    if not month or not year:
-        return jsonify({'status': 'error', 'message': 'Month and year are required.'}), 400
-
-    # Set date range for query
-    first_day = datetime(year, month, 1)
-    last_day = datetime(year + (1 if month == 12 else 0), (month % 12) + 1, 1)
-
-    db = get_db()
-    query = '''
-    SELECT 
-        p.Type AS Technology, 
-        COUNT(*) AS count
-    FROM Log l
-    JOIN Part p ON l.Part_sn = p.Part_sn
-    WHERE l.Date_time >= ? AND l.Date_time < ?
-    GROUP BY p.Type
-    HAVING count > 0
-    '''
-
-    try:
-        results = db.execute(query, (first_day, last_day)).fetchall()
-        technology_data = {row['Technology']: row['count'] for row in results}
-
-        return jsonify({'status': 'success', 'data': technology_data})
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 

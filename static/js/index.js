@@ -565,30 +565,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
     }
     // end parseTextInput
 
-    function showLocationModal(partData) {
-        const content = `
-            <p><strong>Enter the location for the part:</strong></p>
-            <form id="locationForm">
-                <label for="locationInput">Location:</label>
-                <input type="text" id="locationInput" name="location" style="width: 100%;" required>
-                <button type="button" id="locationSubmitBtn" class="btn btn-primary mb-2">OK</button>
-            </form>
-        `;
-        showModal({ title: 'Set Part Location' }, content);
-
-        // Handle form submission
-        $('#locationSubmitBtn').click(function () {
-            const location = $('#locationInput').val();
-            if (location) {
-                partData.Location = location; // Set the location in part data
-                checkInPart(partData); // Proceed to check in the part
-                $('#Modal').css('display', 'none'); // Close modal
-            } else {
-                alert('Please enter a location');
-            }
-        });
-    }
-
     function checkInPart(dataObject) {
         console.log("Data object received:", dataObject);
     
@@ -636,10 +612,11 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 Part_sn: partSn,
                 Type: part.type,
                 Capacity: part.capacity,
-                Size: dataObject.size,
+                Size: dataObject.size, // we change this to Laptop in the backend if the request says AiO
                 Part_status: 'In',
                 Unit_sn: unitSn,
-                Note: dataObject.note
+                Note: dataObject.note,
+                Technology: dataObject.size  // Desktop, Laptop, Server, AiO
             };
     
             // Response.part?.Brand and Model is retrieved from jsonify in check_part_in_inventory app.py
