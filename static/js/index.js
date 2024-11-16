@@ -212,6 +212,7 @@ $(document).ready(function () {
         showModal({ title: 'Edit Part' }, modalContent);
 
         // Attach form submission handler
+        $(document).off('submit', '#editPartForm'); // Remove any existing event handlers to avoid multiple event bindings
         $(document).on('submit', '#editPartForm', function (e) {
             e.preventDefault();
         
