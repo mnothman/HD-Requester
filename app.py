@@ -659,103 +659,86 @@ logging.basicConfig(level=logging.DEBUG)
 @app.route('/check_part_in_inventory', methods=['POST'])
 def check_part_in_inventory():
     data = request.get_json()
-    part_sn = data.get('Part_sn')
-    size = data.get('Size')
-    textarea_type = data.get('Type')
-    textarea_capacity = data.get('Capacity')
-    textarea_part_status = data.get('Part_status')
-    unit_sn = data.get('Unit_sn')
+    ### data object structure RC ###
+    # action: "OUT"
+    # note: ""
+    # parts:
+    #   0 {
+    #      Capacity:    "4GB"
+    #      Part_sn:     "00000001"
+    #      Size:        null
+    #      Speed:       null
+    #      Type:        "PC3"
+    #   }
+    # technology: "Laptop"
+    # tid: "TI000000-00000001"
+    # unit_sn: "123456"
+    ###
 
-    # Edge case check for missing or whitespace-only Capacity
-    if not textarea_capacity or textarea_capacity.strip() == '':
-        return jsonify({
-            'exists': False,
-            'error': 'missing_capacity',
-            'message': 'Capacity is missing in the Parts Request.'
-        })
+    # Extract the part serial numbers to look up in the database
+    part_sn_list = [part['Part_sn'] for part in data['parts']]
+    
+    # Create the response JSON object structure
+    # Only need to check these
+    partsEdgeCases = {
+        "mismatchType": {"part": []},
+        "mismatchCapacity": {"part": []},
+        "alreadyCheckedIn": {"part": []},
+        "alreadyCheckedOut": {"part": []},
+        "doesntExist": {"part": []}
+    }
 
-    # Edge case check for missing or whitespace-only Type
-    if not textarea_type or textarea_type.strip() == '':
-        return jsonify({
-            'exists': False,
-            'error': 'missing_type',
-            'message': 'Type is missing in the Parts Request.'
-        })
-
+    # Connect to the database
     conn = get_db()
     try:
-        part = conn.execute('SELECT * FROM Part WHERE Part_sn = ?', (part_sn,)).fetchone()
+        # Fetch all parts from the database with matching Part_sn values
+        # The use of placeholders (', '.join('?' for _ in part_sn_list))
+        # helps in constructing the query dynamically to match the number
+        # of parts provided.
+        placeholders = ', '.join('?' for _ in part_sn_list)
+        query = f'SELECT * FROM Part WHERE Part_sn IN ({placeholders})'
+        db_parts = conn.execute(query, part_sn_list).fetchall()
 
-        if part is None:
-            return jsonify({
-                'exists': False,
-                'error': 'not_in_inventory',
-                'message': 'Part not found in inventory.'
-            })
+        # Convert database results to a dictionary for easier lookup by Part_sn
+        db_parts_dict = {dict(part)['Part_sn']: dict(part) for part in db_parts}
+        
+        # Iterate over each part from the data object and compare with the database values
+        for part in data['parts']:
+            part_sn = part['Part_sn']
+            db_part = db_parts_dict.get(part_sn)
 
-        # Convert sqlite3.Row to dictionary
-        part = dict(part)
+            if not db_part:
+                # Part doesn't exist in the database
+                partsEdgeCases["doesntExist"]["part"].append(part)
+                continue
 
-        # Debugging log to verify expected and actual values
-        logging.debug(f"Expected Type: {part['Type']}, Expected Capacity: {part['Capacity']}")
-        logging.debug(f"Actual Type: {textarea_type}, Actual Capacity: {textarea_capacity}")
+            # Check for missing or mismatched attributes and update response with actual values
+            if db_part['Type'] != part['Type']:
+                updated_part = part.copy()
+                updated_part['Requested Type'] = part['Type']
+                updated_part['Type'] = db_part['Type']
+                partsEdgeCases["mismatchType"]["part"].append(updated_part)
+                
+            if db_part['Capacity'] != part['Capacity']:
+                updated_part = part.copy()
+                updated_part['Requested Capacity'] = part['Capacity']
+                updated_part['Capacity'] = db_part['Capacity']
+                partsEdgeCases["mismatchCapacity"]["part"].append(updated_part)
 
-        # Handle the Size mismatch logic
-        if part['Type'] in ['PC3', 'PC3L', 'PC4', 'HD']:  # Only relevant types
-            if part['Size'] != size:
-                return jsonify({
-                    'exists': False,
-                    'error': 'size_mismatch',
-                    'message': f'Size mismatch for Part_sn: {part_sn}. Expected {part["Size"]}, got {size}.',
-                    'expected': {'Size': part['Size']},
-                    'actual': {'Size': size}
-                })
-
-        # Mismatch check for Type and Capacity
-        if part['Type'] != textarea_type or (part['Capacity'] or '') != textarea_capacity:
-            logging.debug("Mismatch detected in Type or Capacity")
-            return jsonify({
-                'exists': False,
-                'error': 'mismatch',
-                'message': 'Mismatch in Type or Capacity.',
-                'expected': {'Type': part['Type'], 'Capacity': part['Capacity']},
-                'actual': {'Type': textarea_type, 'Capacity': textarea_capacity}
-            })
-
-        # Check if already checked-in or checked-out
-        if textarea_part_status == 'In' and part['Status'] == 'In':
-            return jsonify({
-                'exists': False,
-                'error': 'checked-in',
-                'message': 'Already checked-in.',
-                'part': part
-            })
-        elif textarea_part_status == 'Out' and part['Status'] == 'Out':
-            return jsonify({
-                'exists': False,
-                'error': 'checked-out',
-                'message': 'Already checked-out.',
-                'part': part
-            })
-
-        # return jsonify({'exists': True, 'message': 'Part exists with matching Type, Capacity, and Size.'})
-        # Return the part details in order to retrieve later in frontend modals (specifically checkInPart)
-        return jsonify({
-        'exists': True,
-        'message': 'Part exists with matching Type, Capacity, and Size.',
-        'part': {
-            'Type': part['Type'],
-            'Capacity': part['Capacity'],
-            'Size': part['Size'],
-            'Speed': part.get('Speed'),
-            'Brand': part.get('Brand'),
-            'Model': part.get('Model'),
-            'Location': part.get('Location')
-        }
-    })
+            # Check if the part is already checked in or out
+            # data['Action'] comes from the homepage buttons and its UPPERCASE
+            # db_part['Status'] is the current status and its Capitalized
+            if data['action'] == 'IN' and db_part['Status'] == 'In':
+                partsEdgeCases["alreadyCheckedIn"]["part"].append(part)
+            elif data['action'] == 'OUT' and db_part['Status'] == 'Out':
+                partsEdgeCases["alreadyCheckedOut"]["part"].append(part)
 
     finally:
         conn.close()
+
+    # Return the response JSON object
+    return jsonify(partsEdgeCases)
+
 
 @app.route('/update_part_status', methods=['POST'])
 def update_part_status():

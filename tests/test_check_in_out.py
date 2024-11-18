@@ -22,7 +22,7 @@ class PartCheckInOutTest(unittest.TestCase):
         options.add_argument('--log-level=1') # supress info message in output
         cls.service = Service(executable_path="chromedriver.exe")
         cls.driver = webdriver.Chrome(service=cls.service, options=options)
-        cls.driver.get("http://127.0.0.1:5000/")
+        cls.driver.get("http://127.0.0.1:8000/")
         time.sleep(2)
 
     def check_modal(self, expected_title, expected_content):
@@ -147,7 +147,7 @@ class PartCheckInOutTest(unittest.TestCase):
 
         self.check_modal(
             "Check-out Error: Mismatch in type or capacity.",
-            "Expected: 4GB PC3\nFound: 4GB PC4"
+            "Expected: 4GB PC4\nFound: 4GB PC3"
         )
         self.close_modal()
 
