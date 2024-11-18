@@ -684,37 +684,37 @@ function showModal(dataObject, htmlContent, onConfirm) {
                     if (value.part.length > 0) {
                         switch (edgeCase) {
                             case "mismatchSize":
-                                modalContent += "Mismatch in Size";
+                                modalContent += "<h3>Mismatch in Size</h3>";
                                 value.part.forEach(part => {
-                                    modalContent += `<div>Serial number: ${part.Part_sn}<br>Actual: ${part.Size}<br>Requested: ${part["Requested Size"]}</div>`;
+                                    modalContent += `<div>Serial number: ${part.Part_sn}<br>Actual: ${part.Size}<br>Requested: ${part["requestedSize"]}</div>`;
                                 });
                                 break;
                             case "mismatchType":
-                                modalContent += "Mismatch in Type";
+                                modalContent += "<h3>Mismatch in Type</h3>";
                                 value.part.forEach(part => {
-                                    modalContent += `<div>Serial number: ${part.Part_sn}<br>Actual: ${part.Type}<br>Requested: ${part["Requested Type"]}</div>`;
+                                    modalContent += `<div>Serial number: ${part.Part_sn}<br>Actual: ${part.Type}<br>Requested: ${part["requestedType"]}</div>`;
                                 });
                                 break;
                             case "mismatchCapacity":
-                                modalContent += "Mismatch in Capacity";
+                                modalContent += "<h3>Mismatch in Capacity</h3>";
                                 value.part.forEach(part => {
-                                    modalContent += `<div>Serial number: ${part.Part_sn}<br>Actual: ${part.Capacity}<br>Requested: ${part["Requested Capacity"]}</div>`;
+                                    modalContent += `<div>Serial number: ${part.Part_sn}<br>Actual: ${part.Capacity}<br>Requested: ${part["requestedCapacity"]}</div>`;
                                 });
                                 break;
                             case "missingType":
-                                modalContent += "Missing Part Type";
+                                modalContent += "<h3>Missing Part Type</h3>";
                                 value.part.forEach(part => {
                                     modalContent += `<div>* Type is missing for part Serial Number: ${part.Part_sn}.<br>Please provide a valid type for this part.</div>`;
                                 });
                                 break;
                             case "missingCapacity":
-                                modalContent += "Missing Part Capacity";
+                                modalContent += "<h3>Missing Part Capacity</h3>";
                                 value.part.forEach(part => {
                                     modalContent += `<div>* Capacity is missing for part Serial Number: ${part.Part_sn}.<br>Please provide a valid capacity for this part.</div>`;
                                 });
                                 break;
                             case "alreadyCheckedIn":
-                                modalContent += "Already Checked In";
+                                modalContent += "<h3>Already Checked In</h3>";
                                 modalContent += `<div>* The following parts are already checked in:</div><table><tr><th>Type</th><th>Capacity</th><th>Size</th><th>Speed</th><th>Brand</th><th>Model</th><th>Location</th><th>Part Serial Number</th></tr>`;
                                 value.part.forEach(part => {
                                     modalContent += `<tr><td>${part.Type}</td><td>${part.Capacity}</td><td>${part.Size}</td><td>${part.Speed}</td><td>${part.Brand}</td><td>${part.Model}</td><td>${part.Location}</td><td>${part.Part_sn}</td></tr>`;

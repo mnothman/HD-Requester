@@ -714,7 +714,7 @@ def check_part_in_inventory():
                 continue
 
             # Check for mismatch in Size if Type is PC3, PC3L, or PC4
-            if part['Type'] in ['PC3', 'PC3L', 'PC4'] and db_part['Size'] != part['Size']:
+            if db_part['Type'] in ['PC3', 'PC3L', 'PC4'] and db_part['Size'] != part['Size']:
                 updated_part = part.copy()
                 updated_part['requestedSize'] = part['Size']
                 updated_part['Size'] = db_part['Size']
