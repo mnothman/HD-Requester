@@ -681,6 +681,7 @@ def check_part_in_inventory():
     # Create the response JSON object structure
     # Only need to check these
     partsEdgeCases = {
+        "mismatchSize": {"part": []},
         "mismatchType": {"part": []},
         "mismatchCapacity": {"part": []},
         "alreadyCheckedIn": {"part": []},
@@ -712,16 +713,23 @@ def check_part_in_inventory():
                 partsEdgeCases["doesntExist"]["part"].append(part)
                 continue
 
+            # Check for mismatch in Size if Type is PC3, PC3L, or PC4
+            if part['Type'] in ['PC3', 'PC3L', 'PC4'] and db_part['Size'] != part['Size']:
+                updated_part = part.copy()
+                updated_part['requestedSize'] = part['Size']
+                updated_part['Size'] = db_part['Size']
+                partsEdgeCases["mismatchSize"]["part"].append(updated_part)
+
             # Check for missing or mismatched attributes and update response with actual values
             if db_part['Type'] != part['Type']:
                 updated_part = part.copy()
-                updated_part['Requested Type'] = part['Type']
+                updated_part['requestedType'] = part['Type']
                 updated_part['Type'] = db_part['Type']
                 partsEdgeCases["mismatchType"]["part"].append(updated_part)
                 
             if db_part['Capacity'] != part['Capacity']:
                 updated_part = part.copy()
-                updated_part['Requested Capacity'] = part['Capacity']
+                updated_part['requestedCapacity'] = part['Capacity']
                 updated_part['Capacity'] = db_part['Capacity']
                 partsEdgeCases["mismatchCapacity"]["part"].append(updated_part)
 

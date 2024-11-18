@@ -513,7 +513,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
     
         // Parse Parts
         var i = 2;
-        while (lines[i] && !["Laptop", "Desktop", "Server"].includes(lines[i].trim())) {
+        while (lines[i] && !["Laptop", "Desktop", "Server", "AiO"].includes(lines[i].trim())) {
             var details = lines[i].trim().split(' ');
             var part = {
                 Part_sn: null,
@@ -553,6 +553,22 @@ function showModal(dataObject, htmlContent, onConfirm) {
         }
     
         dataObject.technology = lines[i].trim();
+
+        // Assign Size for Parts if applicable
+        if (dataObject.technology) {
+            dataObject.parts.forEach(part => {
+                if (['PC3', 'PC3L', 'PC4'].includes(part.Type)) {
+                    if (dataObject.technology === 'Server') {
+                        part.Size = 'Desktop';
+                    } else if (dataObject.technology === 'AiO') {
+                        part.Size = 'Laptop';
+                    } else {
+                        part.Size = dataObject.technology;
+                    }
+                }
+            });
+        }
+
         i++;
     
         // Parse Serial Numbers and Assign to Parts
@@ -597,6 +613,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
         console.log("Data object received:", partsData);
         partsData["action"] = action
         const edgeCases = {
+            "mismatchSize": { part: [] },
             "missingType": { part: [] },
             "mismatchType": { part: [] },
             "missingCapacity": { part: [] },
@@ -641,6 +658,9 @@ function showModal(dataObject, htmlContent, onConfirm) {
                     }
                 });
 
+                if (edgeCases.mismatchSize.part.length > 0) {
+                    console.log("Mismatch Size");
+                }
                 if (edgeCases.mismatchType.part.length > 0) {
                     console.log("Mismatch Type");
                 }
@@ -656,8 +676,77 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 if (edgeCases.doesntExist.part.length > 0) {
                     console.log("Doesn't Exist");
                 }
-            }
-        });
+                let modalTitle = "Check-" + (action === 'OUT' ? "Out" : "In") + " Error:";
+                let modalContent = "";
 
+                 // Append HTML for each edge case
+                for (const [edgeCase, value] of Object.entries(edgeCases)) {
+                    if (value.part.length > 0) {
+                        switch (edgeCase) {
+                            case "mismatchSize":
+                                modalContent += "Mismatch in Size";
+                                value.part.forEach(part => {
+                                    modalContent += `<div>Serial number: ${part.Part_sn}<br>Actual: ${part.Size}<br>Requested: ${part["Requested Size"]}</div>`;
+                                });
+                                break;
+                            case "mismatchType":
+                                modalContent += "Mismatch in Type";
+                                value.part.forEach(part => {
+                                    modalContent += `<div>Serial number: ${part.Part_sn}<br>Actual: ${part.Type}<br>Requested: ${part["Requested Type"]}</div>`;
+                                });
+                                break;
+                            case "mismatchCapacity":
+                                modalContent += "Mismatch in Capacity";
+                                value.part.forEach(part => {
+                                    modalContent += `<div>Serial number: ${part.Part_sn}<br>Actual: ${part.Capacity}<br>Requested: ${part["Requested Capacity"]}</div>`;
+                                });
+                                break;
+                            case "missingType":
+                                modalContent += "Missing Part Type";
+                                value.part.forEach(part => {
+                                    modalContent += `<div>* Type is missing for part Serial Number: ${part.Part_sn}.<br>Please provide a valid type for this part.</div>`;
+                                });
+                                break;
+                            case "missingCapacity":
+                                modalContent += "Missing Part Capacity";
+                                value.part.forEach(part => {
+                                    modalContent += `<div>* Capacity is missing for part Serial Number: ${part.Part_sn}.<br>Please provide a valid capacity for this part.</div>`;
+                                });
+                                break;
+                            case "alreadyCheckedIn":
+                                modalContent += "Already Checked In";
+                                modalContent += `<div>* The following parts are already checked in:</div><table><tr><th>Type</th><th>Capacity</th><th>Size</th><th>Speed</th><th>Brand</th><th>Model</th><th>Location</th><th>Part Serial Number</th></tr>`;
+                                value.part.forEach(part => {
+                                    modalContent += `<tr><td>${part.Type}</td><td>${part.Capacity}</td><td>${part.Size}</td><td>${part.Speed}</td><td>${part.Brand}</td><td>${part.Model}</td><td>${part.Location}</td><td>${part.Part_sn}</td></tr>`;
+                                });
+                                modalContent += `</table>`;
+                                break;
+                            case "alreadyCheckedOut":
+                                modalContent += "<h3>Already Checked Out</h3>";
+                                modalContent += `<div>* The following parts are already checked out:</div><table><tr><th>Type</th><th>Capacity</th><th>Size</th><th>Speed</th><th>Brand</th><th>Model</th><th>Part Serial Number</th></tr>`;
+                                value.part.forEach(part => {
+                                    modalContent += `<tr><td>${part.Type}</td><td>${part.Capacity}</td><td>${part.Size}</td><td>${part.Speed}</td><td>${part.Brand}</td><td>${part.Model}</td><td>${part.Part_sn}</td></tr>`;
+                                });
+                                modalContent += `</table>`;
+                                break;
+                            case "doesntExist":
+                                modalContent += "<h3>Part Doesn't Exist in Inventory</h3>";
+                                value.part.forEach(part => {
+                                    modalContent += `<div>Serial number: ${part.Part_sn}<br>Type: ${part.Type}, Capacity: ${part.Capacity}, Size: ${part.Size}, Speed: ${part.Speed}, Brand: ${part.Brand}, Model: ${part.Model}</div>`;
+                                });
+                                break;
+                            default:
+                                modalTitle = "Unknown Edge Case";
+                            }
+                        }
+                    }
+
+                    // Show the modal
+                    if (modalContent) {
+                        showModal({ title: modalTitle }, modalContent);
+                    }
+                }
+            
+        });
 
     }
