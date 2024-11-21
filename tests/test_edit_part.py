@@ -67,6 +67,15 @@ class EditPartTests(unittest.TestCase):
         self.driver.execute_script("arguments[0].click();", close_button)
 
 
+    def cancel_modal(self):
+        # Close the modal by clicking the close button
+        # Wait for the close button to be clickable
+        cancel_button = WebDriverWait(self.driver, 10).until(
+        EC.presence_of_element_located((By.ID, "cancelModalBtn"))
+        )
+        self.driver.execute_script("arguments[0].click();", cancel_button)
+
+
     def right_click_edit(self):
         # Locate the row that has a part with serial number 00000002
         part_sn_2 = self.driver.find_element(By.XPATH, "//td[contains(text(), '00000002')]")
@@ -111,9 +120,27 @@ class EditPartTests(unittest.TestCase):
         self.assertEqual(display_style, "none", "Modal should not be displayed")
 
 
-    def test02_edit_part(self):
+    def test02_edit_part_modal_close(self):
+        print("\nTest 2: Cancel Modal Edit Part")
+        
+        modal = self.driver.find_element(By.XPATH, "//*[contains(@id, 'Modal')]")
+
+        display_style = modal.value_of_css_property("display")
+        self.assertEqual(display_style, "none", "Modal should not be displayed")
+        self.right_click_edit()
+
+        display_style = modal.value_of_css_property("display")
+        self.assertEqual(display_style, "block", "Modal should be displayed")
+
+        self.cancel_modal()
+
+        display_style = modal.value_of_css_property("display")
+        self.assertEqual(display_style, "none", "Modal should not be displayed")
+
+
+    def test03_edit_part(self):
         # Test case: Edit Part
-        print("\nTest 2: Edit Part")
+        print("\nTest 3: Edit Part")
 
         # prepare our tests by making the capacity 1TB
         query = 'UPDATE Part SET Capacity = ? WHERE Part_sn = ?'
