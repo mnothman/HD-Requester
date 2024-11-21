@@ -718,27 +718,41 @@ def check_part_in_inventory():
                 updated_part = part.copy()
                 updated_part['requestedSize'] = part['Size']
                 updated_part['Size'] = db_part['Size']
+                updated_part['Brand'] = db_part['Brand']
+                updated_part['Model'] = db_part['Model']
                 partsEdgeCases["mismatchSize"]["part"].append(updated_part)
 
-            # Check for missing or mismatched attributes and update response with actual values
-            if db_part['Type'] != part['Type']:
+            # Check for mismatched Type or Capacity and include the requested Type or Capcity info
+            if db_part['Type'] != part['Type'] and part['Type']:
                 updated_part = part.copy()
                 updated_part['requestedType'] = part['Type']
                 updated_part['Type'] = db_part['Type']
+                updated_part['Brand'] = db_part['Brand']
+                updated_part['Model'] = db_part['Model']
                 partsEdgeCases["mismatchType"]["part"].append(updated_part)
                 
-            if db_part['Capacity'] != part['Capacity']:
+            if db_part['Capacity'] != part['Capacity'] and part['Capacity']:
                 updated_part = part.copy()
                 updated_part['requestedCapacity'] = part['Capacity']
                 updated_part['Capacity'] = db_part['Capacity']
+                updated_part['Brand'] = db_part['Brand']
+                updated_part['Model'] = db_part['Model']
+                updated_part['Speed'] = db_part['Speed']
                 partsEdgeCases["mismatchCapacity"]["part"].append(updated_part)
 
             # Check if the part is already checked in or out
             # data['Action'] comes from the homepage buttons and its UPPERCASE
             # db_part['Status'] is the current status and its Capitalized
             if data['action'] == 'IN' and db_part['Status'] == 'In':
+                part['Brand'] = db_part['Brand']
+                part['Model'] = db_part['Model']
+                part['Speed'] = db_part['Speed']
+                part['Location'] = db_part['Location']
                 partsEdgeCases["alreadyCheckedIn"]["part"].append(part)
             elif data['action'] == 'OUT' and db_part['Status'] == 'Out':
+                part['Brand'] = db_part['Brand']
+                part['Model'] = db_part['Model']
+                part['Speed'] = db_part['Speed']
                 partsEdgeCases["alreadyCheckedOut"]["part"].append(part)
 
     finally:

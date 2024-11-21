@@ -607,6 +607,26 @@ function showModal(dataObject, htmlContent, onConfirm) {
     // end parseTextInput
     
     
+    function makeDivTable(partHTML, location) {
+        let table = `
+            <div class="modal-table-wrapper">
+                <div class="modal-table-header">
+                    <div class="mt-cell">Type</div>
+                    <div class="mt-cell">Capacity</div>
+                    <div class="mt-cell">Size</div>
+                    <div class="mt-cell">Speed</div>
+                    <div class="mt-cell">Brand</div>
+                    <div class="mt-cell">Model</div>`;
+        if(location) {
+            table += `<div class="mt-cell">Location</div>`
+        }
+        table += `<div class="mt-cell">Part SN</div>
+                </div>
+                ${partHTML}
+            </div>
+            `;
+        return table;
+    }
 
     function checkPartsInInventory(partsData, action) {
 
@@ -678,61 +698,132 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 }
                 let modalTitle = "Check-" + (action === 'OUT' ? "Out" : "In") + " Error:";
                 let modalContent = "";
+                let partHTML = "";
 
                  // Append HTML for each edge case
                 for (const [edgeCase, value] of Object.entries(edgeCases)) {
                     if (value.part.length > 0) {
                         switch (edgeCase) {
                             case "mismatchSize":
-                                modalContent += "<h3>Mismatch in Size</h3>";
+                                modalContent += "<h3>Size mismatch detected</h3>";
                                 value.part.forEach(part => {
-                                    modalContent += `<div>Serial number: ${part.Part_sn}<br>Actual: ${part.Size}<br>Requested: ${part["requestedSize"]}</div>`;
+                                    modalContent += `<p><strong>Type: </strong>${part.Type}<br><strong>Requested: </strong>${part["requestedSize"]}<br><strong>Actual: </strong>${part.Size}<br>Serial number: ${part.Part_sn}<br></p>`;
                                 });
                                 break;
                             case "mismatchType":
-                                modalContent += "<h3>Mismatch in Type</h3>";
+                                modalContent += "<h3>Type mismatch detected</h3>";
                                 value.part.forEach(part => {
-                                    modalContent += `<div>Serial number: ${part.Part_sn}<br>Actual: ${part.Type}<br>Requested: ${part["requestedType"]}</div>`;
+                                    modalContent += `<p><strong>Actual: </strong>${part.Type}<br><strong>Requested: </strong>${part["requestedType"]}<br>Serial number: ${part.Part_sn}<br></p>`;
                                 });
                                 break;
                             case "mismatchCapacity":
-                                modalContent += "<h3>Mismatch in Capacity</h3>";
+                                modalContent += "<h3>Capacity mismatch detected</h3>";
                                 value.part.forEach(part => {
-                                    modalContent += `<div>Serial number: ${part.Part_sn}<br>Actual: ${part.Capacity}<br>Requested: ${part["requestedCapacity"]}</div>`;
+                                    modalContent += `<p><strong>Requested: </strong>${part.requestedCapacity}<br><strong>Actual: </strong>${part.Capacity}<br>Serial number: ${part.Part_sn}<br></p>`;
                                 });
                                 break;
                             case "missingType":
                                 modalContent += "<h3>Missing Part Type</h3>";
                                 value.part.forEach(part => {
-                                    modalContent += `<div>* Type is missing for part Serial Number: ${part.Part_sn}.<br>Please provide a valid type for this part.</div>`;
+                                    modalContent += `<p><h4 id="error-message">Please provide a valid type for this part.</h4>Serial Number: ${part.Part_sn}</p>`;
                                 });
                                 break;
                             case "missingCapacity":
                                 modalContent += "<h3>Missing Part Capacity</h3>";
                                 value.part.forEach(part => {
-                                    modalContent += `<div>* Capacity is missing for part Serial Number: ${part.Part_sn}.<br>Please provide a valid capacity for this part.</div>`;
+                                    modalContent += `<p><h4 id="error-message">Please provide a valid capacity for this part.</h4>Serial Number: ${part.Part_sn}</p>`;
                                 });
                                 break;
                             case "alreadyCheckedIn":
-                                modalContent += "<h3>Already Checked In</h3>";
-                                modalContent += `<div>* The following parts are already checked in:</div><table><tr><th>Type</th><th>Capacity</th><th>Size</th><th>Speed</th><th>Brand</th><th>Model</th><th>Location</th><th>Part Serial Number</th></tr>`;
+                                modalContent += `<h3>Already Checked In</h3>`;
+                                modalContent += `<h4 id="error-message">The following parts are already checked in:</h4>`
+                                partHTML = "";
                                 value.part.forEach(part => {
-                                    modalContent += `<tr><td>${part.Type}</td><td>${part.Capacity}</td><td>${part.Size}</td><td>${part.Speed}</td><td>${part.Brand}</td><td>${part.Model}</td><td>${part.Location}</td><td>${part.Part_sn}</td></tr>`;
+                                    partHTML += `<div style="display: flex;">
+                                    <div class="mt-cell">${part.Type}</div>
+                                    <div class="mt-cell">${part.Capacity}</div>
+                                    <div class="mt-cell">${part.Size}</div>
+                                    <div class="mt-cell">${part.Speed}</div>
+                                    <div class="mt-cell">${part.Brand}</div>
+                                    <div class="mt-cell">${part.Model}</div>
+                                    <div class="mt-cell">${part.Location}</div>
+                                    <div class="mt-cell">${part.Part_sn}</div>
+                                    </div>`;
                                 });
-                                modalContent += `</table>`;
+                                modalContent += makeDivTable(partHTML, true);
+
                                 break;
                             case "alreadyCheckedOut":
                                 modalContent += "<h3>Already Checked Out</h3>";
-                                modalContent += `<div>* The following parts are already checked out:</div><table><tr><th>Type</th><th>Capacity</th><th>Size</th><th>Speed</th><th>Brand</th><th>Model</th><th>Part Serial Number</th></tr>`;
+                                modalContent += `<h4 id="error-message">The following parts are already checked out:</h4>`;
+                                partHTML = ''; // reset
                                 value.part.forEach(part => {
-                                    modalContent += `<tr><td>${part.Type}</td><td>${part.Capacity}</td><td>${part.Size}</td><td>${part.Speed}</td><td>${part.Brand}</td><td>${part.Model}</td><td>${part.Part_sn}</td></tr>`;
+                                    partHTML += `<div style="display: flex;">
+                                    <div class="mt-cell">${part.Type}</div>
+                                    <div class="mt-cell">${part.Capacity}</div>
+                                    <div class="mt-cell">${part.Size}</div>
+                                    <div class="mt-cell">${part.Speed}</div>
+                                    <div class="mt-cell">${part.Brand}</div>
+                                    <div class="mt-cell">${part.Model}</div>
+                                    <div class="mt-cell">${part.Part_sn}</div>
+                                    </div>`;
                                 });
-                                modalContent += `</table>`;
+                                modalContent += makeDivTable(partHTML, false);
                                 break;
                             case "doesntExist":
-                                modalContent += "<h3>Part Doesn't Exist in Inventory</h3>";
-                                value.part.forEach(part => {
-                                    modalContent += `<div>Serial number: ${part.Part_sn}<br>Type: ${part.Type}, Capacity: ${part.Capacity}, Size: ${part.Size}, Speed: ${part.Speed}, Brand: ${part.Brand}, Model: ${part.Model}</div>`;
+                                modalContent += `<h3>Part Doesn't Exist in Inventory</h3><h4 id="error-message">Add item to inventory. Fill in the blanks.</h4>`;
+                                partHTML = ''; // reset
+                                value.part.forEach(part => {  
+                                    partHTML += `<div style="display: flex;">
+                                        <div class="mt-cell">
+                                            <input type="text" id="iType_${part.Part_sn}" name="Type" style="width: 100%;" value="${part.Type}"/>
+                                        </div>
+                                        <div class="mt-cell">
+                                            <input type="text" id="iCapacity_${part.Part_sn}" name="Type" style="width: 100%;" value="${part.Capacity}"/>
+                                        </div>
+                                        <div class="mt-cell">
+                                            <input type="text" id="ddSize_${part.Part_sn}" name="Type" style="width: 100%;" value="${part.Size}"/>
+                                        </div>
+                                        <div class="mt-cell">
+                                            <input type="text" id="iSpeed_${part.Part_sn}" name="Speed" style="width: 100%;" />
+                                        </div>
+                                        <div class="mt-cell">
+                                            <input type="text" id="iBrand_${part.Part_sn}" name="Brand" style="width: 100%;" />
+                                        </div>
+                                        <div class="mt-cell">
+                                            <input type="text" id="iModel_${part.Part_sn}" name="Model" style="width: 100%;" />
+                                        </div>
+                                        <div class="mt-cell">
+                                            <input type="text" id="iLocation_${part.Part_sn}" name="Location" style="width: 100%;" />
+                                        </div>
+                                        <div class="mt-cell">
+                                            <input type="text" id="iPart_sn_${part.Part_sn}" name="Part SN" style="width: 100%;" value="${part.Part_sn}"/>
+                                        </div>  
+                                    </div>
+                                `});
+                                modalContent += makeDivTable(partHTML, true);
+                                modalContent += `
+                                <div style="margin-top: 10px;">
+                                    <button type="button" id="add_btn" class="btn btn-primary mb-2">Add Part</button>	
+                                </div>
+                                `;
+                                // Handle form submission when the user clicks "Add Part"
+                                $('#add_btn').click(function () {
+                                    const newPartData = {
+                                        TID: '',
+                                        Unit_sn: '',
+                                        Part_status: 'Out',
+                                        Note: 'New part added to inventory',
+                                        Type: $(`#iType_${part.Part_sn}`).val(),
+                                        Capacity: $(`#iCapacity_${part.Part_sn}`).val(),
+                                        Size: $(`#ddSize_${part.Part_sn}`).val(),
+                                        Speed: $(`#iSpeed_${part.Part_sn}`).val(),
+                                        Brand: $(`#iBrand_${part.Part_sn}`).val(),
+                                        Model: $(`#iModel_${part.Part_sn}`).val(),
+                                        Location: $(`#iLocation_${part.Part_sn}`).val(),
+                                        Part_sn: $(`#iPart_sn_${part.Part_sn}`).val()
+                                    };
+                                    submitPart(newPartData);
                                 });
                                 break;
                             default:
@@ -743,6 +834,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
 
                     // Show the modal
                     if (modalContent) {
+                        
                         showModal({ title: modalTitle }, modalContent);
                     }
                 }
