@@ -1,4 +1,5 @@
-import unittest 
+import unittest
+import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -70,11 +71,17 @@ class PartSearchSortTests(unittest.TestCase):
         # Fetch all rows from the Serial Number column after sorting
         part_sn_elements = driver.find_elements(By.XPATH, "//table[@id='partsTable']//tbody//tr/td[8]")
 
+        # convert String to Integer for comparing serial numbers
+        def alphanumeric_key(value):
+            # Split into numeric and non-numeric parts
+            return [int(part) if part.isdigit() else part for part in re.split(r'(\d+)', value)]
+
+
         # Collect the serial numbers from the column and verify sorting
         serial_numbers = [element.text for element in part_sn_elements]
 
         # Verify if the serial numbers are sorted in ascending order
-        self.assertEqual(serial_numbers, sorted(serial_numbers), "Serial numbers should be sorted in ascending order.")
+        self.assertEqual(serial_numbers, sorted(serial_numbers, key=alphanumeric_key), "Serial numbers should be sorted in ascending order.")
         print("Sorting by 'Serial Number' column works as expected.")
 
         # Similarly, for the 'Type' column (0th index for Type column)
