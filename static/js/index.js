@@ -485,17 +485,6 @@ function showModal(dataObject, htmlContent, onConfirm) {
             note: noteContent
         };
 
-        if (lines.length < 4) { // Minimum number of lines for valid input
-            console.error("Error: Insufficient input data.");
-            // Show modal for missing or invalid Unit Serial Number
-            const content = `
-                <p><strong>Missing Information For Request</strong></p>
-                <p>Please provide a valid request to proceed.</p>
-            `;
-            showModal({ title: 'Error: Insufficient input data.' }, content);
-            return null; // Stop further processing
-        }
-
         // Parse TID
         dataObject.tid = lines[0].trim();
         if (!dataObject.tid.startsWith("TI") &&
@@ -507,7 +496,13 @@ function showModal(dataObject, htmlContent, onConfirm) {
     
         // Parse Unit_sn
         dataObject.unit_sn = lines[1].trim();
-        if (!dataObject.unit_sn || dataObject.unit_sn.trim() === '' || dataObject.unit_sn.length < 5) {
+        if (
+            !dataObject.unit_sn || 
+            dataObject.unit_sn.trim() === '' || 
+            dataObject.unit_sn.length < 5 || 
+            /\s/.test(dataObject.unit_sn) || 
+            /(Laptop|Desktop|Server|AiO)/i.test(dataObject.unit_sn)
+        ) {
             // Show modal for missing or invalid Unit Serial Number
             const content = `
                 <p><strong>Unit Serial Number is missing or invalid.</strong></p>
@@ -561,6 +556,17 @@ function showModal(dataObject, htmlContent, onConfirm) {
             console.error("Error: The number of parts does not match the number of serial numbers.");
             alert('Error: The number of parts does not match the number of serial numbers.');
             return null;
+        }
+
+        if (lines.length < 4) { // Minimum number of lines for valid input
+            console.error("Error: Insufficient input data.");
+            // Show modal for missing or invalid Unit Serial Number
+            const content = `
+                <p><strong>Missing Information For Request</strong></p>
+                <p>Please provide a valid request to proceed.</p>
+            `;
+            showModal({ title: 'Error: Insufficient input data.' }, content);
+            return null; // Stop further processing
         }
     
         return dataObject;
