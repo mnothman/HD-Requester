@@ -169,6 +169,7 @@ $(document).ready(function () {
         const partData = $(".context-menu").data('partData');
 
         // Generate modal content dynamically to match the design of other modals
+        // This ensures flexibility and consistency across different modals in the application.
         const modalContent = `
             <form id="editPartForm">
                 <div class="form-group">
@@ -212,6 +213,7 @@ $(document).ready(function () {
         showModal({ title: 'Edit Part' }, modalContent);
 
         // Attach form submission handler
+        $(document).off('submit', '#editPartForm'); // Remove any existing event handlers to avoid multiple event bindings
         $(document).on('submit', '#editPartForm', function (e) {
             e.preventDefault();
         
