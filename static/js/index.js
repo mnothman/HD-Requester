@@ -205,7 +205,7 @@ $(document).ready(function () {
                     <input type="text" id="editPart_sn" class="form-control" value="${partData[7]}" readonly>
                 </div>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
-                <button type="button" class="btn btn-secondary" id="closeModalBtn">Cancel</button>
+                <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
             </form>
         `;
 
@@ -248,7 +248,7 @@ $(document).ready(function () {
         });
 
         // Add Cancel button functionality
-        $(document).on('click', '#closeModalBtn', function () {
+        $(document).on('click', '#closeModalBtn, #cancelModalBtn', function () {
             $('#Modal').css('display', 'none');
         });
 
@@ -313,7 +313,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
     // Handle background clicks to also close the modal
     $('#Modal').css('display', 'block');
     // close modal
-    $('#closeModalBtn').click(function () {
+    $('#closeModalBtn, #cancelModalBtn').click(function () {
         $('#Modal').css('display', 'none');
     });
     $(window).click(function (event) {
