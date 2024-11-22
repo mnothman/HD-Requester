@@ -1,0 +1,415 @@
+* {
+	margin: 0px;
+	padding: 0px;
+	box-sizing: border-box;
+	font-family: sans-serif;
+
+}
+
+nav {
+	width: 100%;
+	height: 75px;
+	background-color: rgb(6, 64, 14, .9);
+	color: black;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0px 50px;
+	top: 0;
+}
+
+
+/* Search */
+#partsTable_filter {
+	position: relative;
+	top: -5px; /* fix alignment with other items in row */
+}
+
+#partsTable_filter input {
+	background-color: white;
+	width: 300px;
+	padding-left: 10px;
+	font-size: 16px;
+	border-radius: 30px;
+}
+
+#partsTable_filter input:hover {
+	border: 1px solid #7babe2;
+}
+
+#partsTable_filter button {
+	background-color: #FFF;
+	color: black;
+	outline: none;
+	padding: 0px 10px;
+	border-radius: 20px;
+	border: solid 0px #FFF;
+	cursor: pointer;
+}
+
+#partsTable_filter::after {
+	content: '\f002';
+	/* FontAwesome search icon unicode */
+	font-family: 'Font Awesome 5 Pro';
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	pointer-events: none;
+	/* Makes the icon non-interactive */
+	color: #ccc;
+	/* Icon color, can be changed as needed */
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	display: inline-block;
+	font-style: normal;
+	font-variant: normal;
+	text-rendering: auto;
+	line-height: 1;
+}
+
+#partsTable_filter label {
+	margin-bottom: 0px; /* override for search icon alignment */
+}
+
+#clearButton {
+	display: none;
+	position: absolute;
+	right: 4px;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 1000;
+	font-size: 1.3em;
+}
+
+
+/* end Search */
+
+/* Side Bar */
+#hamburgerBtn {
+    position: fixed;
+    top: 15px;
+    right: 10px;
+    z-index: 1001;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+#hamburgerBtn:hover {
+    transform: scale(1.1); /* Subtle hover effect */
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: -250px;
+    width: 250px;
+    height: 100%;
+    background-color: #343a40;
+    color: white;
+    transition: right 0.3s ease; 
+    z-index: 1000;
+}
+
+.sidebar.active {
+    right: 0; 
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 20px 10px;
+}
+
+.sidebar ul li {
+    margin: 15px 0;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+}
+
+/* End of SideBar */
+
+.adminLogin button {
+	color: black;
+	font-size: 14px;
+	border: none;
+	outline: black;
+	margin-left: auto;
+	padding: 0px 10px;
+	border-radius: 20px;
+	cursor: pointer;
+}
+
+#btn-group-inout {
+    display: flex;
+    overflow: hidden; /* Ensures the border-radius is respected */
+	margin-top: 10px;
+    justify-content: space-between;
+}
+
+#btn-group-inout .btn {
+    width: 50%;
+    padding: 10px 20px;
+    box-sizing: border-box;
+    border: 1px solid black;
+    font-size: 20px;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    margin: 0; /* Remove any margin to prevent separation */
+}
+
+/* Apply specific border-radius values */
+#btn-group-inout .btn:first-child {
+    border-radius: 8px 0 0 8px; /* Rounded on left corners for first button */
+}
+
+#btn-group-inout .btn:last-child {
+    border-radius: 0 8px 8px 0; /* Rounded on right corners for last button */
+}
+
+
+.btn-primary {
+	background-color: rgb(6, 64, 14, .9);
+	/* green */
+}
+
+.btn-secondary {
+	background-color: rgb(214, 214, 214);
+	/* light grey*/
+	color: rgb(0, 0, 0);
+	margin-top: 5px;
+	flex: right;
+}
+
+.btn-check:checked+.btn {
+	background-color: rgb(6, 64, 14,.9);
+	color: rgb(255, 255, 255)
+}
+
+.btn-active {
+	background-color: #0b3080;
+	color: white;
+}
+
+.btn-submit {
+	background-color: white;
+	color: black;
+	border: 1px solid black;
+	width: 65%;
+	margin-top: 10px;
+	margin: 50px auto 0 auto;
+	display: block;
+	
+
+}
+
+.btn-submit:hover {
+    background-color: #0b3080; /* Green background on hover */
+    color: white; /* White text on hover */
+    border-color: #0b3080; /* Match border to background on hover */
+}
+
+
+#toggleNotesBtn {
+    margin-left: right; /* Pushes the button to the right */
+    margin-top: 8px;
+	display: block; /* Ensure proper alignment in flex or block containers */
+    color: white; /* White text */
+    border: 1px solid black;
+    border-radius: 10px; /* Rounded corners */
+    cursor: pointer;
+	font-size: small;
+	background-color: rgb(49, 49, 49);
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+
+#parts-buttons {
+	height: 100%;
+	margin: 20px 0px;
+}
+
+#parts-buttons .btn {
+	background-color: rgb(214, 214, 214);
+	color: black;
+	border: 1px solid black;
+}
+
+/* TOPBAR AND LOGO */
+.logo {
+	color: rgb(214, 214, 214);
+	font-family: "Markazi Text", serif;
+	font-weight: 700;
+	font-style: normal;
+	text-transform: uppercase;
+	margin-bottom: 0px;
+	margin-right: 0px;
+	margin-left: -10px;
+	float: left;
+	width: 100%;
+	font-size: 1.8em;
+}
+
+.adminLogin .btnLogin {
+	width: 110px;
+	font-size: 1em;
+}
+
+/* TEXT INPUT REQUEST AREA */
+#textarea-request {
+	margin: 30px 0px 0px;
+	margin-bottom: 15px;
+}
+
+/* TABLE */
+#partsTable .even{
+	background-color: rgb(255, 255, 255);
+}
+
+#partsTable .odd {
+	background-color: rgba(0, 0, 0, .05);
+}
+
+/* Fix alternate colors upon search */
+.table> :not(caption)>*>* {
+	background-color: transparent !important;
+	box-shadow: none;
+}
+
+.table td,
+.table th {
+	padding: .25rem;
+	vertical-align: top;
+	border-top: 1px solid #dee2e6;
+}
+
+.table .sortable-column {
+	cursor: pointer;
+}
+
+/* Context Menu Styles */
+.context-menu {
+	display: none;
+	position: absolute;
+	z-index: 10;
+	width: 150px;
+	background-color: white;
+	border: 1px solid #ddd;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	border-radius: 4px;
+}
+
+.context-menu ul {
+	list-style: none;
+	margin: 0;
+	padding: 10px;
+}
+
+.context-menu ul li {
+	padding: 10px;
+	cursor: pointer;
+	color: #333;
+	font-size: 14px;
+}
+
+.context-menu ul li:hover {
+	background-color: #f2f2f2;
+}
+
+/* Right-click menu item */
+.context-menu ul li.edit {
+	color: #007bff;
+}
+
+.context-menu ul li:hover.edit {
+	background-color: #e0f7ff;
+}
+
+/* Hide the context menu when clicking elsewhere */
+body.hide-menu .context-menu {
+	display: none;
+}
+
+
+/* MODAL */
+.background-modal {
+	display: none;
+	position: fixed;
+	z-index: 1;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-form {
+	background-color: #fefefe;
+	margin: 5% auto;
+	padding: 20px;
+	border: 1px solid #888;
+	width: auto;
+	max-width: 1000px;
+}
+
+.modal-header,
+.modal-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding-bottom: 10px;
+}
+
+.modal-header {
+	border-bottom: 1px solid #e5e5e5;
+}
+
+.modal-footer {
+	border-top: 1px solid #e5e5e5;
+	justify-content: flex-start;
+}
+
+#modalContent table {
+	width: 100%; border-collapse: collapse; border: 1px solid #000;
+}
+
+.modal-table-wrapper{
+	display: flex; flex-direction: column; width: 100%; border: 1px solid #000;
+}
+
+.modal-table-header{
+	display: flex; font-weight: bold; border-bottom: 1px solid #000; background-color: #f0f0f0;
+}
+
+#modalContent thead tr:first td{
+	width: 10%;
+}
+
+#modalContent td {
+	padding: 8px;
+}
+
+.form-control {
+	margin: 5px;
+	flex-grow: 1;
+	min-width: 120px;
+}
+
+.form-col {
+	padding: 5px;
+}
+
+.close {
+	cursor: pointer;
+	font-size: 1.5rem;
+}
+
+.btn-success {
+	margin-top: 20px;
+}
