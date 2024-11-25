@@ -37,11 +37,23 @@ Note: Make sure you have SQLite, Python, and Flask installed before following th
 
 ## Testing
 
-*This section will be used in CSC 191 to outline the testing procedures and guidelines for the HD Requester application.*
+1. Clone the GitHub repository: 
+`git clone https://github.com/mnothman/HD-Requester.git`
+2. Upgrade pip:
+   `python.exe -m pip install --upgrade pip`
+3. Install system requirements:
+`pip install -r requirements.txt`
+4. Install selenium for testing:
+`pip install selenium`
+5. Install webdriver-manager for testing:
+`pip install webdriver-manager`
+6. Launch the app
+`python app.py`
+7. Open a new terminal window in the tests directory
+8. Launch the test i.e. “all_tests.py”
+`python all_tests.py`
 
-## Deployment
 
-*This section will be used in CSC 191 to provide instructions and best practices for deploying the HD Requester application in a production environment.*
 
 ## Developer Instructions
 
