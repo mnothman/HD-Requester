@@ -563,14 +563,18 @@ def get_repeated():
     
     db = get_db()
     check_in_query = '''
-        SELECT Unit_sn, MAX(Date_time) AS last_request_date, COUNT(*) AS check_count
+        SELECT Unit_sn, 
+            MAX(DATE(Date_time)) AS last_request_date, 
+            COUNT(*) AS check_count
         FROM Log
         WHERE Date_time >= ? AND Date_time < ? AND Part_status = 'In'
         GROUP BY Unit_sn
         HAVING COUNT(*) > 1;
         '''
     check_out_query = '''
-        SELECT Unit_sn, MAX(Date_time) AS last_request_date, COUNT(*) AS check_count
+        SELECT Unit_sn, 
+            MAX(DATE(Date_time)) AS last_request_date, 
+            COUNT(*) AS check_count
         FROM Log
         WHERE Date_time >= ? AND Date_time < ? AND Part_status = 'Out'
         GROUP BY Unit_sn
