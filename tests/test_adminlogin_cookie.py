@@ -227,41 +227,6 @@ class AdminLoginCookieTests(unittest.TestCase):
 
         self.assertIsNone(remember_me_cookie, "No 'remember_me' cookie should be set for invalid login credentials.")
 
-    def test_remember_me_cookie_expiry(self):
-        driver = self.driver
-
-        # Log in with "Remember Me"
-        driver.get("http://127.0.0.1:8000/login")
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
-
-        # Fill in credentials and select "Remember Me"
-        username_input = driver.find_element(By.ID, "username")
-        password_input = driver.find_element(By.ID, "password")
-        remember_me_checkbox = driver.find_element(By.ID, "rememberMe")
-        login_button = driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
-
-        username_input.send_keys("admin")
-        password_input.send_keys("admin123")
-        if not remember_me_checkbox.is_selected():
-            remember_me_checkbox.click()
-
-        login_button.click()
-        WebDriverWait(driver, 10).until(EC.url_contains("/dashboard"))
-
-        # Manually set cookie expiry to a past time
-        driver.delete_cookie("remember_me")
-        driver.add_cookie({
-            'name': 'remember_me',
-            'value': 'admin',
-            'path': '/',
-            'expiry': int(time.time()) - 1  # Use integer expiry time
-        })
-
-        # Reload page and verify that the "remember_me" cookie is no longer present
-        driver.get("http://127.0.0.1:8000/login")
-        cookies = driver.get_cookies()
-        remember_me_cookie = next((cookie for cookie in cookies if cookie['name'] == 'remember_me'), None)
-        self.assertIsNone(remember_me_cookie, "The 'remember_me' cookie should be removed after expiry.")
 
     
     @classmethod

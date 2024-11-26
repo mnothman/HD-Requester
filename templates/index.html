@@ -41,6 +41,11 @@
 			</li>
 			<li>
 				<a href="/logout" id="logoutLink" class="linkLogout">Log Out</a>
+			</li>
+			<li style="position: absolute; bottom: 10px; right: 10px;">
+				<a href="#" onclick="showTeamAlert()" style="font-size: 0.5em; color: #343a40;">
+					Created by Team Refresh
+				</a>
 			</li>		
 		</ul>
     </div>
@@ -163,6 +168,17 @@
 				window.location.href = '/logout';  // Redirect to the logout route
 			});
 		};
+	</script>
+
+	<footer style="position: fixed; bottom: 10px; left: 10px;">
+		<a href="user_manual.pdf" target="_blank" style="font-size: 0.6em;">Open User Manual</a>
+	</footer>
+
+
+	<script>
+		function showTeamAlert() {
+			alert("Team Members:\n- Rick Clinger\n- Salvador Del Rio Torres\n- Kaylyn Saludo\n- Mohammad Othman\n- Juan Valentin Mendez\n- Hamza Kassem\n- Abdul Karim Nushin\n- Delia Nepomuseno Hernandez\n- Saboor Malik");
+		}
 	</script>
 
 </body>
