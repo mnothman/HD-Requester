@@ -208,11 +208,13 @@ body {
   padding-bottom: 3px;
   padding-left: 0px;
   opacity: 0;
+  display: none;
   }
   
   #inventory-levels .box-header ul.capacities.show {
   opacity: 1;
   transition: opacity 0.3s ease;
+  display: block;
   }
   
   /* Trends */
