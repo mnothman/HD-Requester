@@ -451,34 +451,55 @@ $(document).ready(function () {
                 }
             });
         } else if (buttonId === 'upgradeBtn') {
-            $.getJSON(`/get_upgrades?month=${month}&year=${year}`, function (response) {
+            $.getJSON(`/get_upgrades?month=${month}&year=${year}`, function(response) {
                 if (response.status === 'success') {
-                    const upgrades = response.data;
-                    const dates = Object.keys(upgrades);
-                    const checkIns = dates.map(date => upgrades[date].check_ins);
-                    const checkOuts = dates.map(date => upgrades[date].check_outs);
-
-                    const datasets = [
-                        {
-                            label: 'Check-ins',
-                            data: checkIns,
-                            backgroundColor: 'rgba(46, 204, 113, 0.2)',
-                            borderColor: 'rgba(46, 204, 113, 1)',
-                            borderWidth: 1
+                    const data = response.data;
+                    const days = Object.keys(data).sort();
+                    const upgradeCounts = days.map(day => data[day]);
+        
+                    const ctx = document.getElementById('trendsChart').getContext('2d');
+                    if (trendsChart) trendsChart.destroy();  // Destroy the previous instance if exists
+                    trendsChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: days,
+                            datasets: [{
+                                label: 'Daily Upgrades',
+                                data: upgradeCounts,
+                                backgroundColor: 'rgba(52, 152, 219, 0.5)',
+                                borderColor: 'rgba(41, 128, 185, 1)',
+                                borderWidth: 1
+                            }]
                         },
-                        {
-                            label: 'Check-outs',
-                            data: checkOuts,
-                            backgroundColor: 'rgba(231, 76, 60, 0.2)',
-                            borderColor: 'rgba(231, 76, 60, 1)',
-                            borderWidth: 1
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Count of Upgrades'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Date'
+                                    }
+                                }
+                            },
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    display: true
+                                }
+                            }
                         }
-                    ];
-
-                    // Initialize as a line chart for upgrade transactions
-                    initChart(dates, datasets, 'Upgrades');
+                    });
+                } else {
+                    console.error('Failed to load data:', response.message);
                 }
             });
+          
         } else if (buttonId === 'repeatBtn') {
             $.getJSON(`/get_repeated?month=${month}&year=${year}`, function (response) {
                 if (response.status === 'success') {
@@ -531,3 +552,4 @@ $(document).ready(function () {
     // Trigger click on first month to load initial data
     monthsList.first().trigger('click');
 });
+

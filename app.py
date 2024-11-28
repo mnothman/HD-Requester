@@ -485,69 +485,53 @@ def get_trends():
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-# Function to get data regarding upgrades
+
 @app.route('/get_upgrades', methods=['GET'])
 def get_upgrades():
-    month = request.args.get('month', type=int)
     year = request.args.get('year', type=int)
+    month = request.args.get('month', type=int)
 
-    if not month or not year:
-        return jsonify({'status': 'error', 'message': 'Month and year are required.'}), 400
+    # Check for required parameters
+    if not year or not month:
+        return jsonify({'status': 'error', 'message': 'Year and month parameters are required.'}), 400
 
-    first_day = datetime(year, month, 1)
-    last_day = datetime(year + (1 if month == 12 else 0), (month % 12) + 1, 1)
+    # Define the range for the month
+    start_date = datetime(year, month, 1)
+    end_date = datetime(year, month + 1, 1) if month < 12 else datetime(year + 1, 1, 1)
 
     db = get_db()
     query = '''
     SELECT 
-        DATE(Date_time) AS date, 
-        Unit_sn,
-        Type,
-        Capacity,
-        COUNT(CASE WHEN Part_status = 'In' THEN 1 END) AS check_ins,
-        COUNT(CASE WHEN Part_status = 'Out' THEN 1 END) AS check_outs
-    FROM Log l
-    JOIN Part p ON l.Part_sn = p.Part_sn
-    WHERE Date_time >= ? AND Date_time < ?
-    GROUP BY date, Unit_sn, Type, Capacity
-    HAVING COUNT(DISTINCT Capacity) > 1  
-        AND (COUNT(CASE WHEN Part_status = 'In' THEN 1 END) > 0 
-            OR COUNT(CASE WHEN Part_status = 'Out' THEN 1 END) > 0)
-    ORDER BY date, Unit_sn, Type, Capacity
+        DATE(a.Date_time) AS day,
+        COUNT(DISTINCT a.Unit_sn) AS upgrade_count
+    FROM 
+        Log a
+    INNER JOIN 
+        Log b ON a.Unit_sn = b.Unit_sn AND a.Part_sn != b.Part_sn
+    INNER JOIN 
+        Part pa ON a.Part_sn = pa.Part_sn
+    INNER JOIN 
+        Part pb ON b.Part_sn = pb.Part_sn
+    WHERE 
+        a.Part_status = 'Out' 
+        AND b.Part_status = 'In'
+        AND pa.Type = pb.Type 
+        AND pa.Capacity != pb.Capacity
+        AND a.Date_time < b.Date_time
+        AND a.Date_time >= ?
+        AND b.Date_time < ?
+    GROUP BY 
+        DATE(a.Date_time)
+    ORDER BY 
+        DATE(a.Date_time)
     '''
-
     try:
-        results = db.execute(query, (first_day, last_day)).fetchall()
-        upgrades = {}
-
-        for row in results:
-            date = row['date']
-            unit_sn = row['Unit_sn']
-            part_type = row['Type']
-            capacity = row['Capacity']
-
-            if date not in upgrades:
-                upgrades[date] = {}
-
-            if unit_sn not in upgrades[date]:
-                upgrades[date][unit_sn] = {}
-
-            if part_type not in upgrades[date][unit_sn]:
-                upgrades[date][unit_sn][part_type] = {}
-
-            if capacity in upgrades[date][unit_sn][part_type]:
-                upgrades[date][unit_sn][part_type][capacity]['check_ins'] += row['check_ins']
-                upgrades[date][unit_sn][part_type][capacity]['check_outs'] += row['check_outs']
-            else:
-                upgrades[date][unit_sn][part_type][capacity] = {
-                    'check_ins': row['check_ins'],
-                    'check_outs': row['check_outs']
-                }
-
-        return jsonify({'status': 'success', 'data': upgrades})
-
+        results = db.execute(query, (start_date, end_date)).fetchall()
+        data = {result['day']: result['upgrade_count'] for result in results}
+        return jsonify({'status': 'success', 'data': data})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 # Function to get data regarding repeated upgrades
 @app.route('/get_repeated', methods=['GET'])

@@ -377,3 +377,28 @@ body.hide-menu .context-menu {
 .btn-success {
 	margin-top: 20px;
 }
+
+
+.star {
+	position: fixed;
+	pointer-events: none;
+}
+
+.star:before, .star:after {
+	position: absolute;
+	top: 0;
+	left: 0;
+	content: '\2726';
+	font-size: 9px;
+}
+
+.star:before {
+	color: transparent;
+	text-shadow: 0 0 3px rgb(248, 17, 217);
+}
+
+.star:after {
+	background: rgb(204, 0, 160);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
