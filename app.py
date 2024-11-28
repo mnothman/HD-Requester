@@ -633,32 +633,38 @@ def get_technology():
     year = request.args.get('year', type=int)
 
     # Check for complete parameters
-    if not month or not year:
+    if month is None or year is None:
         return jsonify({'status': 'error', 'message': 'Month and year are required.'}), 400
 
     # Set date range for query
     first_day = datetime(year, month, 1)
-    last_day = datetime(year + (1 if month == 12 else 0), (month % 12) + 1, 1)
+    last_day = datetime(year + 1, 1, 1) if month == 12 else datetime(year, month + 1, 1)
 
     db = get_db()
     query = '''
     SELECT 
-        p.Type AS Technology, 
+        l.Technology AS Technology, 
         COUNT(*) AS count
     FROM Log l
-    JOIN Part p ON l.Part_sn = p.Part_sn
-    WHERE l.Date_time >= ? AND l.Date_time < ?
-    GROUP BY p.Type
-    HAVING count > 0
+    WHERE l.Date_time >= ? AND l.Date_time < ? AND l.Technology IS NOT NULL
+    GROUP BY l.Technology
+    
     '''
 
     try:
-        results = db.execute(query, (first_day, last_day)).fetchall()
+        print(f"Debug: first_day={first_day}, last_day={last_day}, first_day_type={type(first_day)}, last_day_type={type(last_day)}")
+        results = db.execute(query, (first_day.strftime('%Y-%m-%d %H:%M:%S'), last_day.strftime('%Y-%m-%d %H:%M:%S'))).fetchall()
         technology_data = {row['Technology']: row['count'] for row in results}
 
         return jsonify({'status': 'success', 'data': technology_data})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+
+
+
+
 
 
 @app.route('/add_part', methods=['POST'])
