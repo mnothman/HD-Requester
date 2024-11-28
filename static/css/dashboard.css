@@ -364,66 +364,67 @@ body {
   }
   
   @media (max-width: 500px) {
-  .inventory-levels-container  {
-      grid-template-columns: 1fr; /* Stack the boxes in one column on very small screens */
-  }
+    .inventory-levels-container  {
+        grid-template-columns: 1fr; /* Stack the boxes in one column on very small screens */
+    }
   }
   
   #parts-by-date-title {
-  font-family: Arial, serif;
-  font-weight: 400;
-  text-align: center; 
-  font-size: 2em; 
-  margin-top: 20px; 
-  color: white; 
+    font-family: Arial, serif;
+    font-weight: 400;
+    text-align: center; 
+    font-size: 2em; 
+    margin-top: 20px; 
+    color: white; 
   }
   
   .monthly-trends {
-  display: flex;
-  background-color: #f0f0f0;
-  color: black;
-  padding: 20px;
+    display: flex;
+    background-color: #f0f0f0;
+    color: black;
+    padding: 20px;
   }
   
   .monthly-trends-menu {
-  width: 20%;
-  margin-right: 20px;
+    width: 20%;
+    margin-right: 20px;
   }
   
   .monthly-trends-menu ul {
-  list-style: none;
-  padding: 0;
-  font-size: 20; 
+    list-style: none;
+    padding: 0;
+    font-size: 20; 
   }
   
   .monthly-trends-menu ul li {
-  padding: 10px;
-  cursor: pointer;
-  font-size: 20; 
+    padding: 10px;
+    cursor: pointer;
+    font-size: 20; 
   }
   
   .monthly-trends-menu ul li:hover {
-  background-color:  rgb(223, 223, 223);
+    background-color:  rgb(223, 223, 223);
   
   }
   
   .monthly-trends-menu ul li.active {
-  background-color:  rgb(6, 64, 14, .9);
-  color:rgb(255, 255, 255);
-  outline: none;  
-  box-shadow: 0 0 8px 4px rgba(255, 255, 255, 0.6);  /* White glow effect */
+    background-color:  rgb(6, 64, 14, .9);
+    color:rgb(255, 255, 255);
+    outline: none;  
+    box-shadow: 0 0 8px 4px rgba(255, 255, 255, 0.6);  /* White glow effect */
   }
   
   .monthly-trends-graph-column {
-  width: 80%;
-  background-color: #222;
-  color: white;
-  padding: 10px;
-  border-radius: 8px;
+    width: 80%;
+    background-color: #222;
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
   }
   
   canvas {
-  max-width: 100%;
-  max-height: 400px;
+    height: 400px;
+    max-width: 100%;
+    max-height: 400px;
   }
   
