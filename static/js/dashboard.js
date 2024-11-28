@@ -333,61 +333,150 @@ $(document).ready(function () {
     monthsList.on('click', function () {
         monthsList.removeClass('active'); // Remove active class from all months
         $(this).addClass('active');  // Add active class to the clicked month
-        
-        // Remove active class from all trend buttons
-        trendButtons.removeClass('active');
 
         const month = $(this).data('month');
-        const year = new Date().getFullYear(); 
-        
-        // Fetch trends data
-        $.getJSON(`/get_trends?month=${month}&year=${year}`, function (response) {
-            if (response.status === 'success') {
-                const trends = response.data;
-                
-                const dates = Object.keys(trends);
-                const checkIns = dates.map(date => trends[date].check_ins);
-                const checkOuts = dates.map(date => trends[date].check_outs);
-                const laptops = dates.map(date => trends[date].laptop_transactions);
-                const desktops = dates.map(date => trends[date].desktop_transactions);
+        const year = new Date().getFullYear();
+        const activeButton = trendButtons.filter('.active').attr('id');
 
-                const datasets = [
-                    {
-                        label: 'Check-ins',
-                        data: checkIns,
-                        backgroundColor: 'rgba(46, 204, 113, 0.2)',
-                        borderColor: 'rgba(46, 204, 113, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Check-outs',
-                        data: checkOuts,
-                        backgroundColor: 'rgba(231, 76, 60, 0.2)',
-                        borderColor: 'rgba(231, 76, 60, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Laptop',
-                        data: laptops,
-                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
-                        borderColor: 'rgba(52, 152, 219, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Desktop',
-                        data: desktops,
-                        backgroundColor: 'rgba(241, 196, 15, 0.2)',
-                        borderColor: 'rgba(241, 196, 15, 1)',
-                        borderWidth: 1
+        // Determine which endpoint to call based on the active trend button
+        let endpoint = '';
+        switch (activeButton) {
+            case 'utilizationBtn':
+                endpoint = `/get_utilization?month=${month}&year=${year}`;
+                break;
+            case 'technologyBtn':
+                endpoint = `/get_technology?month=${month}&year=${year}`;
+                break;
+            case 'upgradeBtn':
+                endpoint = `/get_upgrades?month=${month}&year=${year}`;
+                break;
+            case 'repeatBtn':
+                endpoint = `/get_repeated?month=${month}&year=${year}`;
+                break;
+            case 'partsByDateBtn':
+            default:
+                endpoint = `/get_trends?month=${month}&year=${year}`;
+                break;
+        }
+
+        // Fetch data from the determined endpoint
+        if (endpoint) {
+            $.getJSON(endpoint, function (response) {
+                if (response.status === 'success') {
+                    const trends = response.data;
+                    let labels = [], datasets = [], chartType = 'line', title = 'Data by Date', xAxisLabel = 'Date';
+
+                    if (activeButton === 'utilizationBtn') {
+                        labels = [`${month}-${year}`];
+                        datasets = [
+                            {
+                                label: 'Checked In',
+                                data: [trends.checked_in],
+                                backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                                borderColor: 'rgba(46, 204, 113, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Checked Out',
+                                data: [trends.checked_out],
+                                backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                                borderColor: 'rgba(231, 76, 60, 1)',
+                                borderWidth: 1
+                            }
+                        ];
+                        chartType = 'bar';
+                        title = 'Utilization';
+                    } else if (activeButton === 'technologyBtn') {
+                        labels = Object.keys(trends);
+                        datasets = [
+                            {
+                                label: 'Technology Transactions',
+                                data: Object.values(trends),
+                                backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                                borderColor: 'rgba(52, 152, 219, 1)',
+                                borderWidth: 1
+                            }
+                        ];
+                        chartType = 'bar';
+                        title = 'Technology Transactions';
+                        xAxisLabel = 'Technology Type';
+                    } else if (activeButton === 'upgradeBtn') {
+                        labels = Object.keys(trends).sort();
+                        datasets = [
+                            {
+                                label: 'Daily Upgrades',
+                                data: labels.map(day => trends[day]),
+                                backgroundColor: 'rgba(52, 152, 219, 0.5)',
+                                borderColor: 'rgba(41, 128, 185, 1)',
+                                borderWidth: 1
+                            }
+                        ];
+                        chartType = 'bar';
+                        title = 'Daily Upgrades';
+                        xAxisLabel = 'Day of the Month';
+                    } else if (activeButton === 'repeatBtn') {
+                        labels = trends.map(item => item.Unit_sn);
+                        datasets = [
+                            {
+                                label: 'Repeated Check-ins',
+                                data: trends.filter(item => item.status === 'In').map(item => item.check_count),
+                                backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                                borderColor: 'rgba(46, 204, 113, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Repeated Check-outs',
+                                data: trends.filter(item => item.status === 'Out').map(item => item.check_count),
+                                backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                                borderColor: 'rgba(231, 76, 60, 1)',
+                                borderWidth: 1
+                            }
+                        ];
+                        chartType = 'bar';
+                        title = 'Repeated Transactions by Unit SN';
+                        xAxisLabel = 'Unit SN';
+                    } else {
+                        labels = Object.keys(trends);
+                        datasets = [
+                            {
+                                label: 'Check-ins',
+                                data: labels.map(date => trends[date].check_ins),
+                                backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                                borderColor: 'rgba(46, 204, 113, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Check-outs',
+                                data: labels.map(date => trends[date].check_outs),
+                                backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                                borderColor: 'rgba(231, 76, 60, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Laptop',
+                                data: labels.map(date => trends[date].laptop_transactions),
+                                backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                                borderColor: 'rgba(52, 152, 219, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Desktop',
+                                data: labels.map(date => trends[date].desktop_transactions),
+                                backgroundColor: 'rgba(241, 196, 15, 0.2)',
+                                borderColor: 'rgba(241, 196, 15, 1)',
+                                borderWidth: 1
+                            }
+                        ];
+                        title = 'Parts by Date';
                     }
-                ];
 
-                // Line chart for trends
-                initChart(dates, datasets, 'Parts by Date');
-            } else {
-                console.error('Error fetching trends:', response.message);
-            }
-        });
+                    // Initialize the chart with the updated data
+                    initChart(labels, datasets, title, chartType, xAxisLabel);
+                } else {
+                    console.error('Error fetching data:', response.message);
+                }
+            });
+        }
     });
 
     // Handle button click - make the clicked button active and store it
@@ -395,158 +484,8 @@ $(document).ready(function () {
         trendButtons.removeClass('active');  // Remove 'active' class from all buttons
         $(this).addClass('active');  // Add 'active' class to clicked button
 
-        const buttonId = $(this).attr('id');
-        const month = $('#monthsList .active').data('month');
-        const year = new Date().getFullYear();
-
-        // Fetch data based on the selected button
-        if (buttonId === 'utilizationBtn') {
-            $.getJSON(`/get_utilization?month=${month}&year=${year}`, function (response) {
-                if (response.status === 'success') {
-                    const utilization = response.data;
-                    const dates = [month + '-' + year]; // Only one entry for month-year
-                    const checkIns = [utilization.checked_in];
-                    const checkOuts = [utilization.checked_out];
-
-                    const datasets = [
-                        {
-                            label: 'Checked In',
-                            data: checkIns,
-                            backgroundColor: 'rgba(46, 204, 113, 0.2)',  // Green color for "Checked In"
-                            borderColor: 'rgba(46, 204, 113, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Checked Out',
-                            data: checkOuts,
-                            backgroundColor: 'rgba(231, 76, 60, 0.2)',  // Red color for "Checked Out"
-                            borderColor: 'rgba(231, 76, 60, 1)',
-                            borderWidth: 1
-                        }
-                    ];
-
-                    // Initialize the chart as a bar chart for Utilization
-                    initChart(dates, datasets, 'Utilization', 'bar');
-                }
-            });
-        } else if (buttonId === 'technologyBtn') {
-            $.getJSON(`/get_technology?month=${month}&year=${year}`, function (response) {
-                if (response.status === 'success') {
-                    const technology = response.data;
-
-                    // Extract the technology categories (keys) and their corresponding counts (values)
-                    const techCategories = Object.keys(technology);  // Technology types: Apple, HD, etc.
-                    const techCounts = Object.values(technology);    // Transaction counts for each type
-
-                    const datasets = [{
-                        label: 'Technology Transactions',
-                        data: techCounts,
-                        backgroundColor: 'rgba(52, 152, 219, 0.2)',  // Blue color for technology data
-                        borderColor: 'rgba(52, 152, 219, 1)',
-                        borderWidth: 1
-                    }];
-
-                    // Initialize the chart as a bar chart, using technology categories for the x-axis
-                    initChart(techCategories, datasets, 'Technology Transactions', 'bar', 'Technology Type');
-                }
-            });
-        } else if (buttonId === 'upgradeBtn') {
-            $.getJSON(`/get_upgrades?month=${month}&year=${year}`, function(response) {
-                if (response.status === 'success') {
-                    const data = response.data;
-                    const days = Object.keys(data).sort();
-                    const upgradeCounts = days.map(day => data[day]);
-        
-                    const ctx = document.getElementById('trendsChart').getContext('2d');
-                    if (trendsChart) trendsChart.destroy();  // Destroy previous instance if exists
-                    trendsChart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: days,
-                            datasets: [{
-                                label: 'Daily Upgrades',
-                                data: upgradeCounts,
-                                backgroundColor: 'rgba(52, 152, 219, 0.5)',
-                                borderColor: 'rgba(41, 128, 185, 1)',
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    title: {
-                                        display: true,
-                                        text: 'Count of Upgrades'
-                                    }
-                                },
-                                x: {
-                                    title: {
-                                        display: true,
-                                        text: 'Day of the Month'
-                                    }
-                                }
-                            },
-                            responsive: true,
-                            plugins: {
-                                legend: {
-                                    display: true
-                                }
-                            }
-                        }
-                    });
-                } else {
-                    console.error('Failed to load data:', response.message);
-                }
-            });
-          
-        } else if (buttonId === 'repeatBtn') {
-            $.getJSON(`/get_repeated?month=${month}&year=${year}`, function (response) {
-                if (response.status === 'success') {
-                    const repeated = response.data;
-
-                    // Extract Unit SN, check count, status, and last request date
-                    const unitSNs = repeated.map(item => item.Unit_sn);
-                    const checkIns = repeated.filter(item => item.status === 'In').map(item => item.check_count);  // Filter check-ins
-                    const checkOuts = repeated.filter(item => item.status === 'Out').map(item => item.check_count);  // Filter check-outs
-                    const lastRequestDates = repeated.map(item => item.last_request_date);  // Last requested date
-
-                    // Define datasets for check-ins and check-outs
-                    const datasets = [
-                        {
-                            label: 'Repeated Check-ins',
-                            data: checkIns,
-                            backgroundColor: 'rgba(46, 204, 113, 0.2)',  // Green for check-ins
-                            borderColor: 'rgba(46, 204, 113, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Repeated Check-outs',
-                            data: checkOuts,
-                            backgroundColor: 'rgba(231, 76, 60, 0.2)',  // Red for check-outs
-                            borderColor: 'rgba(231, 76, 60, 1)',
-                            borderWidth: 1
-                        }
-                    ];
-
-                    // Initialize the chart as a stacked bar chart for Repeated Transactions
-                    initChart(unitSNs, datasets, 'Repeated Transactions by Unit SN', 'bar', 'Unit SN');
-                    
-                    // Tooltip customization for repeated transactions
-                    trendsChart.options.plugins.tooltip.callbacks = {
-                        title: function(tooltipItems) {
-                            const unitSN = tooltipItems[0].label;
-                            const status = tooltipItems[0].datasetIndex === 0 ? 'Checked In' : 'Checked Out';
-                            const date = lastRequestDates[unitSNs.indexOf(unitSN)]; // Get last request date for the current Unit SN
-                            return `${status}: ${unitSN} | Last Request Date: ${date}`;
-                        },
-                        label: function(tooltipItem) {
-                            return `Count: ${tooltipItem.raw}`;
-                        }
-                    };
-                }
-            });
-        }
+        // Trigger the active month's click to reload data
+        $('#monthsList .active').trigger('click');
     });
 
     // Trigger click on first month to load initial data
