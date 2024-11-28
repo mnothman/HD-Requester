@@ -491,11 +491,9 @@ def get_upgrades():
     year = request.args.get('year', type=int)
     month = request.args.get('month', type=int)
 
-    # Check for required parameters
     if not year or not month:
         return jsonify({'status': 'error', 'message': 'Year and month parameters are required.'}), 400
 
-    # Define the range for the month
     start_date = datetime(year, month, 1)
     end_date = datetime(year, month + 1, 1) if month < 12 else datetime(year + 1, 1, 1)
 
@@ -503,7 +501,7 @@ def get_upgrades():
     query = '''
     SELECT 
         DATE(a.Date_time) AS day,
-        COUNT(DISTINCT a.Unit_sn) AS upgrade_count
+        COUNT(*) AS upgrade_count  -- Count every upgrade instance
     FROM 
         Log a
     INNER JOIN 
@@ -531,6 +529,7 @@ def get_upgrades():
         return jsonify({'status': 'success', 'data': data})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 
 # Function to get data regarding repeated upgrades

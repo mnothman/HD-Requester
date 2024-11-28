@@ -458,7 +458,7 @@ $(document).ready(function () {
                     const upgradeCounts = days.map(day => data[day]);
         
                     const ctx = document.getElementById('trendsChart').getContext('2d');
-                    if (trendsChart) trendsChart.destroy();  // Destroy the previous instance if exists
+                    if (trendsChart) trendsChart.destroy();  // Destroy previous instance if exists
                     trendsChart = new Chart(ctx, {
                         type: 'bar',
                         data: {
@@ -483,7 +483,7 @@ $(document).ready(function () {
                                 x: {
                                     title: {
                                         display: true,
-                                        text: 'Date'
+                                        text: 'Day of the Month'
                                     }
                                 }
                             },
