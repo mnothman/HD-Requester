@@ -513,7 +513,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
         }
         // Proceed with parsing parts, size, and serial numbers as usual
         var i = 2;
-        while (lines[i] && !["Laptop", "Desktop", "Server"].includes(lines[i].trim())) {
+        while (lines[i] && !["laptop", "desktop", "server", "aio"].includes(lines[i].trim().toLowerCase())) {
             var details = lines[i].trim().split(' ');
             var part = {};
     
@@ -620,7 +620,7 @@ function showModal(dataObject, htmlContent, onConfirm) {
                 Part_sn: partSn,
                 Type: part.type,
                 Capacity: part.capacity,
-                Size: dataObject.size, // we change this to Laptop in the backend if the request says AiO
+                Size: dataObject.size === 'AiO' ? 'Laptop' : (dataObject.size === 'Server' ? 'Desktop' : dataObject.size), // Change Size if AiO or Server
                 Part_status: 'In',
                 Unit_sn: unitSn,
                 Note: dataObject.note,
