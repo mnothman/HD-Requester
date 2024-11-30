@@ -8,6 +8,12 @@
 
 HD Requester is a secure parts management system designed to streamline the process of checking parts in and out of a secure area. It makes it convenient for authorized personnel to access and manage parts efficiently. The application provides a user-friendly interface for tracking and monitoring parts inventory, ensuring the security and accountability of the process. Every action gets logged and provides extra information for the company owner. In the admin dashboard, the company owner can see inventory levels at a glance and also a chart that shows data for laptops, desktops, and servers. The app has a login page for the admin and everything is securely stored in an SQLite database using Argon hash algorithm.
 
+![Front Page](https://github.com/mnothman/HD-Requester/blob/main/images/FrontPage.png) Here is a screenshot of the front page of the app. On this page, the user can check in/out a part from the inventory, remove a part from the database and add a new part into the the database. The way it works is the user is given a message containing the part information and from there the user can input that message into the text area in order to check in/out a part.
+
+![Login Page](https://github.com/mnothman/HD-Requester/blob/main/images/LoginPage.png) Here is a screenshot of the login page where the user can type in their login page in order to log into the admin dashboard. 
+
+![DashBoard](https://github.com/mnothman/HD-Requester/blob/main/images/Appdashboard.png) Here is a screenshot of the Admin Dashboard where the user can see Inventory levels, Monthly trends and check the check in/check out records.
+
 ## App Requirements
 
 To run our app, you will need the following:
@@ -53,11 +59,6 @@ Note: Make sure you have SQLite, Python, and Flask installed before following th
 8. Launch the test i.e. “all_tests.py”
 `python all_tests.py`
 
-
-
-## Developer Instructions
-
-*This section will be used in CSC 191 to document the development workflow, coding standards, and guidelines for contributing to the HD Requester project.*
 
 ## Timeline
 
