@@ -18,7 +18,7 @@ To run our app, you will need the following:
 - [SQLite](https://www.sqlite.org/download.html)
 - [Python](https://www.python.org/downloads)
 - Argon2
-    - Run the command pip install argon2-cffi to install Argon2 for Python.
+    - Run the command `pip install argon2-cffi` to install Argon2 for Python.
 - Flask
     - Run the command `pip install flask` to install Flask.
 
