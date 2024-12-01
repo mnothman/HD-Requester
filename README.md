@@ -108,7 +108,8 @@ The following is a timeline of key milestones for the HD Requester project, base
 
 ## Entity-Relationship Diagram (ERD)
 
-![ERD](https://github.com/mnothman/HD-Requester/blob/main/images/ER-DiagramHD_Requester.png)
+![ERD-Home](https://github.com/mnothman/HD-Requester/blob/main/images/ERD-Part-Log-darkbg.png)
+![ERD-Dashboard](https://github.com/mnothman/HD-Requester/blob/main/images/ERD-Admin.png)
 
 The above ERD represents the database schema and relationships between entities in the HD Requester application.
 
