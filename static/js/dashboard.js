@@ -415,26 +415,25 @@ $(document).ready(function () {
                         title = 'Daily Upgrades';
                         xAxisLabel = 'Day of the Month';
                     } else if (activeButton === 'repeatBtn') {
-                        labels = trends.map(item => item.Unit_sn);
-                        datasets = [
-                            {
-                                label: 'Repeated Check-ins',
-                                data: trends.filter(item => item.status === 'In').map(item => item.check_count),
-                                backgroundColor: 'rgba(46, 204, 113, 0.2)',
-                                borderColor: 'rgba(46, 204, 113, 1)',
-                                borderWidth: 1
-                            },
-                            {
-                                label: 'Repeated Check-outs',
-                                data: trends.filter(item => item.status === 'Out').map(item => item.check_count),
-                                backgroundColor: 'rgba(231, 76, 60, 0.2)',
-                                borderColor: 'rgba(231, 76, 60, 1)',
-                                borderWidth: 1
-                            }
-                        ];
+                        const data = response.data;
+                        console.log('Data:', data);  // Check the processed data structure
+                        const upgradeCounts = data.map(item => item.Upgrade_count);  // Correct property for counts
+                        console.log('Upgrade counts:', upgradeCounts);  // Ensure counts are correct
+                        labels = data.map(item => item.Unit_sn);  // Collect Unit_sn for labels
+
+                        datasets = [{
+                            label: 'Repeated Upgrades Count',
+                            data: upgradeCounts,
+                            backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                            borderColor: 'rgba(231, 76, 60, 1)',
+                            borderWidth: 1
+                        }];
+
                         chartType = 'bar';
                         title = 'Repeated Transactions by Unit SN';
                         xAxisLabel = 'Unit SN';
+
+                      
                     } else {
                         labels = Object.keys(trends);
                         datasets = [

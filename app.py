@@ -534,63 +534,50 @@ def get_upgrades():
 
 # Function to get data regarding repeated upgrades
 @app.route('/get_repeated', methods=['GET'])
-def get_repeated():
-    month = request.args.get('month', type=int)
+def get_repeated_upgrades():
     year = request.args.get('year', type=int)
+    month = request.args.get('month', type=int)
 
-    if not month or not year:
-        return jsonify({'status': 'error', 'message': 'Month and year are required.'}), 400
+    if not year or not month:
+        return jsonify({'status': 'error', 'message': 'Year and month are required.'}), 400
 
-    start_date = datetime(year, month + 1, 1)
-    end_date = datetime(year - 1, month, 1)
-    
+    # Format month and year into 'YYYY-MM' format for SQL query
+    month_year = f'{year}-{month:02}'
+
     db = get_db()
-    check_in_query = '''
-        SELECT Unit_sn, 
-            MAX(DATE(Date_time)) AS last_request_date, 
-            COUNT(*) AS check_count
-        FROM Log
-        WHERE Date_time >= ? AND Date_time < ? AND Part_status = 'In'
-        GROUP BY Unit_sn
-        HAVING COUNT(*) > 1;
-        '''
-    check_out_query = '''
-        SELECT Unit_sn, 
-            MAX(DATE(Date_time)) AS last_request_date, 
-            COUNT(*) AS check_count
-        FROM Log
-        WHERE Date_time >= ? AND Date_time < ? AND Part_status = 'Out'
-        GROUP BY Unit_sn
-        HAVING COUNT(*) > 1;
-        '''
-    
+    query = '''
+    SELECT 
+        l.Unit_sn,
+        COUNT(*) AS upgrade_count
+    FROM 
+        Log l
+    INNER JOIN 
+        Log l2 ON l.Unit_sn = l2.Unit_sn AND l.Part_sn != l2.Part_sn
+    INNER JOIN 
+        Part p ON l.Part_sn = p.Part_sn
+    INNER JOIN 
+        Part p2 ON l2.Part_sn = p2.Part_sn
+    WHERE 
+        p.Type = p2.Type 
+        AND p.Capacity != p2.Capacity
+        AND l.Part_status = 'Out' 
+        AND l2.Part_status = 'In' 
+        AND strftime('%Y-%m', l.Date_time) = ? 
+        AND strftime('%Y-%m', l2.Date_time) = ?
+    GROUP BY 
+        l.Unit_sn
+    ORDER BY 
+        upgrade_count DESC
+    '''
+
     try:
-        check_in_results = db.execute(check_in_query, (end_date, start_date)).fetchall()
-        repeated_check_ins = [
-            {
-                "Unit_sn": row[0],
-                "last_request_date": row[1],
-                "check_count": row[2],
-                "status": "In"
-            } for row in check_in_results
-        ]
-
-        check_out_results = db.execute(check_out_query, (end_date, start_date)).fetchall()
-        repeated_check_outs = [
-            {
-                "Unit_sn": row[0],
-                "last_request_date": row[1],
-                "check_count": row[2],
-                "status": "Out"
-            } for row in check_out_results
-        ]
-
-        repeated_requests = repeated_check_ins + repeated_check_outs
-
-        return jsonify({'status': 'success', 'data': repeated_requests})
-
+        results = db.execute(query, (month_year, month_year)).fetchall()
+        upgrades = [{'Unit_sn': row['Unit_sn'], 'Upgrade_count': row['upgrade_count']} for row in results]
+        return jsonify({'status': 'success', 'data': upgrades})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 
 
 @app.route('/get_utilization', methods=['GET'])
